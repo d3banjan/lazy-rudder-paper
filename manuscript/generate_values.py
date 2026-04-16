@@ -209,6 +209,46 @@ lines = [
     macro("autopsyResidualMinPct", autopsy_residual_min * 100),
     macro("autopsyResidualMaxPct", autopsy_residual_max * 100),
     "",
+    "% ── Early vs late layer split (per-scale) ────────────",
+]
+
+# Compute early/late-quarter averages per scale
+def el_split_petri(model_key: str) -> dict:
+    pl = petri[model_key]["per_layer"]
+    n = len(pl); q = max(1, n // 4)
+    return {
+        "early_sr": statistics.mean(p["srank"] for p in pl[:q]),
+        "late_sr":  statistics.mean(p["srank"] for p in pl[-q:]),
+        "early_bR": statistics.mean(p["bonus_R_k5"] for p in pl[:q]),
+        "late_bR":  statistics.mean(p["bonus_R_k5"] for p in pl[-q:]),
+    }
+
+def el_split_gamma(runs: dict, run_key: str) -> dict:
+    pl = runs[run_key]["per_layer"]
+    n = len(pl); q = max(1, n // 4)
+    return {
+        "early_sr": statistics.mean(p["srank_delta"] for p in pl[:q]),
+        "late_sr":  statistics.mean(p["srank_delta"] for p in pl[-q:]),
+        "early_bR": statistics.mean(p["k5"]["bonus_right"] for p in pl[:q]),
+        "late_bR":  statistics.mean(p["k5"]["bonus_right"] for p in pl[-q:]),
+    }
+
+el_70m  = el_split_petri("pythia-70m")
+el_160m = el_split_petri("pythia-160m")
+el_410m = el_split_gamma(g410["runs"], "v2_dpo_r128")
+el_1b   = el_split_gamma(g1b["runs"],  "v2_dpo_r128_1b")
+
+for label, d in [("SeventyM", el_70m), ("OneSixtyM", el_160m),
+                  ("FourTenM", el_410m), ("OneB", el_1b)]:
+    lines += [
+        macro(f"earlyLayerSrank{label}", d["early_sr"]),
+        macro(f"lateLayerSrank{label}",  d["late_sr"]),
+        macro(f"earlyLayerBonusR{label}", d["early_bR"]),
+        macro(f"lateLayerBonusR{label}",  d["late_bR"]),
+    ]
+
+lines += [
+    "",
     "% ── Compounding compression numbers ───────────────────",
     macro("sgdBound", "12{,}800"),
     macro("loraCap", 128),

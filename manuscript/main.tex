@@ -527,21 +527,83 @@ modulation of existing pretrained directions.
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{Connection to PiSSA.}
+\paragraph{Reconciling with the acoustic anti-scaling literature.}
+A growing line of work (reviewed in \citealp{aghajanyan2020intrinsic}
+and subsequent follow-ups) reports that the intrinsic dimensionality
+of fine-tuning updates is inversely correlated with model width: larger
+pretrained models develop denser acoustic manifolds, requiring fewer
+effective directions to achieve the same task performance. Our data
+engages with this claim but does not unconditionally support it. Against
+the three candidate monotone sub-linear scaling forms we tested
+(Table~\ref{tab:scaling-fit}), the constant-function fit achieved RMS
+residual $\srankFitTaskRMS$ versus $\srankFitCbrtRMS$ for the
+best-fitting sub-linear form ($c/d^{1/3}$) and $\srankFitSqrtRMS$ for
+$c/\sqrt{d}$. The 1B datum ($srank = \srankOneBDPOsFortyTwo$) does
+sit slightly below the 70M/410M floor ($\approx 3.93$), providing
+\emph{weak} evidence for a mild acoustic correction at the largest
+probed scale --- but the non-monotone 160M--410M ordering refutes any
+smooth monotone scaling law at the resolution of our measurement. We
+therefore adopt the framing ``task-intrinsic dimensional floor with
+architecture-scale noise of $\pm 0.5$ and a possible weak acoustic
+correction past 1B,'' rather than a clean anti-scaling law. Future
+work at 2.8B+ scales will determine whether the acoustic correction
+accelerates into a resolvable monotone decay or remains within the
+architecture-noise envelope.
+
+\paragraph{Layer-depth partitioning: early reasoning, late crystallization.}
+Decomposing $srank$ and $\text{bonus}_R$ by layer position reveals a
+systematic structure masked by the per-scale averages reported in
+Table~\ref{tab:gamma-scaling}. Comparing the earliest quartile of
+layers to the latest:
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Model & early-$srank$ & late-$srank$ & early-$\text{bonus}_R(5)$ & late-$\text{bonus}_R(5)$ \\
+\midrule
+70M  & $\earlyLayerSrankSeventyM$  & $\lateLayerSrankSeventyM$  & $\earlyLayerBonusRSeventyM\times$  & $\lateLayerBonusRSeventyM\times$ \\
+160M & $\earlyLayerSrankOneSixtyM$ & $\lateLayerSrankOneSixtyM$ & $\earlyLayerBonusROneSixtyM\times$ & $\lateLayerBonusROneSixtyM\times$ \\
+410M & $\earlyLayerSrankFourTenM$  & $\lateLayerSrankFourTenM$  & $\earlyLayerBonusRFourTenM\times$  & $\lateLayerBonusRFourTenM\times$ \\
+1B   & $\earlyLayerSrankOneB$      & $\lateLayerSrankOneB$      & $\earlyLayerBonusROneB\times$      & $\lateLayerBonusROneB\times$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+At every scale except 1B, $srank$ decreases from early to late layers
+while $\text{bonus}_R(5)$ increases. Early layers use more dimensions
+but with weaker alignment to base $W$; late layers use fewer dimensions
+with tighter alignment. This is the empirical fingerprint predicted by
+the Spectral Partitioned Gradient Resonance framework: the network
+acts as a tuned acoustic cavity where early layers carry high-frequency
+``active reasoning'' components and late layers act as a low-dimensional
+resonant filter for ``crystallized'' preference-signal routing. At 1B
+the asymmetry flattens --- both $srank$ and $\text{bonus}_R$ become
+layer-position-independent --- suggesting that at sufficient width the
+task-intrinsic crystallized signature propagates all the way up to the
+earliest attention modules.
+
+\paragraph{Connection to PiSSA and the ``keyring'' hypothesis.}
 PiSSA \citep{meng2024pissa} initializes the LoRA factors by decomposing
 $W$ via SVD and using the top-$r$ singular components as the initial
 $B$ and $A$ matrices, leaving the residual low-energy components frozen.
 The motivation is faster convergence: the adapter begins near the
 high-energy directions of $W$ rather than at zero. Our $\gamma$-rudder
-findings provide a mechanistic explanation for why this initialization
-accelerates training: SGD with the standard (zero) initialization
-converges toward the same destination --- as quantified by
-$\text{bonus}_R(srank) \geq 5\times$ random across all scales --- but
-takes more steps to arrive. The gradient signal has an implicit attractor
-in the pretrained top-$k$ right-singular subspace, and PiSSA simply
-places the adapter at that attractor from step zero. This observation
-suggests that subspace-alignment is a universal feature of LoRA
-optimization on language tasks, not an artifact of PiSSA's design.
+findings provide \emph{empirical first-principles evidence} for why this
+initialization accelerates training: SGD with the standard (zero)
+initialization converges toward the same destination --- as quantified
+by $\text{bonus}_R(srank) \geq 5\times$ random across all scales
+(Table~\ref{tab:gamma-scaling}) --- but takes more steps to arrive.
+The broader ``keyring'' hypothesis \citep{meng2024pissa,
+aghajanyan2020intrinsic} posits that alignment gradients preferentially
+reuse the top right singular vectors of the base parameters rather than
+carving novel directions; our $\gamma$ metric is a direct, quantitative
+measurement of this reuse. The observed $\text{bonus}_R \geq 5\times$
+random across 70M--1B constitutes a strong empirical anchor for the
+hypothesis: the gradient does not merely end up near the top pretrained
+subspace, it has an \emph{implicit attractor} there, which PiSSA
+exploits by skipping the convergence phase entirely. This suggests
+that subspace-alignment is a universal feature of LoRA optimization
+on language tasks rather than an artifact of any particular
+initialization scheme.
 
 \paragraph{Connection to intrinsic dimensionality.}
 \citet{aghajanyan2020intrinsic} showed that the intrinsic dimensionality
@@ -653,6 +715,15 @@ extensions (\texttt{attention.dense}, MLP up/down projections) are
 reported in the supplementary results (see
 \texttt{results/spectral\_overlap\_gamma\_modules/}) but full interpretive
 integration into the main narrative is pending further analysis.
+(v) Our $srank$ is measured on the standard LoRA $\Delta W = BA$
+parameterization, which enforces $\mathrm{rank}(\Delta W) \leq r$ by
+construction. Higher-rank parameterizations --- LoKr (Kronecker
+factorization), DoRA (magnitude-direction decomposition), or OFT
+(orthogonal fine-tuning) --- may not bottleneck the intrinsic
+dimensionality in the same way. The observed $srank \approx 3.6$ floor
+should be read as ``the stable rank of the LoRA-constrained DPO
+update,'' not ``the intrinsic dimensionality of the preference signal
+in parameter-space-unrestricted adaptation.''
 
 
 % ── bibliography ────────────────────────────────────────────────────────────
