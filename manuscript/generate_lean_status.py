@@ -53,8 +53,10 @@ decls = parse(src)
 
 
 def tex_name(name: str) -> str:
-    """Convert snake_case to CamelCase for LaTeX macro names."""
-    return "thmStatOf" + "".join(w.title() for w in name.split("_"))
+    """Convert snake_case to CamelCase for LaTeX macro names.
+    Preserve existing camelCase within each underscore-separated segment:
+    `frobeniusSq` → `FrobeniusSq` (not `Frobeniussq`)."""
+    return "thmStatOf" + "".join(w[:1].upper() + w[1:] for w in name.split("_"))
 
 
 # Emit per-theorem status macros

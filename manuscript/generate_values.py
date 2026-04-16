@@ -163,6 +163,8 @@ lines = [
     macro("bonusRKfiveOneBDPOsOneSeventeen", r_dpo_1b_s117["bonus_R_k5"]),
     macro("bonusRKfiveOneBCLMsFortyTwo", r_clm_1b_s42["bonus_R_k5"]),
     macro("bonusRKfiveOneBCLMsOneSeventeen", r_clm_1b_s117["bonus_R_k5"]),
+    macro("bonusRKfiveOneBDPOavgSeeds", (r_dpo_1b_s42["bonus_R_k5"] + r_dpo_1b_s117["bonus_R_k5"]) / 2),
+    macro("bonusRKfiveOneBCLMavgSeeds", (r_clm_1b_s42["bonus_R_k5"] + r_clm_1b_s117["bonus_R_k5"]) / 2),
     "",
     "% ── γ bonus_R(k=srank) ────────────────────────────────",
     macro("bonusRKsrankSeventyM", bonusR_ksrank_70m),

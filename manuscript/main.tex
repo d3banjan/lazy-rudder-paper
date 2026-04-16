@@ -57,8 +57,9 @@ that overlaps the base weight's top right-singular subspace at
 $\bonusRKsrankFourTenMDPO\times$ random chance (Pythia-410M, DPO). We
 isolate a distinct objective-dependent signal, finding that CLM adapters
 exhibit higher top-$k$ subspace overlap than DPO adapters at $k{=}5$
-($\bonusRKfiveFourTenMCLM\times$ vs.\ $\bonusRKfiveFourTenMDPO\times$ at
-1B averaged across two seeds), quantifying the geometric cost of
+($\bonusRKfiveOneBCLMavgSeeds\times$ vs.\
+$\bonusRKfiveOneBDPOavgSeeds\times$ at 1B, averaged across seeds 42
+and 117), quantifying the geometric cost of
 contrastive preference routing. Through high-resolution ablation of
 bias-only fine-tuning (BitFit), we demonstrate that only
 $\bitfitLearningRatio$ of the DPO loss reduction is gauge-accessible
