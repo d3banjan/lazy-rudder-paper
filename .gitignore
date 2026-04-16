@@ -1,0 +1,50 @@
+# ── Model checkpoints (reproducible via training; HF/LFS mirror planned)
+results/**/checkpoints/
+results/**/adapter_model.safetensors
+results/**/adapter_config.json
+results/**/training_args.bin
+results/**/optimizer.pt
+results/**/scheduler.pt
+results/**/rng_state.pth
+results/**/trainer_state.json
+results/**/tokenizer.json
+results/**/tokenizer_config.json
+results/**/special_tokens_map.json
+results/**/generation_config.json
+results/**/config.json
+results/**/model.safetensors
+results/**/README.md
+
+# ── Training logs
+results/**/training_log.txt
+results/**/*.log
+
+# ── Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# ── LaTeX build artifacts (manuscript/.gitignore also covers these)
+*.aux
+*.log
+*.bbl
+*.blg
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# ── OS
+.DS_Store
+Thumbs.db
+
+# ── Editor
+.vscode/
+.idea/
+*.swp
+*~
