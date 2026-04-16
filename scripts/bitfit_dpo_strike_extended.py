@@ -19,17 +19,18 @@ Updated verdict thresholds (applied at step 1600):
 import os, sys, json, time, math, logging
 import torch
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 # ── paths ──────────────────────────────────────────────────────────────────────
-BASE_DIR   = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
-MODEL_DIR  = BASE_DIR / "models" / "pythia-410m"
+MODEL_DIR  = MODELS_DIR / "pythia-410m"
 # Resume checkpoint from the ORIGINAL run (DO NOT overwrite it)
-RESUME_CKPT = BASE_DIR / "results" / "bitfit_dpo_strike" / "checkpoints" / "checkpoint-800"
+RESUME_CKPT = RESULTS_DIR / "bitfit_dpo_strike" / "checkpoints" / "checkpoint-800"
 # New output directory — original preserved intact
-OUT_DIR    = BASE_DIR / "results" / "bitfit_dpo_strike_extended"
+OUT_DIR    = RESULTS_DIR / "bitfit_dpo_strike_extended"
 CKPT_DIR   = OUT_DIR / "checkpoints"
 CKPT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -37,7 +38,7 @@ RESULT_JSON  = OUT_DIR / "loss_trajectory.json"
 SUMMARY_JSON = OUT_DIR / "summary.json"
 
 # Prior run data for merged trajectory
-PRIOR_TRAJ_JSON = BASE_DIR / "results" / "bitfit_dpo_strike" / "loss_trajectory.json"
+PRIOR_TRAJ_JSON = RESULTS_DIR / "bitfit_dpo_strike" / "loss_trajectory.json"
 
 # Reference values
 LORA_DPO_V2_FINAL_LOSS = 0.487

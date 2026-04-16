@@ -1,0 +1,37 @@
+{
+  "_provenance_note": "Sidecar metadata for spectral_overlap_gamma_petri/results.json",
+  "source_script": "paper/scripts/spectral_overlap_gamma_petri.py",
+  "model": "pythia-70m and pythia-160m",
+  "seed": "N/A — analysis-only; reads trained adapter checkpoints",
+  "lora_rank": 128,
+  "lora_alpha": 256,
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "70m_dpo_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_70m/v2/checkpoints/checkpoint-800",
+      "model_dir": "cross-check/trained-model-battery/models/pythia-70m",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_70m.py"
+    },
+    {
+      "run_key": "160m_dpo_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_160m/v2/checkpoints/checkpoint-800",
+      "model_dir": "cross-check/trained-model-battery/models/pythia-160m",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_160m.py"
+    }
+  ],
+  "reference_priors": {
+    "410m_dpo_r128": {"d_in": 1024, "srank_avg": 3.924, "n_layers": 24},
+    "1b_dpo_r128": {"d_in": 2048, "srank_avg": 3.134, "n_layers": 16}
+  },
+  "notes": "Petri-dish petri-dish scale probe. Tests acoustic vs task-intrinsic vs disentanglement scaling hypothesis across 4 model sizes (70m, 160m, 410m reference, 1b reference). Dimensions detected at runtime."
+}

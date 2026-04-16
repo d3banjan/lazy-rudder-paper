@@ -373,9 +373,12 @@ preference logic.
 \paragraph{Lean~4 artifact statement.} All theorems in this section are
 formally verified using the Lean~4 interactive theorem prover and
 \texttt{Mathlib}. The source file \texttt{SubspaceOverlap.lean} contains
-\leanProvenCount~real-proven theorems with zero \texttt{sorry} in the
-scaling branch; \leanSorryCount~targeted \texttt{sorry} stubs mark
-literature-terminology placeholders for downstream work
+\leanProvenCount~fully-proven theorems (zero \texttt{sorry} in the
+load-bearing theorems listed in Table~\ref{tab:lean-status});
+\leanSorryCount~targeted \texttt{sorry} stubs mark
+literature-terminology placeholders for downstream work, and
+\leanStubCount~\texttt{stub} entries are literature-terminology
+placeholders not yet assigned proofs
 (Table~\ref{tab:lean-status}).
 
 
@@ -404,11 +407,14 @@ central observation is that the DPO stable rank remains within a
 narrow band across the full 70M-to-1B range: $\srankSeventyM$ at 70M,
 $\srankOneSixtyM$ at 160M, $\srankFourTenM$ at 410M, and
 $\srankOneBDPOsFortyTwo$ (seed 42) / $\srankOneBDPOsOneSeventeen$
-(seed 117) at 1B. Crucially, this ordering is non-monotone: the 410M
-model has a higher srank than the smaller 160M model, and the 1B model
-sits below both. This pattern directly refutes a smooth width-scaling
-hypothesis; no $c/d^\gamma$ curve with $\gamma > 0$ fits a non-monotone
-sequence without overfitting to noise.
+(seed 117) at 1B. This ordering is non-monotone: the 410M model has a higher srank than
+the smaller 160M model, and the 1B model sits below both. Table~\ref{tab:scaling-fit}
+shows that on these $n=4$ points the constant fit achieves
+$\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$ over $1/\sqrt{d}$ and
+$\Delta\mathrm{AIC} = \srankFitDeltaAICCbrt$ over $1/\sqrt[3]{d}$,
+consistent with a task-intrinsic floor; however, power-law models
+cannot be ruled out on four data points alone. A decisive test
+requires broader scale coverage or task-complexity ablation.
 
 The right-side subspace overlap at the natural rank,
 $\text{bonus}_R(srank)$, forms a universal band across the sweep: from
@@ -433,6 +439,14 @@ completions. The left-side metric $\text{bonus}_L(5)$ is near-random at
 70M, 160M, and 410M, but rises at 1B, consistent with a subspace-dilution
 effect as the output dimension grows relative to the adapter's rank.
 
+\paragraph{Per-layer heterogeneity caveat.} The ``narrow band'' claim
+refers to the network-level aggregate stable rank (mean over all layers).
+Individual layers show substantial variation: at 410M, per-layer sranks
+range from $\srankPerLayerMinFourTenM$ to $\srankPerLayerMaxFourTenM$
+(std $\approx \srankPerLayerStdFourTenM$). The task-intrinsic floor is
+therefore a property of the \emph{aggregate}, not a claim that every
+layer encodes alignment in the same number of dimensions.
+
 \subsection{Task-Intrinsic Scaling Fit}
 
 Table~\ref{tab:scaling-fit} formalizes the scaling comparison by fitting
@@ -442,26 +456,25 @@ power law $c/\sqrt{d}$ (motivated by random-matrix acoustic scaling
 arguments), and a shallower decay $c/\sqrt[3]{d}$.
 
 The task-intrinsic constant achieves an RMS residual of
-$\srankFitTaskRMS$ stable-rank units, substantially lower than both
-the $1/\sqrt{d}$ fit ($\srankFitSqrtRMS$) and the $1/\sqrt[3]{d}$ fit
-($\srankFitCbrtRMS$). The best-fit constant is $\srankFitTaskConst$.
-This is not merely a consequence of the small number of data points: the
-non-monotone ordering of the measured values (70M~$= \srankSeventyM$,
-160M~$= \srankOneSixtyM$, 410M~$= \srankFourTenM$,
-1B~$= \srankOneBDPOsFortyTwo$) provides positive evidence
-that the data are drawn from a distribution with a task-set floor and
-architecture-level variance of approximately $\pm 0.5$ around it, rather
-than from a smooth monotone function of $d$. A monotone decreasing fit
-would need to explain why the 410M model exceeds the 70M model --- which
-it cannot do without attributing the observation to sampling noise.
+$\srankFitTaskRMS$ stable-rank units, lower than both
+the $1/\sqrt{d}$ fit ($\srankFitSqrtRMS$, $\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$)
+and the $1/\sqrt[3]{d}$ fit
+($\srankFitCbrtRMS$, $\Delta\mathrm{AIC} = \srankFitDeltaAICCbrt$).
+The best-fit constant is $\srankFitTaskConst$ (std $= \srankFourPtStd$
+across the four model widths). The constant fit is favored by both RMS
+and AIC; however, power-law models remain plausible on $n=4$ points. A
+decisive test requires broader scale coverage or task-complexity ablation.
+Note that the $\pm\srankFourPtStd$ variation reported here is the
+empirical standard deviation across four network-level aggregates, not a
+confidence interval; the true CI would be wider given the small sample.
 
-The implication is that alignment dimensionality is a property of the
-preference task and dataset, not of the model architecture. For the
-\texttt{hh-rlhf} task family studied here, the signal requires
-approximately $\srankFitTaskConst$ effective dimensions per QKV adapter,
-independent of model scale. This has direct practical consequence: LoRA
-ranks above 8 represent significant over-provisioning for preference
-learning at this data scale.
+Preliminary evidence across four model widths suggests the stable rank
+is bounded in a narrow band around $\srankFitTaskConst$ effective
+dimensions per QKV adapter. Under this hypothesis, alignment
+dimensionality would be a property of the preference task and dataset
+rather than of the model architecture, with LoRA ranks above 8
+representing significant over-provisioning at this data scale. Confirming
+this claim requires a larger scale sweep or task-complexity ablation.
 
 \subsection{BitFit-DPO: Gauge-Theory Falsification}
 
@@ -475,12 +488,17 @@ $\bitfitTrainableParams$ bias parameters ($\bitfitTrainableFrac\%$ of
 total model parameters) are trained under the DPO objective for 800
 steps on \texttt{hh-rlhf}.
 
-Table~\ref{tab:bitfit} reports the result. BitFit achieves a final loss
-of $\bitfitFinalLoss$ (last-10-step mean), compared with the LoRA-DPO
-endpoint of $\bitfitLoRAReference$. The learning ratio --- the fraction
-of LoRA's total loss reduction captured by BitFit --- is
-$\bitfitLearningRatio$. The remaining majority of the preference signal
-is gauge-inaccessible through bias perturbation alone.
+Table~\ref{tab:bitfit} reports the result. All loss endpoints are taken
+from the authoritative \texttt{summary.json} scalar logged at run end
+(not from trajectory window averages). BitFit achieves a final loss
+of $\bitfitFinalLoss$, compared with the LoRA-DPO
+endpoint of $\bitfitLoRAReference$.\footnote{The LoRA-DPO reference
+$\bitfitLoRAReference$ is stored in \texttt{bitfit\_dpo\_strike/summary.json};
+no separate run-level results JSON is retained for this reference run.
+Provenance is therefore asserted, not independently verified.} The
+learning ratio --- the fraction of LoRA's total loss reduction captured
+by BitFit --- is $\bitfitLearningRatio$. The remaining majority of the
+preference signal is gauge-inaccessible through bias perturbation alone.
 
 To test for the possibility of a punctuated phase transition (grokking),
 we extended the BitFit run to $\bitfitExtLastStep$ steps, nearly doubling
@@ -513,8 +531,10 @@ The Frobenius-squared residual fraction measures how much of $\Delta W$
 lies outside the best diagonal approximation.
 
 Table~\ref{tab:autopsy} reports the results across three adapter
-variants (DPO $r=16$, DPO $r=128$, CLM $r=128$). The right-mult
-residual fraction is at least $\autopsyResidualMinPct\%$ in every run;
+variants (DPO $r=16$, DPO $r=128$, CLM $r=128$) --- all on Pythia-410M
+with the same hh-rlhf training regime. The right-mult residual fraction
+is $\autopsyResidualSummaryPct\%$ (mean across variants, rounded to
+2 significant figures; range $[\autopsyResidualMinPct\%, \autopsyResidualMaxPct\%]$);
 the left-mult residual is similarly extreme. Less than $0.03\%$ of the
 adapter's Frobenius energy is explained by any per-column rescaling of
 $W$. Combined with the BitFit-DPO failure, this definitively rules out

@@ -1,0 +1,12 @@
+# Python dependencies for lazy-rudder-paper scripts.
+# Install with: uv sync  (or: pip install -r requirements.txt)
+# Python >= 3.12 required (tomllib is stdlib).
+
+torch>=2.2
+transformers>=4.40
+peft>=0.10
+trl>=0.8
+datasets>=2.18
+safetensors>=0.4
+scipy>=1.12
+huggingface_hub>=0.23

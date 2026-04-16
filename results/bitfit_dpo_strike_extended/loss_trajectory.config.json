@@ -1,0 +1,22 @@
+{
+  "_provenance_note": "Sidecar metadata for bitfit_dpo_strike_extended/loss_trajectory.json",
+  "source_script": "paper/scripts/bitfit_dpo_strike_extended.py",
+  "model": "pythia-410m",
+  "seed": 42,
+  "lora_rank": "N/A — BitFit (biases-only, no LoRA)",
+  "lora_alpha": "N/A",
+  "lr": 1e-4,
+  "batch": 1,
+  "gradient_accumulation_steps": 8,
+  "effective_batch": 8,
+  "steps": 1600,
+  "lr_scheduler": "cosine",
+  "warmup_steps": 50,
+  "dataset": "Anthropic/hh-rlhf (train split, 2000 samples, shuffle seed=42)",
+  "method": "BitFit extended (steps 800 → 1600), resumed from bitfit_dpo_strike checkpoint-800",
+  "resume_from_checkpoint": "cross-check/trained-model-battery/results/bitfit_dpo_strike/checkpoints/checkpoint-800",
+  "checkpoint_path": "cross-check/trained-model-battery/results/bitfit_dpo_strike_extended/checkpoints/",
+  "lora_dpo_v2_reference_loss": 0.487,
+  "lora_dpo_v2_reference_source": "cross-check/trained-model-battery/results/_leak/v2/summary_v2.json → train_loss=0.48728475034236907",
+  "notes": "Extension of bitfit_dpo_strike to test whether accelerating trend at steps 720-800 continues. Trajectory file covers only steps 810-1600 (new steps only)."
+}

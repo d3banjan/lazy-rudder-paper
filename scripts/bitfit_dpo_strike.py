@@ -15,14 +15,15 @@ Reference: LoRA-DPO v2 (r=128) final train_loss = 0.487
 import os, sys, json, time, math, logging
 import torch
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 # ── paths ──────────────────────────────────────────────────────────────────────
-BASE_DIR  = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
-MODEL_DIR = BASE_DIR / "models" / "pythia-410m"
-OUT_DIR   = BASE_DIR / "results" / "bitfit_dpo_strike"
+MODEL_DIR = MODELS_DIR / "pythia-410m"
+OUT_DIR   = RESULTS_DIR / "bitfit_dpo_strike"
 CKPT_DIR  = OUT_DIR / "checkpoints"
 CKPT_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -1,0 +1,39 @@
+{
+  "_provenance_note": "Sidecar metadata for dpo_clm_orthogonal_decomp/results.json",
+  "source_script": "paper/scripts/dpo_clm_orthogonal_decomp.py",
+  "model": "pythia-1b",
+  "seed": "N/A — analysis-only; reads trained adapter checkpoints",
+  "lora_rank": 128,
+  "lora_alpha": 256,
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "1b_dpo_s42",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b/v2/checkpoints/checkpoint-800",
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_1b.py"
+    },
+    {
+      "run_key": "1b_dpo_s117",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b_seed117/v2/checkpoints/checkpoint-800",
+      "training_seed": 117,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_1b_seed117.py"
+    },
+    {
+      "run_key": "1b_clm_s42",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b/v3/checkpoints/checkpoint-800",
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train_1b.py"
+    },
+    {
+      "run_key": "1b_clm_s117",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b_seed117/v3/checkpoints/checkpoint-800",
+      "training_seed": 117,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train_1b_seed117.py"
+    }
+  ],
+  "notes": "Tests whether DPO ΔW and CLM ΔW QKV subspaces are orthogonal. Analysis is deterministic once checkpoints are fixed. Note: dpo_clm_orthogonal_decomp.py is also present inside results/dpo_clm_orthogonal_decomp/ — that copy is a snapshot of the script version at the time of this run."
+}

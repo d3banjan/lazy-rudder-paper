@@ -1,0 +1,48 @@
+{
+  "_provenance_note": "Sidecar metadata for spectral_autopsy_sectional_3tier/results.json",
+  "source_script": "paper/scripts/spectral_autopsy_sectional_3tier.py",
+  "model": "pythia-410m",
+  "seed": "N/A — analysis-only; reads trained adapter checkpoints",
+  "lora_rank": "varies by run (see checkpoint_inputs)",
+  "lora_alpha": "varies by run (see checkpoint_inputs)",
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "v1_dpo_r16",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/checkpoints/checkpoint-800",
+      "lora_r": 16,
+      "lora_alpha": 32,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train.py"
+    },
+    {
+      "run_key": "v2_dpo_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v2/checkpoints/checkpoint-800",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_v2.py"
+    },
+    {
+      "run_key": "v3_clm_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v3/checkpoints/checkpoint-800",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train.py"
+    }
+  ],
+  "partition_config": {
+    "n_bot": 341,
+    "n_mid": 678,
+    "n_top": 5,
+    "p_ps_fraction": 0.333,
+    "p_srn_fraction": 0.662,
+    "p_gauge_fraction": 0.005,
+    "partition_source": "_leak/v2/channel_partition.json (via compute_channel_partition.py)"
+  },
+  "notes": "3-tier orbit-aligned decomposition (dormant/SRN/gauge). Tests L-conservation isotropy hypothesis. Uses pre-computed channel partition from activation variance."
+}

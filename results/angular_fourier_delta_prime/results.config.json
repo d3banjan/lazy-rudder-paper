@@ -1,0 +1,19 @@
+{
+  "_provenance_note": "Sidecar metadata for angular_fourier_delta_prime/results.json",
+  "source_script": "paper/scripts/angular_fourier_delta_prime.py",
+  "model": "pythia-410m (base + sft + dpo)",
+  "seed": "N/A — analysis-only; no training in this script",
+  "lora_rank": "N/A — reads pre-trained checkpoints",
+  "lora_alpha": "N/A",
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "pre-recorded activations from cross-check/trained-model-battery/results/_orbit/*.pt",
+  "checkpoint_inputs": [
+    "models/pythia-410m (base weights loaded via from_pretrained)",
+    "Activations: _orbit/410m_base_activations.pt",
+    "Activations: _orbit/410m_sft_activations.pt",
+    "Activations: _orbit/410m_dpo_activations.pt"
+  ],
+  "notes": "Pure analysis. Uses top-5 right singular vectors of base W_QKV per layer as basis. No RNG dependency."
+}

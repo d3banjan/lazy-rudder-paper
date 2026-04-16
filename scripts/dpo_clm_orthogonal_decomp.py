@@ -27,7 +27,10 @@ from __future__ import annotations
 import json
 import logging
 import shutil
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 from safetensors import safe_open
@@ -46,9 +49,9 @@ log = logging.getLogger(__name__)
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR   = Path(__file__).resolve().parent
-BATTERY_DIR  = SCRIPT_DIR.parent.parent / "cross-check" / "trained-model-battery"
-MODEL_DIR    = BATTERY_DIR / "models" / "pythia-1b"
-RESULTS_ROOT = BATTERY_DIR / "results"
+MODEL_DIR    = MODELS_DIR / "pythia-1b"
+RESULTS_ROOT = RESULTS_DIR
+# NOTE: output intentionally pinned to paper/results/ (not RESULTS_DIR) — this script produces analysis artifacts that ship with the paper, separate from training checkpoints.
 OUT_DIR      = SCRIPT_DIR.parent / "results" / "dpo_clm_orthogonal_decomp"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

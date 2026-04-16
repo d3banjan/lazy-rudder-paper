@@ -1,0 +1,27 @@
+{
+  "_provenance_note": "Sidecar metadata for seed_variance_quick/results.json",
+  "source_script": "paper/scripts/seed_variance_quick.py",
+  "model": "pythia-1b",
+  "seed": "N/A — analysis-only; reads adapter checkpoints for both seed=42 and seed=117",
+  "lora_rank": 128,
+  "lora_alpha": 256,
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "seed42_DPO",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b/v2/checkpoints/checkpoint-800",
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_1b.py"
+    },
+    {
+      "run_key": "seed117_DPO",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b_seed117/v2/checkpoints/checkpoint-800",
+      "training_seed": 117,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_1b_seed117.py"
+    }
+  ],
+  "notes": "Quick seed-variance check: computes per-layer stable rank and bonus_R (right-subspace overlap) at k=5 and k=round(srank). CPU-only, fp32. Analysis is deterministic once checkpoints are fixed."
+}

@@ -20,22 +20,25 @@ Runs on existing adapters (no training needed, ~2 min CPU).
 """
 from __future__ import annotations
 import json
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 from safetensors import safe_open
 from transformers import AutoModelForCausalLM
 
 
-ROOT = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
-BASE = ROOT / "models" / "pythia-410m-safetensors"
-OUT = ROOT / "results" / "bias_theory_autopsy"
+# HF repo: EleutherAI/pythia-410m (safetensors native)
+BASE = MODELS_DIR / "pythia-410m"
+OUT = RESULTS_DIR / "bias_theory_autopsy"
 OUT.mkdir(exist_ok=True)
 
 RUNS = [
-    ("v1_dpo_r16",  ROOT / "results" / "_leak" / "checkpoints" / "checkpoint-800",     16,  32),
-    ("v2_dpo_r128", ROOT / "results" / "_leak" / "v2" / "checkpoints" / "checkpoint-800", 128, 256),
-    ("v3_clm_r128", ROOT / "results" / "_leak" / "v3" / "checkpoints" / "checkpoint-800", 128, 256),
+    ("v1_dpo_r16",  RESULTS_DIR / "_leak" / "checkpoints" / "checkpoint-800",     16,  32),
+    ("v2_dpo_r128", RESULTS_DIR / "_leak" / "v2" / "checkpoints" / "checkpoint-800", 128, 256),
+    ("v3_clm_r128", RESULTS_DIR / "_leak" / "v3" / "checkpoints" / "checkpoint-800", 128, 256),
 ]
 
 

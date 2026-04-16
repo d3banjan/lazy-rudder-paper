@@ -1,0 +1,18 @@
+{
+  "_provenance_note": "Sidecar metadata for two_point_correlator_delta/results.json",
+  "source_script": "paper/scripts/two_point_correlator_delta.py",
+  "model": "pythia-410m (base + sft + dpo)",
+  "seed": "N/A — analysis-only; reads pre-recorded activation files",
+  "lora_rank": "N/A",
+  "lora_alpha": "N/A",
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "pre-recorded activation tensors from cross-check/trained-model-battery/results/_orbit/",
+  "checkpoint_inputs": [
+    "Activations: _orbit/410m_base_activations.pt",
+    "Activations: _orbit/410m_sft_activations.pt",
+    "Activations: _orbit/410m_dpo_activations.pt"
+  ],
+  "notes": "Two-point layer-depth correlator C(L, L+k) test. Uses Pearson R, F-test, DMD spectral gap. Negative result: no depth-wise angular modulation structure; δ' quasiparticle hypothesis falsified. Pure analysis; deterministic given fixed activation files."
+}

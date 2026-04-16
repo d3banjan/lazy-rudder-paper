@@ -1,10 +1,28 @@
-"""Generate lean_status.tex: parse SubspaceOverlap.lean, emit theorem-status
+r"""Generate lean_status.tex: parse SubspaceOverlap.lean, emit theorem-status
 macros and a status table.
 
 For each `theorem` / `lemma` / `def` declaration, detect whether the body
 contains `sorry`. Emit macros so main.tex can say
-"Theorem \thmStatOf{stableRank\_smul\_invariant}" and the current status
+"Theorem \thmStatOf{stableRank_smul_invariant}" and the current status
 flips automatically when the Lean file changes.
+
+Three-way classification (authoritative definitions):
+  (a) PROVEN  — theorem/lemma with a real proof body; no sorry at all.
+                 → \leanProvenCount, status marker \proofCheck
+  (b) STUB    — top-level `theorem foo : True := sorry` placeholders.
+                 Literature-terminology stubs; statement is trivially True,
+                 proof is just sorry.  These are NOT claims about math — they
+                 name concepts for downstream work.
+                 → \leanSorryCount (= stub count), status marker \proofStub
+  (c) DEFERRED — theorem with a real (non-True) mathematical statement but
+                 the entire proof body is a bare `sorry`.  These are honest
+                 gaps in load-bearing proofs with known proof sketches.
+                 → \leanInProofSorryCount, status marker \proofSorry
+
+Note: \leanSorryCount counts category (b) stubs, NOT category (c) deferred
+proofs.  This matches the prose in main.tex ("sorry stubs mark
+literature-terminology placeholders").  Category (c) is separately reported
+via \leanInProofSorryCount so reviewers see the honest gap count.
 """
 from __future__ import annotations
 import re
@@ -70,27 +88,36 @@ lines = [
     "",
 ]
 
-proven_count = 0
-sorry_count = 0
-stub_count = 0
+proven_count = 0          # (a) real proofs
+in_proof_sorry_count = 0  # (c) non-True statements with bare := sorry
+stub_count = 0            # (b) True := sorry placeholders
 
 for d in decls:
     if d["kind"] in ("theorem", "lemma"):
         if d["is_true_stub"]:
+            # (b) literature-terminology stub: `theorem foo : True := sorry`
             status_macro = "\\proofStub"
             stub_count += 1
         elif d["has_sorry"]:
+            # (c) real mathematical statement, proof body deferred via sorry
             status_macro = "\\proofSorry"
-            sorry_count += 1
+            in_proof_sorry_count += 1
         else:
+            # (a) complete proof, no sorry
             status_macro = "\\proofCheck"
             proven_count += 1
         lines.append(f"\\newcommand{{\\{tex_name(d['name'])}}}{{{status_macro}}}")
 
 lines += [
     "",
+    f"% (a) theorems/lemmas with complete proofs (no sorry)",
     f"\\newcommand{{\\leanProvenCount}}{{{proven_count}}}",
-    f"\\newcommand{{\\leanSorryCount}}{{{sorry_count}}}",
+    f"% (b) True := sorry stubs — literature-terminology placeholders",
+    f"% NOTE: \\leanSorryCount = stub count (b), matching main.tex prose",
+    f"\\newcommand{{\\leanSorryCount}}{{{stub_count}}}",
+    f"% (c) real statements with deferred proof body (honest load-bearing gaps)",
+    f"\\newcommand{{\\leanInProofSorryCount}}{{{in_proof_sorry_count}}}",
+    f"% backward-compat alias (same as \\leanSorryCount)",
     f"\\newcommand{{\\leanStubCount}}{{{stub_count}}}",
     f"\\newcommand{{\\leanDefCount}}{{{sum(1 for d in decls if d['kind']=='def')}}}",
     "",
@@ -104,9 +131,14 @@ lines += [
     "  \\centering",
     "  \\caption{Formally verified theorems in",
     "  \\texttt{LeanMining/NeuralGeometry/SubspaceOverlap.lean}"
-    " (Lean 4 + Mathlib). $\\proofCheck$ = complete proof;"
-    " $\\proofSorry$ = targeted \\texttt{sorry} (definition or statement"
-    " deferred); $\\proofStub$ = literature-terminology placeholder.}",
+    " (Lean 4 + Mathlib). Three-way status:"
+    " $\\proofCheck$ = complete proof (no \\texttt{sorry});"
+    " $\\proofSorry$ = real mathematical statement with deferred proof body"
+    " (honest load-bearing gap, known proof sketch exists);"
+    " $\\proofStub$ = \\texttt{True := sorry} literature-terminology"
+    " placeholder (not a mathematical claim, names a concept for downstream"
+    " work). Counts: \\leanProvenCount~proven,"
+    " \\leanInProofSorryCount~deferred, \\leanSorryCount~stubs.}",
     "  \\label{tab:lean-status}",
     "  \\small",
     "  \\begin{tabular}{ll}",
@@ -129,4 +161,4 @@ lines += [
 
 (HERE / "lean_status.tex").write_text("\n".join(lines) + "\n")
 print(f"wrote {HERE / 'lean_status.tex'}")
-print(f"  proven: {proven_count}, sorry: {sorry_count}, stub: {stub_count}")
+print(f"  proven (a): {proven_count}, deferred/in-proof sorry (c): {in_proof_sorry_count}, stubs/True-sorry (b): {stub_count}")

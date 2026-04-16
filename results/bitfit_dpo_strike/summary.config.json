@@ -1,0 +1,21 @@
+{
+  "_provenance_note": "Sidecar metadata for bitfit_dpo_strike/summary.json and bitfit_dpo_strike/loss_trajectory.json",
+  "source_script": "paper/scripts/bitfit_dpo_strike.py",
+  "model": "pythia-410m",
+  "seed": 42,
+  "lora_rank": "N/A — BitFit (biases-only, no LoRA)",
+  "lora_alpha": "N/A",
+  "lr": 1e-4,
+  "batch": 1,
+  "gradient_accumulation_steps": 8,
+  "effective_batch": 8,
+  "steps": 800,
+  "lr_scheduler": "cosine",
+  "warmup_steps": 50,
+  "dataset": "Anthropic/hh-rlhf (train split, 2000 samples, shuffle seed=42)",
+  "method": "BitFit (biases only, weights frozen)",
+  "checkpoint_path": "cross-check/trained-model-battery/results/bitfit_dpo_strike/checkpoints/checkpoint-800",
+  "lora_dpo_v2_reference_loss": 0.487,
+  "lora_dpo_v2_reference_source": "cross-check/trained-model-battery/results/_leak/v2/summary_v2.json → train_loss=0.48728475034236907",
+  "notes": "Baseline for gauge-theory falsification. Measures how much loss reduction is achievable with bias shifts alone vs LoRA weight rewiring."
+}

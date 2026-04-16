@@ -7,18 +7,20 @@ CPU-only (base model in fp32; SVD on 16 layers × [6144, 2048]).
 """
 from __future__ import annotations
 import json
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 from safetensors import safe_open
 from transformers import AutoModelForCausalLM
 
-ROOT = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
-BASE = ROOT / "models" / "pythia-1b"
+BASE = MODELS_DIR / "pythia-1b"
 
 RUNS = [
-    ("seed42_DPO",  ROOT / "results" / "_leak_1b"         / "v2" / "checkpoints" / "checkpoint-800"),
-    ("seed117_DPO", ROOT / "results" / "_leak_1b_seed117" / "v2" / "checkpoints" / "checkpoint-800"),
+    ("seed42_DPO",  RESULTS_DIR / "_leak_1b"         / "v2" / "checkpoints" / "checkpoint-800"),
+    ("seed117_DPO", RESULTS_DIR / "_leak_1b_seed117" / "v2" / "checkpoints" / "checkpoint-800"),
 ]
 R, ALPHA = 128, 256
 N_LAYERS = 16

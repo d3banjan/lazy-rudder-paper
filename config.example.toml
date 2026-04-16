@@ -1,0 +1,16 @@
+# Copy to config.toml and edit paths. Environment variables override config.toml.
+#
+# Resolution order: env vars > config.toml > fallback (../cross-check/... dev layout)
+# See scripts/_paths.py for full documentation.
+
+# Where Pythia base weights live (one sub-dir per model, e.g. ./models/pythia-410m/)
+models_dir = "./models"
+
+# Where training scripts write results (sub-dirs: _leak/, _leak_1b/, etc.)
+results_dir = "./results"
+
+# Battery root (legacy alias used by some scripts as BASE_DIR)
+base_dir   = "."
+
+# Optional: HuggingFace artifact repo for adapters + activations
+# hf_artifacts_repo = "d3banjan/lazy-rudder-artifacts"

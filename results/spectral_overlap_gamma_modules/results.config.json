@@ -1,0 +1,51 @@
+{
+  "_provenance_note": "Sidecar metadata for spectral_overlap_gamma_modules/results.json",
+  "source_script": "paper/scripts/spectral_overlap_gamma_modules.py",
+  "model": "pythia-410m and pythia-1b (both sizes probed)",
+  "seed": "N/A — analysis-only; reads trained adapter checkpoints",
+  "lora_rank": 128,
+  "lora_alpha": 256,
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "410m_dpo",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v2/checkpoints/checkpoint-800",
+      "model_dir": "cross-check/trained-model-battery/models/pythia-410m-safetensors",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_v2.py"
+    },
+    {
+      "run_key": "410m_clm",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v3/checkpoints/checkpoint-800",
+      "model_dir": "cross-check/trained-model-battery/models/pythia-410m-safetensors",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train.py"
+    },
+    {
+      "run_key": "1b_dpo",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b/v2/checkpoints/checkpoint-800",
+      "model_dir": "cross-check/trained-model-battery/models/pythia-1b",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_1b.py"
+    },
+    {
+      "run_key": "1b_clm",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b/v3/checkpoints/checkpoint-800",
+      "model_dir": "cross-check/trained-model-battery/models/pythia-1b",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train_1b.py"
+    }
+  ],
+  "notes": "Adversarial check: tests whether srank~3.6 is QKV-specific or universal across all LoRA-adapted modules (QKV, dense, dense_h_to_4h, dense_4h_to_h). Also note: a copy of this script is saved inside the results directory itself. Note: spectral_overlap_gamma_modules.py snapshot also exists at results/spectral_overlap_gamma_modules/spectral_overlap_gamma_modules.py."
+}

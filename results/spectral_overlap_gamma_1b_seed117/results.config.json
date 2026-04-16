@@ -1,0 +1,39 @@
+{
+  "_provenance_note": "Sidecar metadata for spectral_overlap_gamma_1b_seed117/results.json",
+  "source_script": "paper/scripts/spectral_overlap_gamma_1b_seed117.py",
+  "model": "pythia-1b",
+  "seed": "N/A — analysis-only; reads adapter checkpoints for both seed=42 and seed=117 training runs",
+  "lora_rank": 128,
+  "lora_alpha": 256,
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "v2_dpo_r128_1b_s42",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b/v2/checkpoints/checkpoint-800",
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_1b.py"
+    },
+    {
+      "run_key": "v3_clm_r128_1b_s42",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b/v3/checkpoints/checkpoint-800",
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train_1b.py"
+    },
+    {
+      "run_key": "v2_dpo_r128_1b_s117",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b_seed117/v2/checkpoints/checkpoint-800",
+      "training_seed": 117,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_1b_seed117.py"
+    },
+    {
+      "run_key": "v3_clm_r128_1b_s117",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak_1b_seed117/v3/checkpoints/checkpoint-800",
+      "training_seed": 117,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train_1b_seed117.py"
+    }
+  ],
+  "notes": "4-way seed comparison: γ-metric at 1B for DPO and CLM at both seed=42 and seed=117. Compares bonus_R to assess seed sensitivity of the alignment manifold."
+}

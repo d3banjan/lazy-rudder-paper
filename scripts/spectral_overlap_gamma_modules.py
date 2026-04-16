@@ -30,7 +30,10 @@ from __future__ import annotations
 import json
 import logging
 import shutil
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 from safetensors import safe_open
@@ -48,11 +51,7 @@ log = logging.getLogger(__name__)
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 
-# Script lives at paper/scripts/; resolve relative to it
 PAPER_DIR = Path(__file__).resolve().parent.parent          # paper/
-REPO_DIR  = PAPER_DIR.parent                               # lean-mining/
-XCHECK    = REPO_DIR / "cross-check" / "trained-model-battery"
-
 OUT_DIR = PAPER_DIR / "results" / "spectral_overlap_gamma_modules"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -60,26 +59,28 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 RUNS = {
     "410m_dpo": {
-        "ckpt":      XCHECK / "results" / "_leak"    / "v2" / "checkpoints" / "checkpoint-800",
-        "model_dir": XCHECK / "models" / "pythia-410m-safetensors",
+        "ckpt":      RESULTS_DIR / "_leak"    / "v2" / "checkpoints" / "checkpoint-800",
+        # HF repo: EleutherAI/pythia-410m (safetensors native)
+        "model_dir": MODELS_DIR / "pythia-410m",
         "r":         128,
         "alpha":     256,
     },
     "410m_clm": {
-        "ckpt":      XCHECK / "results" / "_leak"    / "v3" / "checkpoints" / "checkpoint-800",
-        "model_dir": XCHECK / "models" / "pythia-410m-safetensors",
+        "ckpt":      RESULTS_DIR / "_leak"    / "v3" / "checkpoints" / "checkpoint-800",
+        # HF repo: EleutherAI/pythia-410m (safetensors native)
+        "model_dir": MODELS_DIR / "pythia-410m",
         "r":         128,
         "alpha":     256,
     },
     "1b_dpo": {
-        "ckpt":      XCHECK / "results" / "_leak_1b" / "v2" / "checkpoints" / "checkpoint-800",
-        "model_dir": XCHECK / "models" / "pythia-1b",
+        "ckpt":      RESULTS_DIR / "_leak_1b" / "v2" / "checkpoints" / "checkpoint-800",
+        "model_dir": MODELS_DIR / "pythia-1b",
         "r":         128,
         "alpha":     256,
     },
     "1b_clm": {
-        "ckpt":      XCHECK / "results" / "_leak_1b" / "v3" / "checkpoints" / "checkpoint-800",
-        "model_dir": XCHECK / "models" / "pythia-1b",
+        "ckpt":      RESULTS_DIR / "_leak_1b" / "v3" / "checkpoints" / "checkpoint-800",
+        "model_dir": MODELS_DIR / "pythia-1b",
         "r":         128,
         "alpha":     256,
     },

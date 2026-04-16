@@ -8,16 +8,19 @@ loads each adapter checkpoint, merges it, and computes L on the true effective w
 from __future__ import annotations
 import json
 import math
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM
 
 
-BASE_PATH = "models/pythia-410m"
-CKPT_DIR = Path("results/_leak/checkpoints")
-OUT_PATH = Path("results/_leak/l_trajectory_merged.json")
+BASE_PATH = str(MODELS_DIR / "pythia-410m")
+CKPT_DIR = RESULTS_DIR / "_leak" / "checkpoints"
+OUT_PATH = RESULTS_DIR / "_leak" / "l_trajectory_merged.json"
 
 
 def block_off_mass(W: torch.Tensor, k: int = 4) -> float:

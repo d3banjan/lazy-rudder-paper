@@ -1,0 +1,13 @@
+{
+  "_provenance_note": "Sidecar metadata for _leak/v2/channel_partition.json",
+  "source_script": "paper/scripts/compute_channel_partition.py",
+  "model": "pythia-410m",
+  "seed": 0,
+  "lora_rank": "N/A — analysis-only",
+  "lora_alpha": "N/A",
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "Anthropic/hh-rlhf (train split, 128 samples, shuffle seed=0)",
+  "notes": "Activation-variance-based channel partition. Computes per-layer per-channel variance from base model forward passes. Used as input to spectral_autopsy_sectional.py and spectral_autopsy_sectional_3tier.py. method=activation_variance, n_layers=24, k=4 (quartile boundaries)."
+}

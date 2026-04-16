@@ -1,0 +1,39 @@
+{
+  "_provenance_note": "Sidecar metadata for spectral_autopsy_sectional/results.json",
+  "source_script": "paper/scripts/spectral_autopsy_sectional.py",
+  "model": "pythia-410m",
+  "seed": "N/A — analysis-only; reads trained adapter checkpoints",
+  "lora_rank": "varies by run (see checkpoint_inputs)",
+  "lora_alpha": "varies by run (see checkpoint_inputs)",
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "v1_dpo_r16",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/checkpoints/checkpoint-800",
+      "lora_r": 16,
+      "lora_alpha": 32,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train.py"
+    },
+    {
+      "run_key": "v2_dpo_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v2/checkpoints/checkpoint-800",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_v2.py"
+    },
+    {
+      "run_key": "v3_clm_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v3/checkpoints/checkpoint-800",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train.py"
+    }
+  ],
+  "notes": "Soft-partition sectional SVD. Computes frob_on, frob_off, srank_on, srank_off, k90 using orbit-aligned channel partition (SRN region vs complement). Uses channel partition from _leak/v2/channel_partition.json (activation variance computed via compute_channel_partition.py with Anthropic/hh-rlhf train split 128 samples, shuffle seed=0)."
+}

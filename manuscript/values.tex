@@ -36,15 +36,25 @@
 \newcommand{\bonusLKfiveFourTenMDPO}{1.471}
 \newcommand{\bonusLKfiveOneBDPOsFortyTwo}{3.270}
 
-% ── Scaling fit ───────────────────────────────────────
+% ── Scaling fit (AIC + RMS) ───────────────────────────
 \newcommand{\srankFitTaskConst}{3.629}
 \newcommand{\srankFitTaskRMS}{0.324}
 \newcommand{\srankFitSqrtC}{104.356}
 \newcommand{\srankFitSqrtRMS}{0.649}
 \newcommand{\srankFitCbrtC}{34.682}
 \newcommand{\srankFitCbrtRMS}{0.403}
+\newcommand{\srankFitTaskAIC}{-7.008}
+\newcommand{\srankFitSqrtAIC}{-1.460}
+\newcommand{\srankFitCbrtAIC}{-5.261}
+\newcommand{\srankFitDeltaAICSqrt}{5.547}
+\newcommand{\srankFitDeltaAICCbrt}{1.747}
+\newcommand{\srankFourPtStd}{0.375}
+\newcommand{\srankPerLayerStdFourTenM}{1.080}
+\newcommand{\srankPerLayerMinFourTenM}{2.721}
+\newcommand{\srankPerLayerMaxFourTenM}{7.670}
 
 % ── BitFit-DPO ────────────────────────────────────────
+% Endpoint convention: summary.json final_loss (authoritative). See code comment.
 \newcommand{\bitfitTrainableParams}{271360}
 \newcommand{\bitfitTotalParams}{405334016}
 \newcommand{\bitfitTrainableFrac}{0.067}
@@ -156,8 +166,11 @@
 \newcommand{\orthVerdict}{no significant difference}
 
 % ── Bias-theory autopsy ───────────────────────────────
+% All three variants (v1_dpo_r16, v2_dpo_r128, v3_clm_r128) on Pythia-410M/hh-rlhf.
+% Values cluster tightly; summary reported to 2 sig figs as 99.97%.
 \newcommand{\autopsyResidualMinPct}{99.970}
 \newcommand{\autopsyResidualMaxPct}{99.972}
+\newcommand{\autopsyResidualSummaryPct}{99.970}
 
 % ── Early vs late layer split (per-scale) ────────────
 \newcommand{\earlyLayerSrankSeventyM}{5.455}

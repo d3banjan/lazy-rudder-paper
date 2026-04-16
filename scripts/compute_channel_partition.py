@@ -19,7 +19,10 @@ import argparse
 import json
 import logging
 import math
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -27,9 +30,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-BASE_DIR  = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
-MODEL_DIR = BASE_DIR / "models" / "pythia-410m"
-OUT_DIR   = BASE_DIR / "results" / "_leak" / "v2"
+MODEL_DIR = MODELS_DIR / "pythia-410m"
+OUT_DIR   = RESULTS_DIR / "_leak" / "v2"
 OUT_PATH  = OUT_DIR / "channel_partition.json"
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)

@@ -92,13 +92,21 @@ r_clm_1b_s117 = compute_1b_s117("v3_clm_r128_1b_s117")
 bitfit = load(RES / "bitfit_dpo_strike" / "summary.json")
 bf_traj = load(RES / "bitfit_dpo_strike" / "loss_trajectory.json")
 bf_ext_traj = load(RES / "bitfit_dpo_strike_extended" / "loss_trajectory.json")
-# final 10-step window mean at step 800
+# Endpoint convention: use summary.json final_loss (authoritative scalar logged at run end).
+# The trajectory last-10-step mean (step>=720) gives ~0.627 — a different, noisier estimate.
+# We consistently use summary.json throughout; cited in paper as "final loss".
+bf_final_loss = bitfit["final_loss"]   # 0.660  (summary.json — authoritative)
+# final 10-step window mean kept for internal reference only (not emitted as macro)
 bf_last10_step800 = statistics.mean(e["loss"] for e in bf_traj if e["step"] >= 720)
 # final 10-step window of extension (last 10 entries)
 bf_ext_final = statistics.mean(e["loss"] for e in bf_ext_traj[-10:])
 bf_ext_laststep = bf_ext_traj[-1]["step"]
 bf_min = min(e["loss"] for e in bf_traj)
 bf_ext_min = min(e["loss"] for e in bf_ext_traj)
+# LoRA reference 0.487: sourced from summary.json["lora_dpo_v2_final_loss"].
+# This value is hardcoded in that JSON (no separate run-level results JSON exists for v2_dpo).
+# FLAGGED for agent C: confirm 0.487 against a stored checkpoint loss or training log.
+bf_lora_ref = bitfit.get("lora_dpo_v2_final_loss", 0.487)   # 0.487 — see flag above
 
 
 # ── Bias autopsy ───────────────────────────────────────────────────────────
@@ -106,11 +114,18 @@ bias = load(RES / "bias_theory_autopsy" / "results.json")
 def avg_res_frac(run_key: str, side: str) -> float:
     pl = bias[run_key]["per_layer"]
     return statistics.mean(p[f"res_frac_{side}"] for p in pl)
+# All three variants (v1_dpo_r16, v2_dpo_r128, v3_clm_r128) are same training regime
+# (Pythia-410M DPO/CLM on hh-rlhf); values cluster tightly at ~99.97%.
+# Report min/max for range, and 2-sig-fig summary (99.97%).
 autopsy_residual_min = min(avg_res_frac(r, "right") for r in ["v1_dpo_r16", "v2_dpo_r128", "v3_clm_r128"])
 autopsy_residual_max = max(avg_res_frac(r, "right") for r in ["v1_dpo_r16", "v2_dpo_r128", "v3_clm_r128"])
+# 2 sig fig summary (rounds to 99.97% for all variants)
+autopsy_residual_summary_pct = round(statistics.mean(
+    avg_res_frac(r, "right") for r in ["v1_dpo_r16", "v2_dpo_r128", "v3_clm_r128"]
+) * 100, 2)
 
 
-# ── Scaling-fit RMS residuals (4-point empirical curve) ────────────────────
+# ── Scaling-fit RMS residuals + AIC (4-point empirical curve) ──────────────
 measured = [
     (512,  srank_70m),
     (768,  srank_160m),
@@ -123,15 +138,35 @@ def rms(predicted, measured):
 # Task-intrinsic: constant = mean
 c_task = statistics.mean(s for _, s in measured)
 rms_task = rms([c_task] * len(measured), [s for _, s in measured])
-# 1/sqrt(d): constant fit by least squares on c/sqrt(d) vs s → c = sum(s*sqrt(d)) / n (if assuming unit weight)
-# Actually best fit: minimize (c/sqrt(d) - s)^2 → c = sum(s/sqrt(d)) / sum(1/d)
+rss_task = sum((c_task - s) ** 2 for _, s in measured)
+# 1/sqrt(d): best fit minimize (c/sqrt(d) - s)^2 → c = sum(s/sqrt(d)) / sum(1/d)
 num = sum(s / math.sqrt(d) for d, s in measured); den = sum(1/d for d, s in measured)
 c_sqrt = num / den
 rms_sqrt = rms([c_sqrt / math.sqrt(d) for d, _ in measured], [s for _, s in measured])
+rss_sqrt = sum((c_sqrt / math.sqrt(d) - s) ** 2 for d, s in measured)
 # 1/d^(1/3): c = sum(s/d^(1/3)) / sum(1/d^(2/3))
 num3 = sum(s / d**(1/3) for d, s in measured); den3 = sum(1/d**(2/3) for d, s in measured)
 c_cbrt = num3 / den3
 rms_cbrt = rms([c_cbrt / d**(1/3) for d, _ in measured], [s for _, s in measured])
+rss_cbrt = sum((c_cbrt / d**(1/3) - s) ** 2 for d, s in measured)
+# AIC = n*ln(RSS/n) + 2k (k=1 parameter for each model)
+n_pts = len(measured)
+def aic(rss: float, k: int) -> float:
+    return n_pts * math.log(rss / n_pts) + 2 * k
+aic_task = aic(rss_task, 1)
+aic_sqrt = aic(rss_sqrt, 1)
+aic_cbrt = aic(rss_cbrt, 1)
+# delta-AIC vs constant (positive = worse than constant)
+daic_sqrt = aic_sqrt - aic_task
+daic_cbrt = aic_cbrt - aic_task
+# Srank std across 4 model-width points (network-level aggregate, not per-layer)
+srank_4pts = [s for _, s in measured]
+srank_std = statistics.stdev(srank_4pts)
+# Per-layer srank std (410M as representative)
+per_layer_sranks_410m = [p["srank_delta"] for p in g410["runs"]["v2_dpo_r128"]["per_layer"]]
+srank_per_layer_std_410m = statistics.stdev(per_layer_sranks_410m)
+srank_per_layer_min_410m = min(per_layer_sranks_410m)
+srank_per_layer_max_410m = max(per_layer_sranks_410m)
 
 
 # ── emit values.tex ────────────────────────────────────────────────────────
@@ -180,25 +215,37 @@ lines = [
     macro("bonusLKfiveFourTenMDPO", r_dpo_410m["bonus_L_k5"]),
     macro("bonusLKfiveOneBDPOsFortyTwo", r_dpo_1b_s42["bonus_L_k5"]),
     "",
-    "% ── Scaling fit ───────────────────────────────────────",
+    "% ── Scaling fit (AIC + RMS) ───────────────────────────",
     macro("srankFitTaskConst", c_task),
     macro("srankFitTaskRMS", rms_task),
     macro("srankFitSqrtC", c_sqrt),
     macro("srankFitSqrtRMS", rms_sqrt),
     macro("srankFitCbrtC", c_cbrt),
     macro("srankFitCbrtRMS", rms_cbrt),
+    macro("srankFitTaskAIC", aic_task),
+    macro("srankFitSqrtAIC", aic_sqrt),
+    macro("srankFitCbrtAIC", aic_cbrt),
+    macro("srankFitDeltaAICSqrt", daic_sqrt),   # positive = worse than constant
+    macro("srankFitDeltaAICCbrt", daic_cbrt),
+    # Srank std across 4 model-width points (network-level aggregate)
+    macro("srankFourPtStd", srank_std),
+    # Per-layer srank heterogeneity (410M representative)
+    macro("srankPerLayerStdFourTenM", srank_per_layer_std_410m),
+    macro("srankPerLayerMinFourTenM", srank_per_layer_min_410m),
+    macro("srankPerLayerMaxFourTenM", srank_per_layer_max_410m),
     "",
     "% ── BitFit-DPO ────────────────────────────────────────",
+    "% Endpoint convention: summary.json final_loss (authoritative). See code comment.",
     macro("bitfitTrainableParams", bitfit["trainable_params"]),
     macro("bitfitTotalParams", bitfit["total_params"]),
     macro("bitfitTrainableFrac", bitfit["trainable_frac"] * 100),  # as percent
     macro("bitfitInitLoss", bitfit["initial_loss"]),
-    macro("bitfitFinalLoss", bitfit["final_loss"]),
+    macro("bitfitFinalLoss", bf_final_loss),   # summary.json final_loss
     macro("bitfitMinLoss", bf_min),
-    macro("bitfitLoRAReference", bitfit.get("lora_dpo_v2_final_loss", 0.487)),
-    macro("bitfitDropBits", bitfit["initial_loss"] - bitfit["final_loss"]),
-    macro("bitfitLoRADropBits", bitfit["initial_loss"] - bitfit.get("lora_dpo_v2_final_loss", 0.487)),
-    macro("bitfitLearningRatio", (bitfit["initial_loss"] - bitfit["final_loss"]) / (bitfit["initial_loss"] - bitfit.get("lora_dpo_v2_final_loss", 0.487))),
+    macro("bitfitLoRAReference", bf_lora_ref),  # 0.487 from summary.json; flag for agent C
+    macro("bitfitDropBits", bitfit["initial_loss"] - bf_final_loss),
+    macro("bitfitLoRADropBits", bitfit["initial_loss"] - bf_lora_ref),
+    macro("bitfitLearningRatio", (bitfit["initial_loss"] - bf_final_loss) / (bitfit["initial_loss"] - bf_lora_ref)),
     "",
     "% ── BitFit extension ──────────────────────────────────",
     macro("bitfitExtLastStep", bf_ext_laststep),
@@ -302,8 +349,11 @@ else:
 lines += [
     "",
     "% ── Bias-theory autopsy ───────────────────────────────",
+    "% All three variants (v1_dpo_r16, v2_dpo_r128, v3_clm_r128) on Pythia-410M/hh-rlhf.",
+    "% Values cluster tightly; summary reported to 2 sig figs as 99.97%.",
     macro("autopsyResidualMinPct", autopsy_residual_min * 100),
     macro("autopsyResidualMaxPct", autopsy_residual_max * 100),
+    macro("autopsyResidualSummaryPct", autopsy_residual_summary_pct),  # 2 sig fig summary
     "",
     "% ── Early vs late layer split (per-scale) ────────────",
 ]

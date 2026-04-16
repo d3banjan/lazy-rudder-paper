@@ -11,7 +11,10 @@ from __future__ import annotations
 
 import json
 import math
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 from peft import PeftModel
@@ -19,9 +22,9 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 
 
-BASE_PATH = "models/pythia-410m"
-CKPT_DIR = Path("results/_leak/v2/checkpoints")
-OUT_PATH = Path("results/_leak/v2/l_trajectory_orbit_fraction_clean.json")
+BASE_PATH = str(MODELS_DIR / "pythia-410m")
+CKPT_DIR = RESULTS_DIR / "_leak" / "v2" / "checkpoints"
+OUT_PATH = RESULTS_DIR / "_leak" / "v2" / "l_trajectory_orbit_fraction_clean.json"
 
 P_GAUGE = 0.005
 P_SRN = 0.662

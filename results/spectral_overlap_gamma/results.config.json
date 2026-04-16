@@ -1,0 +1,39 @@
+{
+  "_provenance_note": "Sidecar metadata for spectral_overlap_gamma/results.json",
+  "source_script": "paper/scripts/spectral_overlap_gamma.py",
+  "model": "pythia-410m",
+  "seed": "N/A — analysis-only; reads trained adapter checkpoints. Channel partition uses shuffle seed=0 (128 samples from Anthropic/hh-rlhf train split via compute_channel_partition.py).",
+  "lora_rank": "varies by run (see checkpoint_inputs)",
+  "lora_alpha": "varies by run (see checkpoint_inputs)",
+  "lr": "N/A",
+  "batch": "N/A",
+  "steps": "N/A",
+  "dataset": "N/A — does not load training data",
+  "checkpoint_inputs": [
+    {
+      "run_key": "v1_dpo_r16",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/checkpoints/checkpoint-800",
+      "lora_r": 16,
+      "lora_alpha": 32,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train.py"
+    },
+    {
+      "run_key": "v2_dpo_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v2/checkpoints/checkpoint-800",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/dpo_leak_train_v2.py"
+    },
+    {
+      "run_key": "v3_clm_r128",
+      "checkpoint": "cross-check/trained-model-battery/results/_leak/v3/checkpoints/checkpoint-800",
+      "lora_r": 128,
+      "lora_alpha": 256,
+      "training_seed": 42,
+      "training_script": "cross-check/trained-model-battery/clm_leak_train.py"
+    }
+  ],
+  "notes": "γ-metric (right-subspace overlap bonus_R) at k=5,10,20 and k=srank. 3-tier partition (P_PS=0.333, P_GAUGE=0.005) applied. Analysis is deterministic once checkpoints and partition are fixed."
+}
