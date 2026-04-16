@@ -62,12 +62,92 @@ Random baseline at k=5 for bonus_R: 5/d_model (e.g. 1/205 at 1B).
 
 ## Reproducing
 
-Training runs expect:
-- Pythia base models under `cross-check/trained-model-battery/models/`
-- `uv` or an equivalent Python env with `torch`, `transformers`, `peft`, `trl`, `datasets`, `safetensors`
-- RTX 3060 12GB or equivalent for up to 1B DPO (ref+policy LoRA r=128, fp16, gradient_checkpointing, bs=1 grad_accum=8, seq_len=512)
+This repository is a **self-contained snapshot** of theorems, experiment
+drivers, and analysis results. Training checkpoints (adapter weights)
+and base model weights are NOT included — they are reproducible by
+running the training scripts after obtaining the Pythia base models
+from HuggingFace (`EleutherAI/pythia-{70m,160m,410m,1b}`).
 
-Scripts assume the working directory is the parent project tree (paths reference `../cross-check/...`). Kept as-is for parent-repo consistency; see the parent's `lean-mining` repository for the full environment.
+### Environment
+
+```bash
+# Python ≥ 3.12
+uv sync   # reads pyproject.toml from parent project (see below) OR
+pip install torch transformers peft trl datasets safetensors scipy
+```
+
+The scripts were run with:
+- `torch` 2.x, `transformers` ≥ 4.44, `peft` 0.19, `trl` (DPO trainer)
+- `safetensors` for adapter/model I/O
+- `scipy` (for `curve_fit` in `two_point_correlator_delta.py` only)
+
+### Absolute paths
+
+The scripts under `scripts/` were authored in the parent project layout
+where they reference `../cross-check/trained-model-battery/models/...`
+for base weights. To reproduce from this snapshot alone:
+1. Download Pythia base models to a directory of your choice.
+2. Edit `BASE` / `MODEL_DIR` / `ROOT` constants near the top of each
+   script to point at your local paths (grep for `models/pythia-` to
+   find the relevant lines).
+3. Edit `RESULTS` / `OUT_DIR` to write into `results/` under this repo.
+
+A future refactor will replace hard-coded paths with environment
+variables (`LAZY_RUDDER_MODELS_DIR`, `LAZY_RUDDER_RESULTS_DIR`).
+
+### Training reproduction (GPU)
+
+```bash
+# Each command takes 10–35 min on an RTX 3060 12GB.
+python scripts/dpo_leak_train_70m.py   # → adapter at _leak_70m/v2/checkpoints/checkpoint-800
+python scripts/dpo_leak_train_160m.py  # → _leak_160m/v2/...
+python scripts/dpo_leak_train_v2.py    # → _leak/v2/... (410m DPO)
+python scripts/clm_leak_train.py       # → _leak/v3/... (410m CLM control)
+python scripts/dpo_leak_train_1b.py    # → _leak_1b/v2/... (1B DPO seed 42)
+python scripts/dpo_leak_train_1b_seed117.py
+python scripts/clm_leak_train_1b.py
+python scripts/clm_leak_train_1b_seed117.py
+python scripts/bitfit_dpo_strike.py           # bias-only ablation, 800 steps
+python scripts/bitfit_dpo_strike_extended.py  # extension to 1600 steps
+```
+
+### Analysis reproduction (CPU-OK)
+
+After training, run the γ / autopsy / correlator scripts in any order.
+These load adapter checkpoints and write JSON files under `results/`:
+
+```bash
+python scripts/spectral_overlap_gamma.py         # γ at 410M (both objectives)
+python scripts/spectral_overlap_gamma_1b.py      # γ at 1B
+python scripts/spectral_overlap_gamma_1b_seed117.py
+python scripts/spectral_overlap_gamma_petri.py   # γ at 70M + 160M
+python scripts/spectral_autopsy.py               # rank / srank audit
+python scripts/spectral_autopsy_sectional_3tier.py  # needs _leak/v2/channel_partition.json (included)
+python scripts/bias_theory_autopsy.py            # LN-γ hidden-gain test
+python scripts/seed_variance_quick.py            # γ across seeds at 1B
+python scripts/two_point_correlator_delta.py     # δ FFT falsification
+python scripts/angular_fourier_delta_prime.py    # δ′ angular-Fourier probe
+```
+
+### Building the paper
+
+From `manuscript/`:
+```bash
+make paper       # runs all generators + 3× pdflatex + bibtex
+make values      # just regenerate values.tex from results/*.json
+make tables      # just regenerate tables.tex
+make lean-status # just regenerate lean_status.tex from lean/*.lean
+```
+
+Or from this repo root (once `Makefile` is set up), `make paper`
+delegates to `manuscript/`.
+
+### Hardware
+
+- Training: RTX 3060 12GB was sufficient for all runs with fp16 +
+  gradient checkpointing. 2.8B+ models require more VRAM (see §6
+  Limitations in the manuscript).
+- Analysis: CPU is sufficient; no GPU needed for γ / autopsy / correlator.
 
 ## License
 
