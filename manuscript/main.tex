@@ -569,18 +569,24 @@ represent features more monosemantically during pretraining. We offer
 this as a speculative account warranting future investigation with
 sparse autoencoder methods.
 
-\paragraph{Safety implications.}
-The BitFit-DPO failure provides a formal argument against the
-``gauge-transform catastrophe'' interpretation of alignment
-reversibility: if alignment were a simple bias shift of pretrained
-pathways, a bias-only perturbation of equivalent parameter count would
-suffice to undo it. Our result establishes that the alignment signal
-is not gauge-accessible --- it is encoded as specific low-rank weight
-geometry. Reversing alignment therefore requires undoing the exact
-geometric rewiring applied during DPO, which is a more complex and
-detectable operation than a bias flip. This supports a cautiously
-optimistic view of alignment robustness against simple additive
-adversarial perturbations.
+\paragraph{Safety implications (scoped).}
+The BitFit-DPO failure provides a formal argument against a narrow form
+of the ``gauge-transform catastrophe'' interpretation of alignment
+reversibility: if alignment were \emph{SGD-accessible} via bias shifts
+of pretrained pathways, a bias-only perturbation of equivalent parameter
+count would suffice to produce comparable alignment quality. Our result
+establishes that the alignment signal is not \emph{SGD-accessible in
+bias space} --- it is encoded as specific low-rank weight geometry that
+first-order gradient descent on biases alone cannot reach. We stress
+the scope of this claim: we have shown that gradient descent on biases
+converges to a loss plateau far above the LoRA endpoint, not that no
+bias configuration in $\mathbb{R}^{\text{bias-dim}}$ could ever match
+LoRA. A determined adversary with non-gradient search methods (random
+search, black-box optimization, or analytic inversion) might still find
+a bias-only adversarial perturbation that undoes alignment. The result
+therefore supports a cautiously optimistic view of alignment robustness
+against \emph{naturally-occurring gradient-based bias perturbations},
+but does not rule out constructive inversion attacks.
 
 \paragraph{Compute-efficient RLHF.}
 The empirical srank floor of $\srankFitTaskConst \pm 0.5$ across
@@ -612,13 +618,41 @@ work to keep the spectral measurements of the $\gamma$-rudder
 unambiguous; characterizing the geometric degradation of quantized
 alignment remains a critical open problem.
 
-Further limitations: (i) all runs use Pythia; cross-architecture
-replication (OLMo, Qwen, Llama) is queued but not reported here;
-(ii) we study DPO and next-token-prediction only; other preference
-objectives (IPO, KTO, ORPO) may induce different $\gamma$-rudder
-geometries; (iii) the $\gamma$ metric is applied to
-\texttt{attention.query\_key\_value} modules only; cross-module
-comparison (\texttt{dense}, MLP) is deferred.
+\paragraph{Dataset scope: the constant is hh-rlhf-intrinsic, not universal.}
+Our task-intrinsic constant $srank \approx \srankFitTaskConst$ was
+measured exclusively on DPO fine-tuning against
+\texttt{Anthropic/hh-rlhf}, which encodes a relatively simple
+helpful-vs-harmful preference distinction. We do not claim
+universality across preference tasks. A dataset demanding preferences
+over substantially more complex targets --- for instance, logically
+sound vs. buggy code, or grammatical vs. ungrammatical multilingual
+generation --- might induce a qualitatively different $\gamma$-rudder
+dimensionality. The finding should therefore be read as: ``for
+preference tasks in the complexity regime of \texttt{hh-rlhf}, the
+preference signal has a dimensional floor of approximately
+$\srankFitTaskConst$.'' Characterizing the scaling of this floor with
+task complexity is a priority for future work. Concretely:
+replicating the Pythia sweep on \texttt{UltraFeedback},
+\texttt{code-preference-pairs}, and multilingual preference datasets
+would test whether $srank$ scales with the intrinsic rank of the
+preference signal in the data, or remains a narrow constant reflecting
+the inherent low-dimensionality of human-preference abstractions in
+general.
+
+\paragraph{Further limitations.}
+(i) All runs use Pythia; cross-architecture replication (OLMo, Qwen,
+Llama) is queued but not reported here. (ii) We study DPO and
+next-token-prediction only; other preference objectives (IPO, KTO,
+ORPO) may induce different $\gamma$-rudder geometries. (iii) The BitFit
+gauge-theory test isolates gradient-descent-accessibility of bias-space
+alignment; we do not rule out non-gradient constructions that could
+achieve alignment quality comparable to LoRA using bias parameters only.
+(iv) The $\gamma$ metric was originally reported only on
+\texttt{attention.query\_key\_value}; preliminary cross-module
+extensions (\texttt{attention.dense}, MLP up/down projections) are
+reported in the supplementary results (see
+\texttt{results/spectral\_overlap\_gamma\_modules/}) but full interpretive
+integration into the main narrative is pending further analysis.
 
 
 % ── bibliography ────────────────────────────────────────────────────────────
