@@ -527,6 +527,35 @@ modulation of existing pretrained directions.
 \section{Discussion}
 \label{sec:discussion}
 
+\paragraph{The CLM--DPO gap is within-subspace, not orthogonal-complement.}
+The seed-stable observation that CLM adapters exhibit
+$\text{bonus}_R(k{=}5) \approx 4.1\times$ while DPO adapters sit at
+$\approx 3.4\times$ at 1B (§\ref{sec:empirical}) initially suggested
+that DPO's contrastive objective forces the gradient off the dominant
+pretraining singular axes --- carving novel ``rejection-distinguishing''
+directions outside base $W$'s top-$k$ right-singular subspace. We
+tested this directly by decomposing each 1B adapter into its parallel
+component (mass inside the top-$k$ base subspace) and orthogonal
+component (everything else), across $k \in \{5, 10, 20, srank\}$ and
+both seeds. The result falsifies the orthogonal-geometry hypothesis:
+the DPO-minus-CLM orthogonal fraction gap is uniformly below $0.6$
+percentage points (+0.27 pp at $k{=}5$, +0.35 pp at $k{=}10$, +0.56 pp
+at $k{=}20$, +0.18 pp at $k{=}srank$), far below the 5 pp threshold
+for rejecting the null. Both adapters place $\approx 99\%$ of
+Frobenius mass outside the top-$k$ base subspace --- because low-rank
+$\Delta W$ (srank $\approx 3$) by construction fills only a tiny
+fraction of the 2048-dimensional input space, and the top-5 base
+subspace spans only $5/2048 \approx 0.24\%$ of that space. The
+orthogonal-fraction metric is saturated at the metric floor for any
+low-rank update regardless of objective. The CLM/DPO gap of
+$\approx 0.7\times$ in $\text{bonus}_R$ therefore reflects
+\emph{angular density within the top-5 base cone}, not the presence
+or absence of orthogonal ``rejection geometry.'' CLM packs its $\sim 3$
+dominant directions more tightly inside the base cone; DPO spreads
+marginally wider within the same cone. Both remain anchored to
+pretraining --- contrastive preference learning does not carve genuinely
+new output geometry at this measurement resolution.
+
 \paragraph{Reconciling with the acoustic anti-scaling literature.}
 A growing line of work (reviewed in \citealp{aghajanyan2020intrinsic}
 and subsequent follow-ups) reports that the intrinsic dimensionality
