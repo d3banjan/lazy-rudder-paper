@@ -205,6 +205,39 @@ lines = [
     macro("bitfitExtFinalLoss", bf_ext_final),
     macro("bitfitExtMinLoss", bf_ext_min),
     "",
+    "% ── DPO-CLM orthogonal complement ─────────────────────",
+]
+
+# DPO-CLM orthogonal decomposition
+orth_path = RES / "dpo_clm_orthogonal_decomp" / "results.json"
+if orth_path.exists():
+    orth = load(orth_path)
+    comp = orth["comparison"]
+    # Convert fractions to percentage points
+    for k_name in ["k5", "k10", "k20", "k_srank"]:
+        entry = comp.get(f"{k_name}_orthogonal_frac", comp.get(k_name, {}))
+        if isinstance(entry, dict):
+            delta = entry.get("dpo_minus_clm", 0.0)
+            dpo_mean = entry.get("dpo_mean", 0.0)
+            clm_mean = entry.get("clm_mean", 0.0)
+            label_map = {"k5": "Kfive", "k10": "Kten", "k20": "Ktwenty", "k_srank": "Ksrank"}
+            lines += [
+                macro(f"orthDPOMean{label_map[k_name]}",  dpo_mean * 100),  # percentage
+                macro(f"orthCLMMean{label_map[k_name]}",  clm_mean * 100),
+                macro(f"orthDPOminusCLM{label_map[k_name]}", delta * 100),  # percentage points
+            ]
+    verdict = orth.get("verdict", "unknown")
+    lines += [macro("orthVerdict", verdict.replace("_", " "))]
+else:
+    # Stubs if orthogonal decomp hasn't run yet — avoid undefined-macro LaTeX errors
+    for label in ["Kfive", "Kten", "Ktwenty", "Ksrank"]:
+        lines += [macro(f"orthDPOMean{label}", 0.0),
+                  macro(f"orthCLMMean{label}", 0.0),
+                  macro(f"orthDPOminusCLM{label}", 0.0)]
+    lines += [macro("orthVerdict", "pending")]
+
+lines += [
+    "",
     "% ── Bias-theory autopsy ───────────────────────────────",
     macro("autopsyResidualMinPct", autopsy_residual_min * 100),
     macro("autopsyResidualMaxPct", autopsy_residual_max * 100),

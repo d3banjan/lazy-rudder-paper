@@ -538,14 +538,20 @@ tested this directly by decomposing each 1B adapter into its parallel
 component (mass inside the top-$k$ base subspace) and orthogonal
 component (everything else), across $k \in \{5, 10, 20, srank\}$ and
 both seeds. The result falsifies the orthogonal-geometry hypothesis:
-the DPO-minus-CLM orthogonal fraction gap is uniformly below $0.6$
-percentage points (+0.27 pp at $k{=}5$, +0.35 pp at $k{=}10$, +0.56 pp
-at $k{=}20$, +0.18 pp at $k{=}srank$), far below the 5 pp threshold
-for rejecting the null. Both adapters place $\approx 99\%$ of
-Frobenius mass outside the top-$k$ base subspace --- because low-rank
-$\Delta W$ (srank $\approx 3$) by construction fills only a tiny
-fraction of the 2048-dimensional input space, and the top-5 base
-subspace spans only $5/2048 \approx 0.24\%$ of that space. The
+the DPO-minus-CLM orthogonal fraction gap is uniformly below one
+percentage point across all probed $k$:
+$+\orthDPOminusCLMKfive$~pp at $k{=}5$,
+$+\orthDPOminusCLMKten$~pp at $k{=}10$,
+$+\orthDPOminusCLMKtwenty$~pp at $k{=}20$,
+$+\orthDPOminusCLMKsrank$~pp at $k{=}srank$
+(\texttt{\orthVerdict}, below the 5 pp threshold for rejecting the
+null). Both adapters place $\approx \orthDPOMeanKfive\%$ (DPO) and
+$\approx \orthCLMMeanKfive\%$ (CLM) of Frobenius mass outside the
+top-$k{=}5$ base subspace --- because low-rank $\Delta W$
+(srank $\approx \srankFitTaskConst$) by construction fills only a
+tiny fraction of the input space, and the top-5 base subspace spans
+only $5/d_\text{in}$ of that space (e.g.\ $5/2048 \approx 0.24\%$ at
+1B). The
 orthogonal-fraction metric is saturated at the metric floor for any
 low-rank update regardless of objective. The CLM/DPO gap of
 $\approx 0.7\times$ in $\text{bonus}_R$ therefore reflects
