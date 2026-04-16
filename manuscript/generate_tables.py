@@ -129,7 +129,7 @@ t2 = [
     f"    Final loss (last-10 mean) & {bf['final_loss']:.3f} & {bf_ext_final:.3f} \\\\",
     f"    Min loss observed       & {bf_min_overall:.3f} & {bf_ext_min:.3f} \\\\",
     f"    Drop from initial (nats)& {bf['initial_loss']-bf['final_loss']:.3f} & {bf['initial_loss']-bf_ext_final:.3f} \\\\",
-    f"    Verdict                 & \\texttt{{{bf['verdict']}}} & \\texttt{{gauge\\_confirmed\\_dead}} \\\\",
+    f"    Verdict                 & \\texttt{{{bf['verdict'].replace('_','\\_')}}} & \\texttt{{gauge\\_confirmed\\_dead}} \\\\",
     "    \\bottomrule",
     "  \\end{tabular}",
     "\\end{table}",
