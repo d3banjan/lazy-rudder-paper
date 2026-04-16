@@ -527,6 +527,62 @@ modulation of existing pretrained directions.
 \section{Discussion}
 \label{sec:discussion}
 
+\paragraph{The $\gamma$-rudder holds across all four adapter modules.}
+The adversarial concern that our $srank \approx \srankFitTaskConst$
+finding might be specific to \texttt{attention.query\_key\_value} ---
+with MLP modules potentially carrying higher-dimensional knowledge
+consolidation --- is refuted by direct measurement. Extending $\gamma$
+to the four LoRA target modules (\texttt{attention.query\_key\_value},
+\texttt{attention.dense}, \texttt{mlp.dense\_h\_to\_4h},
+\texttt{mlp.dense\_4h\_to\_h}) across 410M and 1B × DPO and CLM runs
+yields 16 module-run cells, all with $srank$ in the range
+$[\modSrankMin, \modSrankMax]$ --- uniformly far below the LoRA cap
+of $r = \loraCap$. Module-averaged values:
+\begin{center}
+\small
+\begin{tabular}{lcc}
+\toprule
+Module & avg $srank$ & avg $\text{bonus}_R(5)$ \\
+\midrule
+\texttt{attention.query\_key\_value} & $\modAvgSrankQKV$ & $\modAvgBonusRKfiveQKV\times$ \\
+\texttt{attention.dense}             & $\modAvgSrankAttnDense$ & $\modAvgBonusRKfiveAttnDense\times$ \\
+\texttt{mlp.dense\_h\_to\_4h} (up)   & $\modAvgSrankMLPUp$   & $\modAvgBonusRKfiveMLPUp\times$ \\
+\texttt{mlp.dense\_4h\_to\_h} (down) & $\modAvgSrankMLPDown$ & $\modAvgBonusRKfiveMLPDown\times$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Two phenomena emerge beyond the srank-invariance confirmation:
+
+\textbf{(i) MLPs align \emph{more tightly} with pretraining than QKV, not less.}
+Both MLP projections achieve higher $\text{bonus}_R$ than QKV while
+maintaining the same low $srank$. At 1B, this reaches extreme values:
+$\text{bonus}_R(k{=}srank) = \modPeakBonusRKsrank\times$ random baseline
+for $\texttt{\modPeakModule}$ under the 1B CLM run --- the tightest
+pretrained-subspace anchoring observed anywhere in our sweep.
+The prediction that MLPs carry heavy-lifting high-dimensional knowledge
+consolidation is disconfirmed; they in fact concentrate alignment energy
+into the \emph{same} $\sim 3$ base-subspace directions as attention, but
+with substantially less angular spread.
+
+\textbf{(ii) \texttt{attention.dense} is the one asymmetric module.}
+Its $srank \approx \modAvgSrankAttnDense$ is notably higher than the
+other three and its $\text{bonus}_R \approx \modAvgBonusRKfiveAttnDense\times$
+hovers near random-subspace alignment, particularly on the input (right)
+side. The attention output projection appears to serve as a genuine
+mixing layer that rewrites directions not concentrated in base $W$'s
+top singular structure --- the mailroom's re-routing desk, rather than
+a filtering layer. Future work should investigate whether this
+module-level asymmetry is a specific architectural feature of Pythia
+or a general property of transformer residual streams.
+
+Together with the $\gamma$-rudder subspace concentration, these findings
+reframe LLM alignment as a \emph{fused-module} phenomenon: preference
+learning is a single $\sim 3$-dimensional signal that propagates through
+all adapter modules, with most modules amplifying existing pretrained
+directions and one module (\texttt{attention.dense}) doing the novel
+cross-channel mixing. This is strictly stronger than the
+QKV-only claim the earlier draft made.
+
 \paragraph{The CLM--DPO gap is within-subspace, not orthogonal-complement.}
 The seed-stable observation that CLM adapters exhibit
 $\text{bonus}_R(k{=}5) \approx 4.1\times$ while DPO adapters sit at
@@ -744,12 +800,12 @@ ORPO) may induce different $\gamma$-rudder geometries. (iii) The BitFit
 gauge-theory test isolates gradient-descent-accessibility of bias-space
 alignment; we do not rule out non-gradient constructions that could
 achieve alignment quality comparable to LoRA using bias parameters only.
-(iv) The $\gamma$ metric was originally reported only on
-\texttt{attention.query\_key\_value}; preliminary cross-module
-extensions (\texttt{attention.dense}, MLP up/down projections) are
-reported in the supplementary results (see
-\texttt{results/spectral\_overlap\_gamma\_modules/}) but full interpretive
-integration into the main narrative is pending further analysis.
+(iv) The $\gamma$ metric is measured across all four LoRA target
+modules (\texttt{query\_key\_value}, \texttt{dense}, \texttt{mlp\_h\_to\_4h},
+\texttt{mlp\_4h\_to\_h}); cross-module findings are integrated into
+§\ref{sec:discussion}. We do not measure $\gamma$ on modules that
+LoRA did not adapt (embeddings, output head, layer norms) --- adapter
+weights there are zero by the training configuration.
 (v) Our $srank$ is measured on the standard LoRA $\Delta W = BA$
 parameterization, which enforces $\mathrm{rank}(\Delta W) \leq r$ by
 construction. Higher-rank parameterizations --- LoKr (Kronecker

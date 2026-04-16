@@ -205,6 +205,69 @@ lines = [
     macro("bitfitExtFinalLoss", bf_ext_final),
     macro("bitfitExtMinLoss", bf_ext_min),
     "",
+    "% ── Cross-module γ (attention + MLP) ──────────────────",
+]
+
+mod_path = RES / "spectral_overlap_gamma_modules" / "results.json"
+if mod_path.exists():
+    mod = load(mod_path)
+    # Per-run, per-module macros
+    run_labels = {"410m_dpo": "FourTenMDPO", "410m_clm": "FourTenMCLM",
+                  "1b_dpo": "OneBDPO", "1b_clm": "OneBCLM"}
+    mod_labels = {"attention.query_key_value": "QKV",
+                  "attention.dense": "AttnDense",
+                  "mlp.dense_h_to_4h": "MLPUp",
+                  "mlp.dense_4h_to_h": "MLPDown"}
+    for run_key, run_tag in run_labels.items():
+        if run_key not in mod["runs"]:
+            continue
+        for mod_key, mod_tag in mod_labels.items():
+            if mod_key not in mod["runs"][run_key]["modules"]:
+                continue
+            avg = mod["runs"][run_key]["modules"][mod_key]["avg"]
+            lines += [
+                macro(f"modSrank{run_tag}{mod_tag}",      avg["srank"]),
+                macro(f"modBonusRKfive{run_tag}{mod_tag}", avg["bonus_R_k5"]),
+                macro(f"modBonusRKsrank{run_tag}{mod_tag}", avg["bonus_R_ksrank"]),
+                macro(f"modBonusLKfive{run_tag}{mod_tag}", avg["bonus_L_k5"]),
+            ]
+    # Cross-run per-module averages
+    for mod_key, mod_tag in mod_labels.items():
+        sranks = [mod["runs"][r]["modules"][mod_key]["avg"]["srank"]
+                  for r in mod["runs"] if mod_key in mod["runs"][r]["modules"]]
+        bRs = [mod["runs"][r]["modules"][mod_key]["avg"]["bonus_R_k5"]
+               for r in mod["runs"] if mod_key in mod["runs"][r]["modules"]]
+        if sranks:
+            lines += [
+                macro(f"modAvgSrank{mod_tag}", sum(sranks)/len(sranks)),
+                macro(f"modAvgBonusRKfive{mod_tag}", sum(bRs)/len(bRs)),
+            ]
+    # Peak bonus_R across all cells
+    all_cells = [(r, m, mod["runs"][r]["modules"][m]["avg"]["bonus_R_ksrank"])
+                 for r in mod["runs"] for m in mod["runs"][r]["modules"]]
+    peak_run, peak_mod, peak_val = max(all_cells, key=lambda x: x[2])
+    lines += [
+        macro("modPeakBonusRKsrank", peak_val),
+        macro("modPeakRun", peak_run.replace("_", " ")),
+        macro("modPeakModule", peak_mod.replace("_", "\\_")),
+    ]
+    # srank range
+    all_sranks = [c[2] for c in [(r, m, mod["runs"][r]["modules"][m]["avg"]["srank"])
+                                  for r in mod["runs"] for m in mod["runs"][r]["modules"]]]
+    lines += [
+        macro("modSrankMin", min(all_sranks)),
+        macro("modSrankMax", max(all_sranks)),
+    ]
+else:
+    for label in ["FourTenMDPO", "FourTenMCLM", "OneBDPO", "OneBCLM"]:
+        for m in ["QKV", "AttnDense", "MLPUp", "MLPDown"]:
+            lines += [macro(f"modSrank{label}{m}", 0.0),
+                      macro(f"modBonusRKfive{label}{m}", 0.0),
+                      macro(f"modBonusRKsrank{label}{m}", 0.0),
+                      macro(f"modBonusLKfive{label}{m}", 0.0)]
+
+lines += [
+    "",
     "% ── DPO-CLM orthogonal complement ─────────────────────",
 ]
 
