@@ -1,0 +1,15 @@
+{
+  "objective": "DPO",
+  "method": "BitFit (biases-only, weights frozen)",
+  "trainable_params": 271360,
+  "total_params": 405334016,
+  "trainable_frac": 0.0006694725566777993,
+  "initial_loss": 0.6931471824645996,
+  "final_loss": 0.660123034119606,
+  "min_loss": 0.5949703693389893,
+  "wall_sec": 2212.3983952999115,
+  "learning_rate": 0.0001,
+  "lora_dpo_v2_final_loss": 0.487,
+  "verdict": "gauge_dead",
+  "headline": "BitFit stalled at 0.6601 (near base DPO starting ~0.69). Additive bias shifts cannot produce DPO alignment. Weight rewiring is strictly necessary; gamma's 3-4 dim rudder is the irreducible mechanism."
+}
