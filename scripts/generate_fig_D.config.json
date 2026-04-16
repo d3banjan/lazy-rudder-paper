@@ -1,0 +1,9 @@
+{
+  "source_jsons": [
+    "results/bitfit_dpo_strike/loss_trajectory.json",
+    "results/bitfit_dpo_strike_extended/loss_trajectory.json"
+  ],
+  "lora_reference_source": "PROVENANCE.md → results/_leak/v2/summary_v2.json (Pythia-410M, LoRA r=128, α=256, LR=5e-6, seed 42, 800 steps)",
+  "generated": "2026-04-16",
+  "description": "BitFit vs LoRA DPO loss trajectories: bias-only DPO saturates far above LoRA endpoint."
+}

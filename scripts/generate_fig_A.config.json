@@ -1,0 +1,9 @@
+{
+  "source_jsons": [
+    "results/spectral_overlap_gamma_petri/results.json",
+    "results/spectral_overlap_gamma/results.json",
+    "results/spectral_overlap_gamma_1b/results.json"
+  ],
+  "generated": "2026-04-16",
+  "description": "Srank floor scatter: 4 model widths, constant vs cbrt power-law fits, ΔAIC annotation."
+}

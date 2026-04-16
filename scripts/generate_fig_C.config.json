@@ -1,0 +1,7 @@
+{
+  "source_jsons": [
+    "results/spectral_overlap_gamma_petri/results.json"
+  ],
+  "generated": "2026-04-16",
+  "description": "Per-layer srank grouped bars for Pythia-70M (6 layers) and Pythia-160M (12 layers); dashed aggregate constant."
+}

@@ -1,0 +1,7 @@
+{
+  "source_jsons": [
+    "results/spectral_overlap_gamma_1b/results.json"
+  ],
+  "generated": "2026-04-16",
+  "description": "Per-layer bonus_R(k=5) for DPO vs CLM at 1B: shows both reuse pretrained cone, CLM more tightly."
+}

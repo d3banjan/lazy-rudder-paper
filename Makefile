@@ -8,7 +8,7 @@
 # regenerated via `make training`, or fetched from a future HuggingFace /
 # GitHub LFS mirror for hard reproducibility.
 
-.PHONY: help all paper experiments training analysis clean distclean \
+.PHONY: help all paper figs experiments training analysis clean distclean \
         clean-checkpoints clean-results \
         train-70m train-160m train-410m-dpo train-410m-clm \
         train-1b-dpo train-1b-clm train-1b-dpo-s117 train-1b-clm-s117 \
@@ -75,7 +75,7 @@ paper:
 
 # Pass-through for manuscript-level targets so `make values` from the
 # top-level works equivalently to `cd manuscript && make values`.
-values tables lean-status:
+values tables lean-status figs:
 	$(MAKE) -C manuscript $@
 
 # ─────────────────────────────────────────────────────────────────────────

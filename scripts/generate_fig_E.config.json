@@ -1,0 +1,7 @@
+{
+  "source_jsons": [
+    "results/spectral_overlap_gamma_modules/results.json"
+  ],
+  "generated": "2026-04-16",
+  "description": "bonus_R(k=5) per module × run (4 modules × 4 runs): shows architecture-wide gamma-rudder invariance."
+}
