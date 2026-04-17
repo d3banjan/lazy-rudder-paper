@@ -23,6 +23,9 @@
 html { font-size: 18px; }
 body { margin: 0; background: var(--bg); color: var(--fg);
        font-family: var(--font-serif); line-height: 1.7; }
+a { color: var(--fg-muted); text-decoration: underline; text-underline-offset: 2px;
+    text-decoration-color: var(--border); }
+a:hover { color: var(--fg); text-decoration-color: var(--fg-muted); }
 
 .site-nav { position: sticky; top: 0; z-index: 100; background: var(--bg);
             border-bottom: 1px solid var(--border);
