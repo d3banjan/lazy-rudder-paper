@@ -140,6 +140,23 @@ figcaption { font-family: var(--font-sans); font-size: .82rem; color: var(--fg-m
 .dashboard-card { border: 1px solid var(--border); border-radius: 6px; padding: 1rem; }
 .dashboard-card h3 { margin-top: 0; }
 
+/* ── Glossary ── */
+dl.glossary { margin: 1.5rem 0; }
+dl.glossary dt { font-family: var(--font-sans); font-weight: 700; font-size: .95rem;
+                  margin-top: 1.25rem; color: var(--fg); }
+dl.glossary dd { margin: .25rem 0 0 1.25rem; font-size: .95rem; color: var(--fg); }
+.math-inline { font-family: var(--font-mono); font-size: .85rem; color: var(--fg-muted); }
+
+/* ── Lean tables ── */
+.lean-table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: 1rem 0; }
+.lean-table th { text-align: left; padding: .4rem .6rem; border-bottom: 2px solid var(--border);
+                  font-family: var(--font-sans); font-weight: 600; font-size: .8rem; }
+.lean-table td { padding: .45rem .6rem; border-bottom: 1px solid var(--border);
+                  vertical-align: top; line-height: 1.5; }
+.lean-table td:first-child { font-family: var(--font-mono); font-size: .8rem;
+                               white-space: nowrap; color: var(--accent); }
+.lean-table tr:last-child td { border-bottom: none; }
+
 /* ── Explore playground ── */
 .explore-controls { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem;
                     font-family: var(--font-sans); font-size: .82rem; }
