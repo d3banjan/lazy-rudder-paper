@@ -329,6 +329,142 @@ def build_lean_status():
     }
 
 
+def build_explore():
+    """Build per-layer geometry data for the 4-model interactive playground.
+
+    Returns:
+        dict with schema explore_v1, one entry per model (70M/160M/410M/1B)
+        containing per-layer srank and bonus_R_k5 for each available objective.
+    """
+    models = []
+
+    # ── 70M ──────────────────────────────────────────────────────────────────
+    petri_path = Path("results/spectral_overlap_gamma_petri/results.json")
+    with open(petri_path) as f:
+        petri = json.load(f)
+
+    for key, name, d_model, color in [
+        ("pythia-70m", "70M", 512, "#4e79a7"),
+        ("pythia-160m", "160M", 768, "#f28e2b"),
+    ]:
+        m = petri[key]
+        n_layers = m["n_layers"]
+        per_layer = []
+        for entry in m["per_layer"]:
+            lyr = entry["layer"]
+            per_layer.append(
+                {
+                    "layer": lyr,
+                    "layer_frac": round(lyr / max(n_layers - 1, 1), 4),
+                    "srank": round(entry["srank"], 4),
+                    "bonus_R_k5": round(entry["bonus_R_k5"], 4),
+                }
+            )
+        models.append(
+            {
+                "name": name,
+                "d_model": d_model,
+                "n_layers": n_layers,
+                "color": color,
+                "dpo": {"per_layer": per_layer},
+                "clm": None,
+            }
+        )
+
+    # ── 410M ─────────────────────────────────────────────────────────────────
+    # srank comes from spectral_autopsy (per-module list; average per layer).
+    # bonus_R_k5 comes from spectral_overlap_gamma (per-layer srank_delta / k5).
+    autopsy_path = Path("results/spectral_autopsy/results.json")
+    with open(autopsy_path) as f:
+        autopsy = json.load(f)
+
+    gamma_path = Path("results/spectral_overlap_gamma/results.json")
+    with open(gamma_path) as f:
+        gamma = json.load(f)
+
+    def _410m_per_layer(autopsy_run_key, gamma_run_key):
+        autopsy_entries = autopsy[autopsy_run_key]
+        gamma_entries = gamma["runs"][gamma_run_key]["per_layer"]
+        n = len(gamma_entries)
+
+        # Build srank lookup: layer -> mean stable_rank across modules
+        from collections import defaultdict
+
+        srank_by_layer = defaultdict(list)
+        for e in autopsy_entries:
+            srank_by_layer[e["layer"]].append(e["stable_rank"])
+        avg_srank = {lyr: mean(vals) for lyr, vals in srank_by_layer.items()}
+
+        result = []
+        for g_entry in gamma_entries:
+            lyr = g_entry["layer"]
+            result.append(
+                {
+                    "layer": lyr,
+                    "layer_frac": round(lyr / max(n - 1, 1), 4),
+                    "srank": round(avg_srank.get(lyr, g_entry["srank_delta"]), 4),
+                    "bonus_R_k5": round(g_entry["k5"]["bonus_right"], 4),
+                }
+            )
+        return result
+
+    models.append(
+        {
+            "name": "410M",
+            "d_model": 1024,
+            "n_layers": 24,
+            "color": "#e15759",
+            "dpo": {"per_layer": _410m_per_layer("v2_dpo_r128", "v2_dpo_r128")},
+            "clm": {"per_layer": _410m_per_layer("v3_clm_r128", "v3_clm_r128")},
+        }
+    )
+
+    # ── 1B ───────────────────────────────────────────────────────────────────
+    seed117_path = Path("results/spectral_overlap_gamma_1b_seed117/results.json")
+    with open(seed117_path) as f:
+        seed117 = json.load(f)
+
+    n_layers_1b = seed117["n_layers"]
+
+    def _1b_per_layer(run_key):
+        entries = seed117["runs"][run_key]["per_layer"]
+        n = len(entries)
+        result = []
+        for e in entries:
+            lyr = e["layer"]
+            result.append(
+                {
+                    "layer": lyr,
+                    "layer_frac": round(lyr / max(n - 1, 1), 4),
+                    "srank": round(e["srank_delta"], 4),
+                    "bonus_R_k5": round(e["k5"]["bonus_right"], 4),
+                }
+            )
+        return result
+
+    models.append(
+        {
+            "name": "1B",
+            "d_model": 2048,
+            "n_layers": n_layers_1b,
+            "color": "#76b7b2",
+            "dpo": {"per_layer": _1b_per_layer("v2_dpo_r128_1b_s42")},
+            "clm": {"per_layer": _1b_per_layer("v3_clm_r128_1b_s42")},
+        }
+    )
+
+    return {
+        "_schema": "explore_v1",
+        "_source_files": [
+            "results/spectral_overlap_gamma_petri/results.json",
+            "results/spectral_autopsy/results.json",
+            "results/spectral_overlap_gamma/results.json",
+            "results/spectral_overlap_gamma_1b_seed117/results.json",
+        ],
+        "models": models,
+    }
+
+
 def main():
     """Generate all 4 site data JSONs."""
     output_dir = Path("docs/assets/data")
@@ -366,6 +502,13 @@ def main():
         f"{counts['deferred']} deferred, "
         f"{counts['stub']} stub"
     )
+
+    # Generate explore
+    print("Generating explore.json...")
+    explore_data = build_explore()
+    with open(output_dir / "explore.json", "w") as f:
+        json.dump(explore_data, f, indent=2)
+    print(f"  {len(explore_data['models'])} models")
 
     print("\nDone!")
 
