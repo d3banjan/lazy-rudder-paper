@@ -24,10 +24,13 @@ paper/
 
 ## Reproducibility — analysis-only path (no GPU)
 
-All adapter checkpoints cited in the paper are mirrored on HuggingFace at
-<https://huggingface.co/d3banjan/lazy-rudder-checkpoints> (~2.5 GB, public).
-With them you can rebuild every JSON in `results/`, every figure, and the
-final PDF without re-running any training:
+All LoRA adapter checkpoints consumed by analysis are mirrored on HuggingFace at
+<https://huggingface.co/d3banjan/lazy-rudder-checkpoints> (~1.9 GB, public).
+BitFit full-model checkpoints are intentionally **not** mirrored — they are
+gauge-theory falsification runs whose only analysis artifact is the training
+loss trajectory, already committed under `paper/results/bitfit_dpo_strike*/`.
+With the adapter mirror you can rebuild every JSON in `results/`, every figure,
+and the final PDF without re-running any training:
 
 ```bash
 git clone https://github.com/d3banjan/lazy-rudder-paper
@@ -37,7 +40,7 @@ cd lazy-rudder-paper
 cp config.example.toml config.toml
 $EDITOR config.toml         # set results_dir = "/path/to/results"
 
-# 2. Pull adapters from HuggingFace (idempotent, ~2.5 GB).
+# 2. Pull adapters from HuggingFace (idempotent, ~1.9 GB).
 uv sync                     # or pip install huggingface_hub
 make fetch-checkpoints      # = python scripts/fetch_checkpoints.py
 
@@ -100,7 +103,7 @@ Load-bearing theorem: `rsLoraUpdate_frob_bounded` (Frobenius² ≤ α²c, rank-i
 | `clm_leak_train_1b.py` | Pythia-1B | CLM (s=42) | 800 | `_leak_1b/v3/` | positive |
 | `clm_leak_train_1b_seed117.py` | Pythia-1B | CLM (s=117) | 800 | `_leak_1b_seed117/v4/` | positive |
 | `bitfit_dpo_strike.py` | Pythia-410M | bias-only DPO | 800 | `bitfit_dpo_strike/` | positive (gauge-theory falsification) |
-| `bitfit_dpo_strike_extended.py` | Pythia-410M | bias-only DPO | 1600 | `bitfit_dpo_strike_extended/` | positive |
+| `bitfit_dpo_strike_extended.py` | Pythia-410M | bias-only DPO | 1500 | `bitfit_dpo_strike_extended/` | positive |
 
 ### Analysis (CPU-feasible)
 
@@ -141,7 +144,7 @@ Load-bearing theorem: `rsLoraUpdate_frob_bounded` (Frobenius² ≤ α²c, rank-i
 | `two_point_correlator_delta/results.json` | layer-depth correlator C(L,L+k) | Pearson ≈ 0.96–0.98 (no trend) | no |
 | `angular_fourier_delta_prime/results.json` | angular-Fourier probe of γ basis | basis_energy_fraction ≈ 0.01–0.13 (flat) | no |
 | `bitfit_dpo_strike/summary.json` | bias-only DPO loss reduction | ~0.23 reduction (gauge-accessible loss) | no |
-| `bitfit_dpo_strike_extended/loss_trajectory.json` | extended BitFit to 1600 steps | convergent to checkpoint-800 signal | no |
+| `bitfit_dpo_strike_extended/loss_trajectory.json` | extended BitFit to 1500 steps | convergent to checkpoint-800 signal | no |
 
 **Seeding note**: Seeds are encoded in script filenames and sidecar `*.config.json` files alongside each result JSON. See `PROVENANCE.md` for the complete trace table.
 

@@ -34,7 +34,7 @@ help:
 	@echo "    make paper                — build manuscript/main.pdf from generated data + Lean"
 	@echo ""
 	@echo "  REPRODUCIBILITY (analysis-only path)"
-	@echo "    make fetch-checkpoints    — pull adapter weights from HF (~2.5 GB, no GPU)"
+	@echo "    make fetch-checkpoints    — pull adapter weights from HF (~1.9 GB, no GPU)"
 	@echo "    make analysis             — all analysis jobs (CPU-OK, needs checkpoints)"
 	@echo ""
 	@echo "  EXPERIMENTS (two tiers)"
@@ -99,7 +99,7 @@ experiments: training analysis
 # ─────────────────────────────────────────────────────────────────────────
 # Fetch checkpoints from HuggingFace
 #
-# Pulls all paper-cited adapter weights (≈ 2.5 GB) from
+# Pulls all paper-cited adapter weights (≈ 1.9 GB) from
 # https://huggingface.co/d3banjan/lazy-rudder-checkpoints
 # into RESULTS_DIR (resolved by scripts/_paths.py — env var
 # LAZY_RUDDER_RESULTS_DIR or paper/config.toml). Idempotent.
@@ -124,7 +124,7 @@ CKPT_1B_CLM      := results/_leak_1b/v3/checkpoints/checkpoint-800/adapter_model
 CKPT_1B_DPO_S117 := results/_leak_1b_seed117/v3/checkpoints/checkpoint-800/adapter_model.safetensors
 CKPT_1B_CLM_S117 := results/_leak_1b_seed117/v4/checkpoints/checkpoint-800/adapter_model.safetensors
 CKPT_BITFIT      := results/bitfit_dpo_strike/checkpoints/checkpoint-800/model.safetensors
-CKPT_BITFIT_EXT  := results/bitfit_dpo_strike_extended/checkpoints/checkpoint-1600/model.safetensors
+CKPT_BITFIT_EXT  := results/bitfit_dpo_strike_extended/checkpoints/checkpoint-1500/model.safetensors
 
 train-70m: $(CKPT_70M)
 $(CKPT_70M):

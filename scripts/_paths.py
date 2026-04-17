@@ -129,7 +129,7 @@ CHECKPOINTS_HF_REPO: str = (
 def download_checkpoints(force: bool = False) -> Path:
     """Download all paper-cited adapter checkpoints into RESULTS_DIR.
 
-    Pulls from `d3banjan/lazy-rudder-checkpoints` (public, ~2.5 GB).
+    Pulls from `d3banjan/lazy-rudder-checkpoints` (public, ~1.9 GB).
     Layout mirrors the on-disk dev tree, so analysis scripts work unchanged
     once this completes:
 

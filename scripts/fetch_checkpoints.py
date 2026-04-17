@@ -28,7 +28,7 @@ def main() -> int:
 
     print(f"Repo : https://huggingface.co/{CHECKPOINTS_HF_REPO}")
     print(f"Dest : {RESULTS_DIR}")
-    print("Downloading (~2.5 GB, idempotent)…")
+    print("Downloading (~1.9 GB, idempotent)…")
     out = download_checkpoints(force=args.force)
     print(f"Done. Files under {out}")
     return 0
