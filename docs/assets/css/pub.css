@@ -107,6 +107,8 @@ figcaption { font-family: var(--font-sans); font-size: .82rem; color: var(--fg-m
 .hero h1 { font-size: 2.2rem; line-height: 1.15; margin-bottom: .75rem; }
 .hero .byline { font-family: var(--font-sans); font-size: .85rem; color: var(--fg-muted); margin-bottom: 2rem; }
 .hero .hook { font-size: 1.15rem; line-height: 1.6; margin-bottom: 1.5rem; font-style: italic; color: var(--fg-muted); }
+.byline-link { color: var(--fg-muted); text-decoration: underline; text-underline-offset: 2px; }
+.byline-link:hover { color: var(--accent); }
 
 /* ── Big callout number ── */
 .callout-row { display: flex; gap: 2rem; flex-wrap: wrap; margin: 1.5rem 0; }

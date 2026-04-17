@@ -12,15 +12,15 @@ extra_js:
 
 # The Alignment Geometry Doesn't Scale
 
-<p class="byline">Debanjan Basu &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Pythia 70M–1B &nbsp;·&nbsp; <a href="https://github.com/d3banjan/lazy-rudder-paper">code &amp; data</a></p>
+<p class="byline" markdown="0">Debanjan Basu &nbsp;&middot;&nbsp; 2026 &nbsp;&middot;&nbsp; Pythia 70M&ndash;1B &nbsp;&middot;&nbsp; <a href="https://github.com/d3banjan/lazy-rudder-paper" class="byline-link">code &amp; data</a></p>
 
-<p class="hook">We made a model four times bigger. The geometry of alignment stayed the same.</p>
+<p class="hook" markdown="0">We made a model four times bigger. The geometry of alignment stayed the same.</p>
 
 When you fine-tune a language model with LoRA under Direct Preference Optimization, the adapter learns to move in a tiny number of directions — roughly 3 to 4, regardless of whether the model has 70 million parameters or a billion. We call this the **task-intrinsic srank floor**. It seems to be set by the complexity of the preference signal, not the capacity of the model.
 
 <div id="widget-figA" class="widget" aria-label="Srank floor scatter across model scales"></div>
 
-<p class="aside">Each dot is one model. Hover for exact values. The dashed line is the empirical floor at srank&nbsp;≈&nbsp;3.6. A random LoRA matrix at r=128 would have srank&nbsp;≈&nbsp;128 — these adapters are ~35× lower-dimensional.</p>
+<p class="aside" markdown="0">Each dot is one model. Hover for exact values. The dashed line is the empirical floor at srank&nbsp;&asymp;&nbsp;3.6. A random LoRA matrix at r=128 would have srank&nbsp;&asymp;&nbsp;128 &mdash; these adapters are ~35&times; lower-dimensional.</p>
 
 <div class="callout-row" markdown="0">
   <div class="callout"><div class="num">3.6</div><div class="label">average stable rank<br>across all models</div></div>
@@ -34,7 +34,8 @@ When you fine-tune a language model with LoRA under Direct Preference Optimizati
 
 <div class="pub-section" id="what-is-srank">
 
-<div class="section-label">Background</div>
+Background
+{:.section-label}
 
 ## What does "stable rank 3.6" mean?
 
@@ -42,7 +43,7 @@ A LoRA adapter is a matrix — a grid of numbers that shifts a weight in the mod
 
 Think of a ship's rudder. The ship is enormous. The rudder is tiny. But the rudder has one job — deflect the flow — and it does that job in a small number of geometric directions. Our finding: DPO always uses a "rudder" of about 3–4 directions, no matter how large the ship.
 
-<div class="finding"><strong>The surprising part:</strong> we expected larger models to learn richer, higher-dimensional alignment geometry. They don't. A 1B-parameter model uses the same number of effective directions as a 70M-parameter model fine-tuned on the same data.</div>
+<div class="finding" markdown="0"><strong>The surprising part:</strong> we expected larger models to learn richer, higher-dimensional alignment geometry. They don't. A 1B-parameter model uses the same number of effective directions as a 70M-parameter model fine-tuned on the same data.</div>
 
 <button class="expand-trigger" onclick="this.nextElementSibling.classList.toggle('open');this.textContent=this.nextElementSibling.classList.contains('open')?'▲ Less detail':'▼ More detail: what is stable rank exactly?'">▼ More detail: what is stable rank exactly?</button>
 <div class="expandable">
@@ -59,7 +60,8 @@ Crucially, srank is **invariant to scaling**: multiplying the matrix by any scal
 
 <div class="pub-section" id="gamma-signal">
 
-<div class="section-label">Key Finding</div>
+Key Finding
+{:.section-label}
 
 ## DPO and CLM find the same directions
 
@@ -69,13 +71,13 @@ The chart below shows, for each layer of a 1B-parameter model, how much DPO and 
 
 <div id="widget-figB" class="widget" aria-label="Bonus_R per layer at 1B, DPO vs CLM, two seeds"></div>
 
-<p class="aside">Four traces: DPO and CLM at two independent seeds (42 and 117). The seeds use completely different data draws — yet the curves track closely. The signal is not a random artifact.</p>
+<p class="aside" markdown="0">Four traces: DPO and CLM at two independent seeds (42 and 117). The seeds use completely different data draws &mdash; yet the curves track closely. The signal is not a random artifact.</p>
 
 This alignment isn't specific to one part of the model. It appears in all four LoRA target modules: the attention projections and both MLP layers.
 
 <div id="widget-figE" class="widget" aria-label="Gamma bonus_R across four adapter modules"></div>
 
-<div class="finding"><strong>What this means:</strong> DPO isn't inventing new geometry. It's steering along directions the model already knows how to use — the same directions unsupervised training finds important.</div>
+<div class="finding" markdown="0"><strong>What this means:</strong> DPO isn't inventing new geometry. It's steering along directions the model already knows how to use &mdash; the same directions unsupervised training finds important.</div>
 
 </div>
 
@@ -83,7 +85,8 @@ This alignment isn't specific to one part of the model. It appears in all four L
 
 <div class="pub-section" id="falsifications">
 
-<div class="section-label">What we ruled out</div>
+What we ruled out
+{:.section-label}
 
 ## Three explanations that didn't survive
 
@@ -93,8 +96,8 @@ Before concluding the srank floor is real, we tried to explain it away. None of 
 
 **Attempt 2: maybe bias-only fine-tuning reproduces it.** BitFit trains only bias parameters — no weight matrices at all. If BitFit-DPO produces the same loss reduction as LoRA-DPO, the geometric signal would be "gauge-accessible" (reachable without learning any subspace). We ran BitFit-DPO to 800 steps and beyond.
 
-<figure>
-  <img src="{{ '/assets/img/figD.png' | relative_url }}" alt="BitFit vs LoRA loss trajectories">
+<figure markdown="0">
+  <img src="/lazy-rudder-paper/assets/img/figD.png" alt="BitFit vs LoRA loss trajectories">
   <figcaption>BitFit-DPO (orange) reduces loss — but plateaus well above LoRA-DPO (blue). The geometry that LoRA learns is not accessible through biases alone.</figcaption>
 </figure>
 
@@ -106,7 +109,8 @@ Before concluding the srank floor is real, we tried to explain it away. None of 
 
 <div class="pub-section" id="lean-bounds">
 
-<div class="section-label">Formal grounding</div>
+Formal grounding
+{:.section-label}
 
 ## Why the geometry can't depend on α or r
 
@@ -119,8 +123,8 @@ We prove it can't — formally, in Lean 4:
 
 The proofs use Mathlib's linear algebra library and are machine-checked. The load-bearing theorem is that energy and geometry decouple: you can change one without the other.
 
-<figure>
-  <img src="{{ '/assets/img/figF.png' | relative_url }}" alt="Conceptual schematic: the lazy rudder">
+<figure markdown="0">
+  <img src="/lazy-rudder-paper/assets/img/figF.png" alt="Conceptual schematic: the lazy rudder">
   <figcaption>The pretrained model occupies a large subspace (blue ellipse). The DPO adapter (red arrow) deflects the flow in ~3–4 directions — a small rudder on a large ship. The α hyperparameter controls the length of the arrow, not its direction.</figcaption>
 </figure>
 
@@ -132,7 +136,8 @@ See the [Lean proof status →]({{ '/lean' | relative_url }})
 
 <div class="pub-section" id="methods">
 
-<div class="section-label">For the curious</div>
+For the curious
+{:.section-label}
 
 ## How the experiments work
 
@@ -144,8 +149,8 @@ See the [Lean proof status →]({{ '/lean' | relative_url }})
 
 **Reproducibility.** All adapter checkpoints are mirrored at [`d3banjan/lazy-rudder-checkpoints`](https://huggingface.co/d3banjan/lazy-rudder-checkpoints) (~1.9 GB). Every figure regenerates from `make analysis && make paper`.
 
-<figure>
-  <img src="{{ '/assets/img/figC.png' | relative_url }}" alt="Per-layer srank for 70M and 160M">
+<figure markdown="0">
+  <img src="/lazy-rudder-paper/assets/img/figC.png" alt="Per-layer srank for 70M and 160M">
   <figcaption>Per-layer stable rank for Pythia-70M and Pythia-160M. Smaller models show a slight upward drift in early layers — a weak "acoustic scaling" trend that flattens at 410M and above.</figcaption>
 </figure>
 
@@ -155,11 +160,12 @@ See the [Lean proof status →]({{ '/lean' | relative_url }})
 
 <div class="pub-section" id="references">
 
-<div class="section-label">Citation</div>
+Citation
+{:.section-label}
 
 ## Cite this work
 
-<div class="citation-box">@misc{basu2026lazyrugder,
+<div class="citation-box" markdown="0">@misc{basu2026lazyrugder,
   title  = {Axiomatic Bounds on {LoRA} Alignment Geometry:
              A Task-Intrinsic Dimensional Floor Across {Pythia} 70M--1B},
   author = {Basu, Debanjan},
