@@ -32,16 +32,18 @@
     <main class="pub-content" id="pub-content">
       <div class="pub-section" id="lean-intro">
 
-## Lean 4 Formal Verification
+  <h2 id="lean-4-formal-verification">Lean 4 Formal Verification</h2>
 
-We use Lean 4 + Mathlib (v4.28.0) to formally verify key algebraic properties of LoRA adapter geometry. The load-bearing theorem is `rsLoraUpdate_frob_bounded`: Frobenius² ≤ α²c, rank-invariant under r.
+  <p>We use Lean 4 + Mathlib (v4.28.0) to formally verify key algebraic properties of LoRA adapter geometry. The load-bearing theorem is <code class="language-plaintext highlighter-rouge">rsLoraUpdate_frob_bounded</code>: Frobenius² ≤ α²c, rank-invariant under r.</p>
 
-**Status:** <span id="lean-counts">loading…</span>
+  <p><strong>Status:</strong> <span id="lean-counts">loading…</span></p>
 
-**Three categories:**
-- <span class="lean-badge proven">proven</span> — complete Lean 4 proof, no `sorry`
-- <span class="lean-badge deferred">deferred</span> — real mathematical statement; proof body is `sorry` with known proof sketch
-- <span class="lean-badge stub">stub</span> — `theorem foo : True := sorry` literature-terminology placeholder
+  <p><strong>Three categories:</strong></p>
+  <ul>
+    <li><span class="lean-badge proven">proven</span> — complete Lean 4 proof, no <code class="language-plaintext highlighter-rouge">sorry</code></li>
+    <li><span class="lean-badge deferred">deferred</span> — real mathematical statement; proof body is <code class="language-plaintext highlighter-rouge">sorry</code> with known proof sketch</li>
+    <li><span class="lean-badge stub">stub</span> — <code class="language-plaintext highlighter-rouge">theorem foo : True := sorry</code> literature-terminology placeholder</li>
+  </ul>
 
 </div>
 
@@ -49,11 +51,11 @@ We use Lean 4 + Mathlib (v4.28.0) to formally verify key algebraic properties of
 
 <div class="pub-section" id="lean-table">
 
-## Theorem Status
+  <h2 id="theorem-status">Theorem Status</h2>
 
-Source: [`lean/SubspaceOverlap.lean`](https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/SubspaceOverlap.lean)
+  <p>Source: <a href="https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/SubspaceOverlap.lean"><code class="language-plaintext highlighter-rouge">lean/SubspaceOverlap.lean</code></a></p>
 
-<table style="width:100%;border-collapse:collapse;font-size:.9rem;">
+  <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
   <thead>
     <tr>
       <th style="text-align:left;padding:.4rem .5rem;border-bottom:2px solid var(--border)">Name</th>
