@@ -79,6 +79,11 @@ RESULTS_DIR: Path = _resolve(
     "RESULTS_DIR",
 )
 
+# Paper-local analysis output dir. Generated JSONs live here and are committed
+# to the paper repo so that `make paper` works without re-running analysis.
+# Always resolves to paper/results/ regardless of where checkpoints live.
+PAPER_RESULTS_DIR: Path = _PAPER_DIR / "results"
+
 BASE_DIR: Path = _resolve(
     "LAZY_RUDDER_BASE_DIR",
     "base_dir",

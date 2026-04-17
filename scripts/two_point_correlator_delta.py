@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import sys
+import sys
 import warnings
 from pathlib import Path
 from typing import Any
@@ -26,12 +27,14 @@ import torch
 from scipy.optimize import curve_fit
 from scipy.stats import pearsonr
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _paths import PAPER_RESULTS_DIR, RESULTS_DIR as _CKPT_RESULTS_DIR  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-RESULTS_DIR = Path(__file__).parent / "results"
-ORBIT_DIR = RESULTS_DIR / "_orbit"
-OUT_DIR = RESULTS_DIR / "two_point_correlator_delta"
+ORBIT_DIR = _CKPT_RESULTS_DIR / "_orbit"
+OUT_DIR = PAPER_RESULTS_DIR / "two_point_correlator_delta"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL_FILES = {

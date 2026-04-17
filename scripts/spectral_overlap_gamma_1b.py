@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import shutil
+import sys
 from pathlib import Path
 
 import torch
@@ -28,17 +29,19 @@ _mu.check_torch_load_is_safe = lambda: None
 
 from transformers import AutoModelForCausalLM
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _paths import MODELS_DIR, PAPER_RESULTS_DIR, RESULTS_DIR  # noqa: E402
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-ROOT      = Path(__file__).resolve().parent
-MODEL_DIR = ROOT / "models" / "pythia-1b"
-RESULTS   = ROOT / "results" / "_leak_1b"
-OUT_DIR   = ROOT / "results" / "spectral_overlap_gamma_1b"
+MODEL_DIR = MODELS_DIR / "pythia-1b"
+RESULTS   = RESULTS_DIR / "_leak_1b"
+OUT_DIR   = PAPER_RESULTS_DIR / "spectral_overlap_gamma_1b"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 410m reference results for comparison
-REF_GAMMA_410M = ROOT / "results" / "spectral_overlap_gamma" / "results.json"
+REF_GAMMA_410M = PAPER_RESULTS_DIR / "spectral_overlap_gamma" / "results.json"
 
 RUNS = [
     ("v2_dpo_r128_1b", RESULTS / "v2" / "checkpoints" / "checkpoint-800", 128, 256),

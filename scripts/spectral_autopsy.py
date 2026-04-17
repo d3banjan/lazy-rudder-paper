@@ -17,16 +17,19 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
 from pathlib import Path
 from dataclasses import dataclass
 
 import torch
 from safetensors import safe_open
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _paths import PAPER_RESULTS_DIR, RESULTS_DIR  # noqa: E402
 
-ROOT = Path(__file__).resolve().parent
-RESULTS = ROOT / "results" / "_leak"
-OUT_DIR = ROOT / "results" / "spectral_autopsy"
+
+RESULTS = RESULTS_DIR / "_leak"
+OUT_DIR = PAPER_RESULTS_DIR / "spectral_autopsy"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 RUNS = [

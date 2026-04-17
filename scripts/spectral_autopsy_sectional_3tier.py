@@ -23,6 +23,7 @@ from __future__ import annotations
 import json
 import logging
 import shutil
+import sys
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
@@ -39,13 +40,15 @@ _mu.check_torch_load_is_safe = lambda: None
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _paths import MODELS_DIR, PAPER_RESULTS_DIR, RESULTS_DIR  # noqa: E402
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-ROOT      = Path(__file__).resolve().parent
-MODEL_DIR = ROOT / "models" / "pythia-410m"
-RESULTS   = ROOT / "results" / "_leak"
-OUT_DIR   = ROOT / "results" / "spectral_autopsy_sectional_3tier"
+MODEL_DIR = MODELS_DIR / "pythia-410m"
+RESULTS   = RESULTS_DIR / "_leak"
+OUT_DIR   = PAPER_RESULTS_DIR / "spectral_autopsy_sectional_3tier"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 VAR_CACHE = OUT_DIR / "variance.pt"

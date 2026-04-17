@@ -22,7 +22,7 @@ import torch
 from safetensors import safe_open
 
 sys.path.insert(0, str(Path(__file__).parent))
-from _paths import MODELS_DIR, RESULTS_DIR  # noqa: E402
+from _paths import MODELS_DIR, PAPER_RESULTS_DIR, RESULTS_DIR  # noqa: E402
 
 # Patch transformers' torch.load safety check
 import transformers.utils.import_utils as _iu
@@ -38,11 +38,11 @@ log = logging.getLogger(__name__)
 MODEL_DIR    = MODELS_DIR / "pythia-1b"
 RESULTS      = RESULTS_DIR / "_leak_1b"
 RESULTS_S117 = RESULTS_DIR / "_leak_1b_seed117"
-OUT_DIR      = RESULTS_DIR / "spectral_overlap_gamma_1b_seed117"
+OUT_DIR      = PAPER_RESULTS_DIR / "spectral_overlap_gamma_1b_seed117"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 410m reference results for comparison
-REF_GAMMA_410M = RESULTS_DIR / "spectral_overlap_gamma" / "results.json"
+REF_GAMMA_410M = PAPER_RESULTS_DIR / "spectral_overlap_gamma" / "results.json"
 
 RUNS = [
     # Seed=42 baseline

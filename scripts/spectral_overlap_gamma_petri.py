@@ -21,6 +21,7 @@ import json
 import logging
 import math
 import shutil
+import sys
 from pathlib import Path
 
 import torch
@@ -34,12 +35,19 @@ _mu.check_torch_load_is_safe = lambda: None
 
 from transformers import AutoModelForCausalLM
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _paths import MODELS_DIR, PAPER_RESULTS_DIR, RESULTS_DIR, download_model  # noqa: E402
+
+
+def _base(name: str) -> Path:
+    """Return local path to `EleutherAI/{name}`, downloading if missing."""
+    p = MODELS_DIR / name
+    return p if (p / "config.json").exists() else download_model(name)
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-ROOT    = Path(__file__).resolve().parent
-RESULTS = ROOT / "results"
-OUT_DIR = RESULTS / "spectral_overlap_gamma_petri"
+OUT_DIR = PAPER_RESULTS_DIR / "spectral_overlap_gamma_petri"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Run definitions ────────────────────────────────────────────────────────────
@@ -47,14 +55,14 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 RUNS = [
     (
         "70m_dpo_r128",
-        RESULTS / "_leak_70m"  / "v2" / "checkpoints" / "checkpoint-800",
-        ROOT / "models" / "pythia-70m",
+        RESULTS_DIR / "_leak_70m"  / "v2" / "checkpoints" / "checkpoint-800",
+        _base("pythia-70m"),
         128, 256,
     ),
     (
         "160m_dpo_r128",
-        RESULTS / "_leak_160m" / "v2" / "checkpoints" / "checkpoint-800",
-        ROOT / "models" / "pythia-160m",
+        RESULTS_DIR / "_leak_160m" / "v2" / "checkpoints" / "checkpoint-800",
+        _base("pythia-160m"),
         128, 256,
     ),
 ]
@@ -475,6 +483,34 @@ def main():
         "reference_points": REFERENCE_POINTS,
         "scaling_fit":    scaling_fit,
     }
+
+    # Back-compat compact view consumed by manuscript/generate_{values,tables}.py
+    def _compact(run_key: str) -> dict:
+        r = results_runs[run_key]
+        a = r["avg"]
+        return {
+            "n_layers": r["n_layers"],
+            "d_in":     r["d_in"],
+            "d_out":    r["d_out"],
+            "per_layer": [
+                {
+                    "layer":          pl["layer"],
+                    "srank":          pl["srank_delta"],
+                    "bonus_R_k5":     pl["k5"]["bonus_right"],
+                    "bonus_R_ksrank": pl["k_srank"]["bonus_right"],
+                    "bonus_L_k5":     pl["k5"]["bonus_left"],
+                }
+                for pl in r["per_layer"]
+            ],
+            "avg": {
+                "srank":          r["srank_avg"],
+                "bonus_R_k5":     a["k5"]["bonus_right"],
+                "bonus_R_ksrank": a["k_srank"]["bonus_right"],
+                "bonus_L_k5":     a["k5"]["bonus_left"],
+            },
+        }
+    out["pythia-70m"]  = _compact("70m_dpo_r128")
+    out["pythia-160m"] = _compact("160m_dpo_r128")
 
     out_json = OUT_DIR / "results.json"
     out_json.write_text(json.dumps(out, indent=2))

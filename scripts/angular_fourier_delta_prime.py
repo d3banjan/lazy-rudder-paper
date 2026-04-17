@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
 import warnings
 from pathlib import Path
 from typing import Any
@@ -32,13 +33,15 @@ _mu.check_torch_load_is_safe = lambda: None
 
 from transformers import AutoModelForCausalLM
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _paths import MODELS_DIR, PAPER_RESULTS_DIR, RESULTS_DIR  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-ROOT      = Path(__file__).resolve().parent
-MODEL_DIR = ROOT / "models" / "pythia-410m"
-ORBIT_DIR = ROOT / "results" / "_orbit"
-OUT_DIR   = ROOT / "results" / "angular_fourier_delta_prime"
+MODEL_DIR = MODELS_DIR / "pythia-410m"
+ORBIT_DIR = RESULTS_DIR / "_orbit"
+OUT_DIR   = PAPER_RESULTS_DIR / "angular_fourier_delta_prime"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL_FILES = {

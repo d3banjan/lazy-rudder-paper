@@ -23,7 +23,7 @@ import json
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
-from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
+from _paths import BASE_DIR, MODELS_DIR, PAPER_RESULTS_DIR, RESULTS_DIR
 
 import torch
 from safetensors import safe_open
@@ -32,8 +32,8 @@ from transformers import AutoModelForCausalLM
 
 # HF repo: EleutherAI/pythia-410m (safetensors native)
 BASE = MODELS_DIR / "pythia-410m"
-OUT = RESULTS_DIR / "bias_theory_autopsy"
-OUT.mkdir(exist_ok=True)
+OUT = PAPER_RESULTS_DIR / "bias_theory_autopsy"
+OUT.mkdir(parents=True, exist_ok=True)
 
 RUNS = [
     ("v1_dpo_r16",  RESULTS_DIR / "_leak" / "checkpoints" / "checkpoint-800",     16,  32),

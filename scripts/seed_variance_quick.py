@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
-from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
+from _paths import BASE_DIR, MODELS_DIR, PAPER_RESULTS_DIR, RESULTS_DIR
 
 import torch
 from safetensors import safe_open
@@ -118,8 +118,8 @@ def main():
         print(f"Δbonus_k5    = {a1['bonus_k5'] - a0['bonus_k5']:+.3f}×")
         print(f"Δbonus_k_nat = {a1['bonus_k_nat'] - a0['bonus_k_nat']:+.3f}×")
 
-    out = ROOT / "results" / "seed_variance_quick"
-    out.mkdir(exist_ok=True)
+    out = PAPER_RESULTS_DIR / "seed_variance_quick"
+    out.mkdir(parents=True, exist_ok=True)
     (out / "results.json").write_text(json.dumps(all_results, indent=2))
     print(f"\nWrote {out / 'results.json'}")
 
