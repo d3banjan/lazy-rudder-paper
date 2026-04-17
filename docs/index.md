@@ -101,6 +101,11 @@ Proven in Lean 4 (Mathlib v4.28.0):
 
 See the [Lean page]({{ '/lean' | relative_url }}) for the full theorem status table.
 
+<figure>
+  <img src="{{ '/assets/img/figF.png' | relative_url }}" alt="Lazy Rudder conceptual schematic">
+  <figcaption>Fig F. Conceptual schematic: the alignment adapter (red arrow) deflects the pretrained singular-vector cone by ~3–4 dimensions — a small rudder on a large flow.</figcaption>
+</figure>
+
 </div>
 
 ---
