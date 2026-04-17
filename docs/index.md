@@ -22,10 +22,10 @@ When you fine-tune a language model with LoRA under Direct Preference Optimizati
 
 <p class="aside">Each dot is one model. Hover for exact values. The dashed line is the empirical floor at srank&nbsp;≈&nbsp;3.6. A random LoRA matrix at r=128 would have srank&nbsp;≈&nbsp;128 — these adapters are ~35× lower-dimensional.</p>
 
-<div class="callout-row">
+<div class="callout-row" markdown="0">
   <div class="callout"><div class="num">3.6</div><div class="label">average stable rank<br>across all models</div></div>
-  <div class="callout"><div class="num">4×</div><div class="label">width increase<br>with no geometry change</div></div>
-  <div class="callout"><div class="num">3–5×</div><div class="label">above-chance subspace<br>alignment (γ signal)</div></div>
+  <div class="callout"><div class="num">4&times;</div><div class="label">width increase<br>with no geometry change</div></div>
+  <div class="callout"><div class="num">3&ndash;5&times;</div><div class="label">above-chance subspace<br>alignment (&gamma; signal)</div></div>
 </div>
 
 </div>

@@ -3,7 +3,7 @@
   if (!el || typeof d3 === 'undefined') return;
 
   const base = document.querySelector('meta[name="baseurl"]')?.content || '/lazy-rudder-paper';
-  fetch(base + '/_data/modules.json')
+  fetch(base + '/assets/data/modules.json')
     .then(r => r.json())
     .then(data => render(el, data))
     .catch(err => { el.textContent = 'Chart unavailable.'; console.error('figE:', err); });

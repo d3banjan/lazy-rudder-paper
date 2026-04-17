@@ -331,7 +331,7 @@ def build_lean_status():
 
 def main():
     """Generate all 4 site data JSONs."""
-    output_dir = Path("docs/_data")
+    output_dir = Path("docs/assets/data")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Generate srank

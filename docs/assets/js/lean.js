@@ -1,6 +1,6 @@
 (function () {
   const base = document.querySelector('meta[name="baseurl"]')?.content || '/lazy-rudder-paper';
-  fetch(base + '/_data/lean_status.json')
+  fetch(base + '/assets/data/lean_status.json')
     .then(r => r.json())
     .then(data => {
       const counts = document.getElementById('lean-counts');
