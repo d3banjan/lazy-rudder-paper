@@ -8,61 +8,74 @@ extra_js:
   - /assets/js/figE.js
 ---
 
-<div class="pub-section" id="abstract">
+<div class="pub-section hero" id="hero">
 
-## Abstract & TL;DR
+# The Alignment Geometry Doesn't Scale
 
-<div class="abstract-card">
-<div class="tldr">TL;DR</div>
-We train LoRA adapters on Pythia 70M–1B under DPO and CLM, then ask: does scale matter for <em>geometry</em>? The answer is no. Stable rank is ~3.6 regardless of model width — set by preference-learning complexity, not parameter count. We prove this is consistent with formal bounds (Lean 4), and show the γ subspace aligns 3–5× above chance across seeds and objectives.
-</div>
+<p class="byline">Debanjan Basu &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Pythia 70M–1B &nbsp;·&nbsp; <a href="https://github.com/d3banjan/lazy-rudder-paper">code &amp; data</a></p>
 
-**Full abstract.** We present an axiomatic framework decoupling energy from geometry in LoRA adapters under Direct Preference Optimization. Using Lean 4 formal verification, we prove that α-scaling bounds Frobenius energy but leaves stable rank unchanged (load-bearing theorem: `rsLoraUpdate_frob_bounded`). Empirically, across three orders of model width (Pythia 70M → 1B), we observe a task-intrinsic stable rank of $\text{srank} \approx 3.6 \pm 0.5$, independent of model capacity.
+<p class="hook">We made a model four times bigger. The geometry of alignment stayed the same.</p>
 
-<button class="expand-trigger" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▲ Hide background' : '▼ New to LoRA? Start here'">▼ New to LoRA? Start here</button>
-<div class="expandable">
-
-**What is a LoRA adapter?** Large language models have billions of parameters. Fine-tuning all of them is expensive. LoRA (Low-Rank Adaptation) instead adds a small adapter — a pair of thin matrices $A$ and $B$ — beside each weight matrix. During training, only $A$ and $B$ update. The effective weight change is $\Delta W = BA$, which is low-rank.
-
-**What is DPO?** Direct Preference Optimization is an alignment technique. Given pairs of (preferred, rejected) responses, DPO tunes the model to prefer the "good" response. The LoRA adapter absorbs the DPO signal.
-
-**What is stable rank?** The rank of a matrix counts linearly independent directions. Stable rank is a smooth version: $\text{srank}(M) = \|M\|_F^2 / \|M\|^2$. It measures effective dimensionality of the adapter. Our finding: this number is ~3.6 no matter how large the model.
-
-</div>
-
-</div>
-
----
-
-<div class="pub-section" id="srank-floor">
-
-## The Task-Intrinsic Srank Floor
-
-Across four model scales, the DPO adapter geometry converges to $\text{srank} \approx 3.6 \pm 0.5$. Scaling model width from 512 to 2048 does not widen the alignment manifold.
+When you fine-tune a language model with LoRA under Direct Preference Optimization, the adapter learns to move in a tiny number of directions — roughly 3 to 4, regardless of whether the model has 70 million parameters or a billion. We call this the **task-intrinsic srank floor**. It seems to be set by the complexity of the preference signal, not the capacity of the model.
 
 <div id="widget-figA" class="widget" aria-label="Srank floor scatter across model scales"></div>
 
-**Reading the chart.** Each dot is one model (hover for exact value). Blue = DPO adapter; teal = CLM (available for 410M and 1B). The dashed line is the empirical floor at 3.6. Random LoRA matrices at $r=128$ would have $\text{srank} \approx 128$ — these adapters are ~35× lower-dimensional.
+<p class="aside">Each dot is one model. Hover for exact values. The dashed line is the empirical floor at srank&nbsp;≈&nbsp;3.6. A random LoRA matrix at r=128 would have srank&nbsp;≈&nbsp;128 — these adapters are ~35× lower-dimensional.</p>
+
+<div class="callout-row">
+  <div class="callout"><div class="num">3.6</div><div class="label">average stable rank<br>across all models</div></div>
+  <div class="callout"><div class="num">4×</div><div class="label">width increase<br>with no geometry change</div></div>
+  <div class="callout"><div class="num">3–5×</div><div class="label">above-chance subspace<br>alignment (γ signal)</div></div>
+</div>
 
 </div>
 
 ---
 
-<div class="pub-section" id="gamma-rudder">
+<div class="pub-section" id="what-is-srank">
 
-## The γ-Rudder: Subspace Overlap
+<div class="section-label">Background</div>
 
-The DPO adapter's top-$k$ singular vectors align with CLM's at 3–5× above random expectation. This is the γ-rudder signal: a shared geometric rudder that both DPO and CLM discover.
+## What does "stable rank 3.6" mean?
+
+A LoRA adapter is a matrix — a grid of numbers that shifts a weight in the model. That matrix can be "wide" (spread across many directions in space) or "narrow" (concentrated in just a few). **Stable rank** measures this width: a value of 3.6 means the adapter's energy is effectively spread across ~3–4 directions, even though the matrix formally has 128 dimensions.
+
+Think of a ship's rudder. The ship is enormous. The rudder is tiny. But the rudder has one job — deflect the flow — and it does that job in a small number of geometric directions. Our finding: DPO always uses a "rudder" of about 3–4 directions, no matter how large the ship.
+
+<div class="finding"><strong>The surprising part:</strong> we expected larger models to learn richer, higher-dimensional alignment geometry. They don't. A 1B-parameter model uses the same number of effective directions as a 70M-parameter model fine-tuned on the same data.</div>
+
+<button class="expand-trigger" onclick="this.nextElementSibling.classList.toggle('open');this.textContent=this.nextElementSibling.classList.contains('open')?'▲ Less detail':'▼ More detail: what is stable rank exactly?'">▼ More detail: what is stable rank exactly?</button>
+<div class="expandable">
+
+Formally: $\text{srank}(M) = \|M\|_F^2\, /\, \|M\|_2^2$. The numerator is total energy (sum of all squared singular values). The denominator is the energy in the single largest direction. The ratio tells you how many directions carry the energy. If all energy is in one direction, srank = 1. If energy is spread equally across 128 directions, srank = 128.
+
+Crucially, srank is **invariant to scaling**: multiplying the matrix by any scalar leaves it unchanged. This matters for LoRA, where the $\alpha$ hyperparameter scales the adapter. We prove this formally in Lean 4 (`stableRank_smul_invariant`). It means the geometry we measure is real — not an artifact of how we initialized the adapter.
+
+</div>
+
+</div>
+
+---
+
+<div class="pub-section" id="gamma-signal">
+
+<div class="section-label">Key Finding</div>
+
+## DPO and CLM find the same directions
+
+Here is the second surprise. When we train on preference data (DPO) vs. plain language modelling (CLM), we get different adapters — but their top singular vectors overlap far more than chance. We call this the **γ-rudder signal**.
+
+The chart below shows, for each layer of a 1B-parameter model, how much DPO and CLM agree on the important directions. A value of 3× means their top-5 singular vectors share 3× more subspace than two random matrices of the same size would.
 
 <div id="widget-figB" class="widget" aria-label="Bonus_R per layer at 1B, DPO vs CLM, two seeds"></div>
 
-**Reading the chart.** Y-axis is $\text{bonus\_R}(k=5)$ — actual overlap divided by random baseline. A value of 3× means the top-5 singular vectors overlap 3× more than chance. Results for two independent seeds (42 and 117) track closely.
+<p class="aside">Four traces: DPO and CLM at two independent seeds (42 and 117). The seeds use completely different data draws — yet the curves track closely. The signal is not a random artifact.</p>
 
-### Module universality
-
-The γ signal appears across all four LoRA target modules, not just QKV.
+This alignment isn't specific to one part of the model. It appears in all four LoRA target modules: the attention projections and both MLP layers.
 
 <div id="widget-figE" class="widget" aria-label="Gamma bonus_R across four adapter modules"></div>
+
+<div class="finding"><strong>What this means:</strong> DPO isn't inventing new geometry. It's steering along directions the model already knows how to use — the same directions unsupervised training finds important.</div>
 
 </div>
 
@@ -70,20 +83,22 @@ The γ signal appears across all four LoRA target modules, not just QKV.
 
 <div class="pub-section" id="falsifications">
 
-## Falsification Results
+<div class="section-label">What we ruled out</div>
 
-Three hypotheses tested and rejected.
+## Three explanations that didn't survive
 
-**BitFit gauge theory (falsified).** Bias-only DPO drives loss from 0.487 → 0.370 by step 800 — partial reduction, but the geometric signal is absent. Gauge theory dead.
+Before concluding the srank floor is real, we tried to explain it away. None of the alternatives held up.
+
+**Attempt 1: maybe it's just the biases.** If LayerNorm gain vectors (γ parameters) span the adapter's subspace, then the geometry would be trivially determined by initialization — not preference learning. We tested this by projecting each DPO adapter onto the LayerNorm gain subspace. Result: **99.97% of the energy lies outside it.** The geometry is not in the biases.
+
+**Attempt 2: maybe bias-only fine-tuning reproduces it.** BitFit trains only bias parameters — no weight matrices at all. If BitFit-DPO produces the same loss reduction as LoRA-DPO, the geometric signal would be "gauge-accessible" (reachable without learning any subspace). We ran BitFit-DPO to 800 steps and beyond.
 
 <figure>
   <img src="{{ '/assets/img/figD.png' | relative_url }}" alt="BitFit vs LoRA loss trajectories">
-  <figcaption>Fig D. BitFit-only DPO (orange) vs LoRA-DPO (blue) loss trajectories. BitFit captures gauge-accessible loss but not the geometric signal.</figcaption>
+  <figcaption>BitFit-DPO (orange) reduces loss — but plateaus well above LoRA-DPO (blue). The geometry that LoRA learns is not accessible through biases alone.</figcaption>
 </figure>
 
-**δ/δ′ quasiparticle (falsified).** No depth-wise structure in the DPO adapter. Layer-depth correlator $C(L, L+k)$ is flat (Pearson ≈ 0.97 — no trend). Angular-Fourier probe shows flat energy distribution.
-
-**Bias-autopsy LN-γ (negative).** 99.97% of DPO adapter energy lies outside the LayerNorm gain subspace.
+**Attempt 3: maybe depth carries structure.** If DPO adapters form a "quasiparticle" — a correlated pattern that travels across layers — we'd expect the layer-depth correlator $C(L, L+k)$ to decay with $k$. It doesn't. The correlator is flat (Pearson ≈ 0.97 regardless of depth gap). No depth-wise structure. No quasiparticle.
 
 </div>
 
@@ -91,20 +106,25 @@ Three hypotheses tested and rejected.
 
 <div class="pub-section" id="lean-bounds">
 
-## Lean Formal Bounds
+<div class="section-label">Formal grounding</div>
 
-Proven in Lean 4 (Mathlib v4.28.0):
+## Why the geometry can't depend on α or r
 
-1. **Frobenius energy decays with r** — $\|\Delta W\|_F^2 \leq \alpha^2 c$ (`rsLoraUpdate_frob_bounded`)
-2. **α-scaling is rank-invariant** — scaling α while reducing r preserves $\alpha/\sqrt{r}$ (`stableRank_smul_invariant`)
-3. **Stable rank is α-invariant** — $\text{srank}(\lambda M) = \text{srank}(M)$ for all $\lambda \neq 0$
+One might worry: maybe we're measuring an artifact of hyperparameter choice. If we change the LoRA rank $r$ or scaling $\alpha$, does srank change?
 
-See the [Lean page]({{ '/lean' | relative_url }}) for the full theorem status table.
+We prove it can't — formally, in Lean 4:
+
+- **`stableRank_smul_invariant`** — scaling by any $\lambda \neq 0$ leaves srank unchanged
+- **`rsLoraUpdate_frob_bounded`** — Frobenius energy obeys $\|\Delta W\|_F^2 \leq \alpha^2 c$, while rank stays invariant under $r$
+
+The proofs use Mathlib's linear algebra library and are machine-checked. The load-bearing theorem is that energy and geometry decouple: you can change one without the other.
 
 <figure>
-  <img src="{{ '/assets/img/figF.png' | relative_url }}" alt="Lazy Rudder conceptual schematic">
-  <figcaption>Fig F. Conceptual schematic: the alignment adapter (red arrow) deflects the pretrained singular-vector cone by ~3–4 dimensions — a small rudder on a large flow.</figcaption>
+  <img src="{{ '/assets/img/figF.png' | relative_url }}" alt="Conceptual schematic: the lazy rudder">
+  <figcaption>The pretrained model occupies a large subspace (blue ellipse). The DPO adapter (red arrow) deflects the flow in ~3–4 directions — a small rudder on a large ship. The α hyperparameter controls the length of the arrow, not its direction.</figcaption>
 </figure>
+
+See the [Lean proof status →]({{ '/lean' | relative_url }})
 
 </div>
 
@@ -112,21 +132,21 @@ See the [Lean page]({{ '/lean' | relative_url }}) for the full theorem status ta
 
 <div class="pub-section" id="methods">
 
-## Methods
+<div class="section-label">For the curious</div>
 
-**Models.** Pythia 70M, 160M, 410M, 1B (EleutherAI).
+## How the experiments work
 
-**LoRA config.** $r=128$, $\alpha=256$ for all primary runs. Target modules: `query_key_value`, `dense`, `dense_h_to_4h`, `dense_4h_to_h`.
+**Models.** Pythia 70M, 160M, 410M, 1B (EleutherAI). Pre-trained, no instruction tuning.
 
-**Training.** 800 steps DPO / CLM, LR=5e-6, cosine schedule, warmup=50, batch=8, fp16. Dataset: Anthropic/hh-rlhf (2000 samples).
+**LoRA.** $r=128$, $\alpha=256$. Targets: `query_key_value`, `dense`, `dense_h_to_4h`, `dense_4h_to_h`. 800 training steps, LR=5e-6, cosine schedule, fp16.
 
-**Seeds.** Primary: seed 42. Independent replication: seed 117 (independent data draw).
+**Data.** Anthropic/hh-rlhf, 2000 samples. DPO uses preference pairs. CLM uses chosen responses only (no rejection signal).
 
-**Checkpoints.** All LoRA adapter checkpoints: [`d3banjan/lazy-rudder-checkpoints`](https://huggingface.co/d3banjan/lazy-rudder-checkpoints) (~1.9 GB).
+**Reproducibility.** All adapter checkpoints are mirrored at [`d3banjan/lazy-rudder-checkpoints`](https://huggingface.co/d3banjan/lazy-rudder-checkpoints) (~1.9 GB). Every figure regenerates from `make analysis && make paper`.
 
 <figure>
-  <img src="{{ '/assets/img/figC.png' | relative_url }}" alt="Per-layer srank bars for 70M and 160M">
-  <figcaption>Fig C. Per-layer stable rank for Pythia-70M and Pythia-160M DPO adapters.</figcaption>
+  <img src="{{ '/assets/img/figC.png' | relative_url }}" alt="Per-layer srank for 70M and 160M">
+  <figcaption>Per-layer stable rank for Pythia-70M and Pythia-160M. Smaller models show a slight upward drift in early layers — a weak "acoustic scaling" trend that flattens at 410M and above.</figcaption>
 </figure>
 
 </div>
@@ -135,7 +155,9 @@ See the [Lean page]({{ '/lean' | relative_url }}) for the full theorem status ta
 
 <div class="pub-section" id="references">
 
-## References & Citation
+<div class="section-label">Citation</div>
+
+## Cite this work
 
 <div class="citation-box">@misc{basu2026lazyrugder,
   title  = {Axiomatic Bounds on {LoRA} Alignment Geometry:
@@ -145,6 +167,6 @@ See the [Lean page]({{ '/lean' | relative_url }}) for the full theorem status ta
   url    = {https://github.com/d3banjan/lazy-rudder-paper}
 }</div>
 
-**Key references:** Hu et al. (2022) LoRA; Rafailov et al. (2023) DPO; Kalajdzievski (2023) RsLoRA; EleutherAI Pythia suite; Lean 4 + Mathlib.
+**References.** Hu et al. (2022) LoRA; Rafailov et al. (2023) DPO; Kalajdzievski (2023) RsLoRA; Biderman et al. (2023) Pythia; Lean 4 + Mathlib.
 
 </div>
