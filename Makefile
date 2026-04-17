@@ -105,8 +105,8 @@ CKPT_410M_DPO    := results/_leak/v2/checkpoints/checkpoint-800/adapter_model.sa
 CKPT_410M_CLM    := results/_leak/v3/checkpoints/checkpoint-800/adapter_model.safetensors
 CKPT_1B_DPO      := results/_leak_1b/v2/checkpoints/checkpoint-800/adapter_model.safetensors
 CKPT_1B_CLM      := results/_leak_1b/v3/checkpoints/checkpoint-800/adapter_model.safetensors
-CKPT_1B_DPO_S117 := results/_leak_1b_seed117/v2/checkpoints/checkpoint-800/adapter_model.safetensors
-CKPT_1B_CLM_S117 := results/_leak_1b_seed117/v3/checkpoints/checkpoint-800/adapter_model.safetensors
+CKPT_1B_DPO_S117 := results/_leak_1b_seed117/v3/checkpoints/checkpoint-800/adapter_model.safetensors
+CKPT_1B_CLM_S117 := results/_leak_1b_seed117/v4/checkpoints/checkpoint-800/adapter_model.safetensors
 CKPT_BITFIT      := results/bitfit_dpo_strike/checkpoints/checkpoint-800/model.safetensors
 CKPT_BITFIT_EXT  := results/bitfit_dpo_strike_extended/checkpoints/checkpoint-1600/model.safetensors
 

@@ -3,7 +3,7 @@
 
 Identical to clm_leak_train.py except:
   - MODEL_DIR → models/pythia-1b
-  - OUT_DIR   → results/_leak_1b_seed117/v3
+  - OUT_DIR   → results/_leak_1b_seed117/v4 (independent-draw replicate; v2/v3 used shuffle seed 42)
   - save_total_limit = 2
 
 No ref model needed. ~5GB GPU usage (vs ~7GB DPO).
@@ -13,11 +13,9 @@ from __future__ import annotations
 import json
 import logging
 import math
-import sys
+import shutil
 import time
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
-from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 import torch
 
@@ -25,10 +23,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger(__name__)
 
 # ── paths ─────────────────────────────────────────────────────────────────────
-MODEL_DIR = MODELS_DIR / "pythia-1b"
-OUT_DIR   = RESULTS_DIR / "_leak_1b_seed117" / "v3"
+BASE_DIR  = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
+MODEL_DIR = BASE_DIR / "models" / "pythia-1b"
+OUT_DIR   = BASE_DIR / "results" / "_leak_1b_seed117" / "v4"
 CKPT_DIR  = OUT_DIR / "checkpoints"
 CKPT_DIR.mkdir(parents=True, exist_ok=True)
+
+shutil.copy(__file__, OUT_DIR / Path(__file__).name)
 
 RESULT_JSON = OUT_DIR / "l_trajectory_clm.json"
 LOG_FILE    = OUT_DIR / "training_log.txt"
@@ -152,7 +153,7 @@ def load_hh_rlhf_clm(tokenizer, max_samples: int = 2000, max_length: int = 512):
     log.info("Loading Anthropic/hh-rlhf for CLM (chosen text only)...")
     ds = load_dataset("Anthropic/hh-rlhf", split="train", streaming=False)
     log.info(f"Loaded {len(ds)} examples")
-    ds = ds.shuffle(seed=42).select(range(min(max_samples, len(ds))))
+    ds = ds.shuffle(seed=117).select(range(min(max_samples, len(ds))))
 
     def tokenize(example):
         text = example["chosen"]

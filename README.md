@@ -69,9 +69,9 @@ Load-bearing theorem: `rsLoraUpdate_frob_bounded` (Frobenius² ≤ α²c, rank-i
 | `dpo_leak_train_v2.py` | Pythia-410M | DPO | 800 | `_leak/v2/` | positive |
 | `clm_leak_train.py` | Pythia-410M | CLM (no ref) | 800 | `_leak/v3/` | positive |
 | `dpo_leak_train_1b.py` | Pythia-1B | DPO (s=42) | 800 | `_leak_1b/v2/` | positive |
-| `dpo_leak_train_1b_seed117.py` | Pythia-1B | DPO (s=117) | 800 | `_leak_1b_seed117/v2/` | positive |
+| `dpo_leak_train_1b_seed117.py` | Pythia-1B | DPO (s=117) | 800 | `_leak_1b_seed117/v3/` | positive |
 | `clm_leak_train_1b.py` | Pythia-1B | CLM (s=42) | 800 | `_leak_1b/v3/` | positive |
-| `clm_leak_train_1b_seed117.py` | Pythia-1B | CLM (s=117) | 800 | `_leak_1b_seed117/v3/` | positive |
+| `clm_leak_train_1b_seed117.py` | Pythia-1B | CLM (s=117) | 800 | `_leak_1b_seed117/v4/` | positive |
 | `bitfit_dpo_strike.py` | Pythia-410M | bias-only DPO | 800 | `bitfit_dpo_strike/` | positive (gauge-theory falsification) |
 | `bitfit_dpo_strike_extended.py` | Pythia-410M | bias-only DPO | 1600 | `bitfit_dpo_strike_extended/` | positive |
 
@@ -105,7 +105,7 @@ Load-bearing theorem: `rsLoraUpdate_frob_bounded` (Frobenius² ≤ α²c, rank-i
 |------|-----------|-------------|---------|
 | `spectral_overlap_gamma/results.json` | γ at 410M, per layer | srank_delta ≈ 4.07 (DPO), bonus_R(k=srank) ≈ 2.1× | no |
 | `spectral_overlap_gamma_1b/results.json` | γ at 1B seed 42, per layer | srank ≈ 3.13, bonus_R(k=srank) ≈ 5.4× | hardcoded s=42 |
-| `spectral_overlap_gamma_1b_seed117/results.json` | γ comparison 1B s=42 vs s=117 | s=42 bonus_R(k=5)=3.58×, s=117=3.24× | hardcoded s=42,117 |
+| `spectral_overlap_gamma_1b_seed117/results.json` | γ comparison 1B s=42 vs s=117 (independent draw) | CLM bonus_R(k=5)=4.15× (s=42), 4.02× (s=117); DPO=3.24×/3.49× | hardcoded s=42,117 |
 | `spectral_overlap_gamma_petri/results.json` | γ at 70M + 160M | 70M srank=3.93, 160M=3.51 (acoustic trend) | no |
 | `spectral_autopsy/results.json` | srank + sectional SVD at 410M | global srank 3.92 (DPO), 3.92 (CLM) | no |
 | `spectral_autopsy_sectional_3tier/results.json` | 3-tier orbit decomposition | orbit fraction ≈ 68–72% at fixed-window | no |

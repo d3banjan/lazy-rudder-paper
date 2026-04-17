@@ -3,27 +3,28 @@
 
 Identical to dpo_leak_train_v2.py except:
   - MODEL_DIR → models/pythia-1b
-  - OUT_DIR   → results/_leak_1b_seed117/v2
+  - OUT_DIR   → results/_leak_1b_seed117/v3 (independent-draw replicate; v2 used shuffle seed 42)
   - save_total_limit = 2 (saves disk; only need checkpoint-800 for γ)
 
 PARTITION_PATH will not exist; script falls back to coord-block for L
 measurement (acceptable — we only need the final adapter checkpoint for γ₁).
 """
-import os, sys, json, time, math, logging
+import os, sys, json, time, math, logging, shutil
 import torch
 import torch.nn as nn
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
-from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 # ── paths ──────────────────────────────────────────────────────────────────────
-MODEL_DIR  = MODELS_DIR / "pythia-1b"
-OUT_DIR    = RESULTS_DIR / "_leak_1b_seed117" / "v2"
+BASE_DIR   = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
+MODEL_DIR  = BASE_DIR / "models" / "pythia-1b"
+OUT_DIR    = BASE_DIR / "results" / "_leak_1b_seed117" / "v3"
 CKPT_DIR   = OUT_DIR / "checkpoints"
 CKPT_DIR.mkdir(parents=True, exist_ok=True)
+
+shutil.copy(__file__, OUT_DIR / Path(__file__).name)
 
 RESULT_JSON    = OUT_DIR / "l_trajectory_orbit_aligned.json"
 LOG_FILE       = OUT_DIR / "training_log.txt"
@@ -172,7 +173,7 @@ def load_hh_rlhf_dpo(tokenizer, max_samples: int = 2000):
             ds = ds.select(range(min(max_samples, len(ds))))
             return ds
 
-    ds = ds.shuffle(seed=42).select(range(min(max_samples, len(ds))))
+    ds = ds.shuffle(seed=117).select(range(min(max_samples, len(ds))))
 
     def parse_hh(example):
         chosen_text   = example["chosen"]

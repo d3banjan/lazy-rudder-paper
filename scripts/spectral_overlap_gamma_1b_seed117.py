@@ -42,12 +42,14 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 REF_GAMMA_410M = ROOT / "results" / "spectral_overlap_gamma" / "results.json"
 
 RUNS = [
-    # Seed=42 (already trained)
-    ("v2_dpo_r128_1b_s42",  RESULTS      / "v2" / "checkpoints" / "checkpoint-800", 128, 256),
-    ("v3_clm_r128_1b_s42",  RESULTS      / "v3" / "checkpoints" / "checkpoint-800", 128, 256),
-    # Seed=117 (new run)
-    ("v2_dpo_r128_1b_s117", RESULTS_S117 / "v2" / "checkpoints" / "checkpoint-800", 128, 256),
-    ("v3_clm_r128_1b_s117", RESULTS_S117 / "v3" / "checkpoints" / "checkpoint-800", 128, 256),
+    # Seed=42 baseline
+    ("v2_dpo_r128_1b_s42",       RESULTS      / "v2" / "checkpoints" / "checkpoint-800", 128, 256),
+    ("v3_clm_r128_1b_s42",       RESULTS      / "v3" / "checkpoints" / "checkpoint-800", 128, 256),
+    # Seed=117 buggy (shuffle seed was 42 — same data draw as s42)
+    ("v2_dpo_r128_1b_s117_bug",  RESULTS_S117 / "v2" / "checkpoints" / "checkpoint-800", 128, 256),
+    # Seed=117 correct (independent draw — shuffle seed 117)
+    ("v3_dpo_r128_1b_s117",      RESULTS_S117 / "v3" / "checkpoints" / "checkpoint-800", 128, 256),
+    ("v4_clm_r128_1b_s117",      RESULTS_S117 / "v4" / "checkpoints" / "checkpoint-800", 128, 256),
 ]
 
 K_VALS = [5, 10, 20]
@@ -447,7 +449,7 @@ def main():
 
     out_json = OUT_DIR / "results.json"
     out_json.write_text(json.dumps(results, indent=2))
-    shutil.copy(__file__, OUT_DIR / "spectral_overlap_gamma_1b.py")
+    shutil.copy(__file__, OUT_DIR / Path(__file__).name)
     log.info(f"Wrote: {out_json}")
     print(f"Artifacts:\n  script  : {__file__}\n  results : {out_json}")
 

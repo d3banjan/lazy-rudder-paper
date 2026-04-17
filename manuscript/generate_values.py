@@ -84,8 +84,8 @@ def compute_1b_s117(run: str) -> dict:
         "bonus_R_ksrank": statistics.mean(p["k_srank"]["bonus_right"] for p in pl if "k_srank" in p),
         "srank": statistics.mean(p["srank_delta"] for p in pl),
     }
-r_dpo_1b_s117 = compute_1b_s117("v2_dpo_r128_1b_s117")
-r_clm_1b_s117 = compute_1b_s117("v3_clm_r128_1b_s117")
+r_dpo_1b_s117 = compute_1b_s117("v3_dpo_r128_1b_s117")
+r_clm_1b_s117 = compute_1b_s117("v4_clm_r128_1b_s117")
 
 
 # ── BitFit ─────────────────────────────────────────────────────────────────

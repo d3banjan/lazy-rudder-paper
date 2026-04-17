@@ -565,9 +565,15 @@ packing within the same subspace rather than a distinct geometry.}
 \label{fig:topk-overlap}
 \end{figure}
 
-Reproducibility of the 1B results is confirmed by a second seed: the
-DPO srank varies by less than $2\%$ across seeds 42 and 117, and the
-$\text{bonus}_R(5)$ varies by less than $8\%$. The CLM control at 1B
+Reproducibility of the 1B results is confirmed by a second seed with
+independent data draw. CLM srank is seed-stable (\srankOneBCLMsFortyTwo{}
+vs.\ \srankOneBCLMsOneSeventeen{}, $\Delta\!\approx\!2\%$); DPO srank
+carries larger seed variance (\srankOneBDPOsFortyTwo{} vs.\
+\srankOneBDPOsOneSeventeen{}, $\Delta\!\approx\!7\%$), consistent
+with CLM being anchored to the dominant pretrained singular axes
+while DPO's contrastive signal picks up draw-dependent variance.
+The $\text{bonus}_R(5)$ varies by less than $8\%$ under both
+objectives. The CLM control at 1B
 exhibits a consistently higher $\text{bonus}_R$ than DPO at $k=5$
 (Figure~\ref{fig:topk-overlap}): $\bonusRKfiveOneBCLMavgSeeds\times$ vs.\
 $\bonusRKfiveOneBDPOavgSeeds\times$

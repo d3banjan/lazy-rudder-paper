@@ -42,8 +42,9 @@ The paper does not include the checkpoint binaries; only sidecar provenance is t
 | `_leak_160m/v2/checkpoints/` | `dpo_leak_train_160m.py` | 42 | pythia-160m | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (2000 samples) | positive |
 | `_leak_1b/v2/checkpoints/` | `dpo_leak_train_1b.py` | 42 | pythia-1b | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (2000 samples) | positive |
 | `_leak_1b/v3/checkpoints/` | `clm_leak_train_1b.py` | 42 | pythia-1b | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (chosen only) | positive |
-| `_leak_1b_seed117/v2/checkpoints/` | `dpo_leak_train_1b_seed117.py` | 117 | pythia-1b | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (2000 samples) | positive |
-| `_leak_1b_seed117/v3/checkpoints/` | `clm_leak_train_1b_seed117.py` | 117 | pythia-1b | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (chosen only) | positive |
+| `_leak_1b_seed117/v3/checkpoints/` | `dpo_leak_train_1b_seed117.py` | 117 (independent draw; shuffle seed 117) | pythia-1b | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (2000 samples) | positive |
+| `_leak_1b_seed117/v4/checkpoints/` | `clm_leak_train_1b_seed117.py` | 117 (independent draw; shuffle seed 117) | pythia-1b | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (chosen only) | positive |
+| `_leak_1b_seed117/v2/checkpoints/` (archived) | `dpo_leak_train_1b_seed117.py` (pre-fix; shuffle seed 42) | 117 model-init, shared data draw | pythia-1b | r=128, α=256 | 5e-6 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (2000 samples) | superseded by v3 — shuffle-seed bug shared the seed-42 draw |
 | `bitfit_dpo_strike/checkpoints/` | `bitfit_dpo_strike.py` | 42 | pythia-410m | N/A (biases only) | 1e-4 | 8 (1×8 accum) | 800 | Anthropic/hh-rlhf (2000 samples) | positive |
 | `bitfit_dpo_strike_extended/checkpoints/` | `bitfit_dpo_strike_extended.py` | 42 | pythia-410m | N/A (biases only) | 1e-4 (cosine restart) | 8 (1×8 accum) | 1600 (800→1600) | Anthropic/hh-rlhf (2000 samples) | positive |
 

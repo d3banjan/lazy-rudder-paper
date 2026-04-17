@@ -54,9 +54,9 @@ rows = [
     row_from_gamma(g410["runs"], "v2_dpo_r128", "410M DPO", 1024, 24),
     row_from_gamma(g410["runs"], "v3_clm_r128", "410M CLM", 1024, 24),
     row_from_gamma(g1b["runs"], "v2_dpo_r128_1b", "1B DPO (seed 42)", 2048, 16),
-    row_from_gamma(g1b_s117["runs"], "v2_dpo_r128_1b_s117", "1B DPO (seed 117)", 2048, 16),
+    row_from_gamma(g1b_s117["runs"], "v3_dpo_r128_1b_s117", "1B DPO (seed 117)", 2048, 16),
     row_from_gamma(g1b["runs"], "v3_clm_r128_1b", "1B CLM (seed 42)", 2048, 16),
-    row_from_gamma(g1b_s117["runs"], "v3_clm_r128_1b_s117", "1B CLM (seed 117)", 2048, 16),
+    row_from_gamma(g1b_s117["runs"], "v4_clm_r128_1b_s117", "1B CLM (seed 117)", 2048, 16),
 ]
 
 
