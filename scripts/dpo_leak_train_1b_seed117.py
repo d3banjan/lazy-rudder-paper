@@ -14,13 +14,15 @@ import torch
 import torch.nn as nn
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
+from _paths import MODELS_DIR, RESULTS_DIR, BASE_DIR  # noqa: E402
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 # ── paths ──────────────────────────────────────────────────────────────────────
-BASE_DIR   = Path("/home/debanjan/Code/Research/lean-mining/cross-check/trained-model-battery")
-MODEL_DIR  = BASE_DIR / "models" / "pythia-1b"
-OUT_DIR    = BASE_DIR / "results" / "_leak_1b_seed117" / "v3"
+MODEL_DIR  = MODELS_DIR / "pythia-1b"
+OUT_DIR    = RESULTS_DIR / "_leak_1b_seed117" / "v3"
 CKPT_DIR   = OUT_DIR / "checkpoints"
 CKPT_DIR.mkdir(parents=True, exist_ok=True)
 
