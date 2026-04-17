@@ -1,0 +1,143 @@
+{
+  "_schema": "lean_status_v1",
+  "_source_files": [
+    "lean/SubspaceOverlap.lean"
+  ],
+  "counts": {
+    "proven": 14,
+    "deferred": 3,
+    "stub": 9
+  },
+  "theorems": [
+    {
+      "name": "frobeniusSq",
+      "kind": "def",
+      "status": "proven"
+    },
+    {
+      "name": "frobeniusSq_nonneg",
+      "kind": "lemma",
+      "status": "proven"
+    },
+    {
+      "name": "frobeniusSq_eq_zero_iff",
+      "kind": "lemma",
+      "status": "proven"
+    },
+    {
+      "name": "stableRank_le_rank",
+      "kind": "theorem",
+      "status": "deferred"
+    },
+    {
+      "name": "stableRank_mul_le_min",
+      "kind": "theorem",
+      "status": "deferred"
+    },
+    {
+      "name": "outerProduct",
+      "kind": "def",
+      "status": "proven"
+    },
+    {
+      "name": "outerProduct_eq_col_mul_row",
+      "kind": "lemma",
+      "status": "proven"
+    },
+    {
+      "name": "rank_outer_product_le_one",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "rank_add_le",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "rank_sum_outer_products_le",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "stable_rank_disentanglement",
+      "kind": "theorem",
+      "status": "deferred"
+    },
+    {
+      "name": "rank_kronecker_eq_mul",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "random_subspace_expected_overlap",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "subspace_dilution",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "gamma_right_alignment",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "stable_rank_acoustic_scaling",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "lower_bound_of_intent",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "core_preservation_under_alignment",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "frobeniusSq_smul",
+      "kind": "lemma",
+      "status": "proven"
+    },
+    {
+      "name": "loraUpdate_frob_decays",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "rsLoraUpdate_frob_bounded",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "ratio_smul_invariant_of_quadratic",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "spectralSq_smul",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "stableRank_smul_invariant",
+      "kind": "theorem",
+      "status": "proven"
+    },
+    {
+      "name": "geometric_overshoot_degradation",
+      "kind": "theorem",
+      "status": "stub"
+    },
+    {
+      "name": "spgr_frequency_decomposition",
+      "kind": "theorem",
+      "status": "stub"
+    }
+  ]
+}

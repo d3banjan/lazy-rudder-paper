@@ -17,7 +17,8 @@
         compute-channel-partition \
         gamma-410m gamma-1b gamma-1b-s117 gamma-petri \
         autopsy-bias autopsy-spectral autopsy-sectional \
-        seed-variance delta delta-prime
+        seed-variance delta delta-prime \
+        site-data site-dev site-figs
 
 PYTHON  ?= python3
 SCRIPTS := scripts
@@ -81,6 +82,31 @@ paper:
 # top-level works equivalently to `cd manuscript && make values`.
 values tables lean-status figs:
 	$(MAKE) -C manuscript $@
+
+# ─────────────────────────────────────────────────────────────────────────
+# GitHub Pages site
+# ─────────────────────────────────────────────────────────────────────────
+site-data: ## Regenerate docs/_data/*.json from results/
+	$(PYTHON) scripts/generate_site_data.py
+
+site-dev: ## Run Jekyll locally (requires: gem install jekyll bundler)
+	cd docs && bundle exec jekyll serve --livereload
+
+site-figs: ## Copy/convert static figures to docs/assets/img/
+	mkdir -p docs/assets/img
+	@for f in figC figD figE; do \
+	  if [ -f manuscript/figures/fig_$$f.png ]; then \
+	    cp manuscript/figures/fig_$$f.png docs/assets/img/fig_$$f.png; \
+	    echo "copied fig_$$f.png"; \
+	  elif [ -f manuscript/figures/fig_$$f.pdf ]; then \
+	    pdftoppm -png -singlefile -r 200 manuscript/figures/fig_$$f.pdf docs/assets/img/fig_$$f && echo "converted fig_$$f.pdf"; \
+	  else \
+	    echo "WARNING: no source for fig_$$f"; \
+	  fi; \
+	done
+	@if [ ! -f docs/assets/img/fig_F.svg ]; then \
+	  echo "WARNING: fig_F.svg not found"; \
+	fi
 
 # ─────────────────────────────────────────────────────────────────────────
 # Aggregate experiment groups
