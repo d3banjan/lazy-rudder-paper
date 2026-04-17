@@ -1,5 +1,6 @@
 name: Deploy GitHub Pages
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -7,6 +8,7 @@ on:
       - 'results/**'
       - 'lean/**'
       - 'scripts/generate_site_data.py'
+      - '.github/workflows/pages.yml'
 permissions:
   contents: read
   pages: write
