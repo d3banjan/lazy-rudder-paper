@@ -1,0 +1,29 @@
+title: "Lazy Rudder"
+description: "Axiomatic Bounds on LoRA Alignment Geometry"
+baseurl: "/lazy-rudder-paper"
+url: "https://d3banjan.github.io"
+
+markdown: kramdown
+kramdown:
+  math_engine: null
+
+plugins:
+  - jekyll-seo-tag
+
+exclude:
+  - Makefile
+  - scripts/
+  - results/
+  - lean/
+  - manuscript/
+  - requirements.txt
+  - "*.zip"
+  - "*.toml"
+
+nav:
+  - title: "Paper"
+    url: "/"
+  - title: "Explore Data"
+    url: "/explore"
+  - title: "Lean Proofs"
+    url: "/lean"
