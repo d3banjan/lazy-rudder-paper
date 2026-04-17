@@ -30,8 +30,9 @@ body { margin: 0; background: var(--bg); color: var(--fg);
 .site-nav-title { font-weight: 700; font-family: var(--font-sans); font-size: .9rem; }
 .site-nav ul { display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0; }
 .site-nav a { font-family: var(--font-sans); font-size: .85rem; color: var(--fg-muted);
-              text-decoration: none; }
-.site-nav a.active, .site-nav a:hover { color: var(--accent); }
+              text-decoration: none; font-weight: 500; }
+.site-nav a:hover { color: var(--fg); }
+.site-nav a.active { color: var(--fg); font-weight: 700; }
 
 .page-wrap { display: flex; max-width: calc(var(--toc-width) + var(--content-max) + 6rem);
              margin: 0 auto; padding: 0 2rem; }
