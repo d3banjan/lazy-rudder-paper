@@ -51,3 +51,4 @@ Thumbs.db
 
 # ── arXiv submission bundles (generated on demand)
 lazy-rudder-arxiv*.zip
+.worktrees/
