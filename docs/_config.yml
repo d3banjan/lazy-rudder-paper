@@ -6,6 +6,7 @@ url: "https://d3banjan.github.io"
 markdown: kramdown
 kramdown:
   math_engine: null
+  parse_block_html: true
 
 plugins:
   - jekyll-seo-tag
