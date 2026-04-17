@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="baseurl" content="/lazy-rudder-paper">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lean Proofs — Lazy Rudder</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})">
+</script>
+
+  <link rel="stylesheet" href="/lazy-rudder-paper/assets/css/pub.css">
+</head>
+<body class="layout-pub" data-page="lean">
+  <nav class="site-nav">
+    <span class="site-nav-title">Lazy Rudder</span>
+    <ul>
+      
+      <li><a href="/lazy-rudder-paper/" >Paper</a></li>
+      
+      <li><a href="/lazy-rudder-paper/explore" >Explore Data</a></li>
+      
+      <li><a href="/lazy-rudder-paper/lean" >Lean Proofs</a></li>
+      
+    </ul>
+  </nav>
+
+  <div class="page-wrap">
+    <aside class="toc-sidebar" id="toc-sidebar"></aside>
+    <main class="pub-content" id="pub-content">
+      <div class="pub-section" id="lean-intro">
+
+## Lean 4 Formal Verification
+
+We use Lean 4 + Mathlib (v4.28.0) to formally verify key algebraic properties of LoRA adapter geometry. The load-bearing theorem is `rsLoraUpdate_frob_bounded`: Frobenius² ≤ α²c, rank-invariant under r.
+
+**Status:** <span id="lean-counts">loading…</span>
+
+**Three categories:**
+- <span class="lean-badge proven">proven</span> — complete Lean 4 proof, no `sorry`
+- <span class="lean-badge deferred">deferred</span> — real mathematical statement; proof body is `sorry` with known proof sketch
+- <span class="lean-badge stub">stub</span> — `theorem foo : True := sorry` literature-terminology placeholder
+
+</div>
+
+<hr />
+
+<div class="pub-section" id="lean-table">
+
+## Theorem Status
+
+Source: [`lean/SubspaceOverlap.lean`](https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/SubspaceOverlap.lean)
+
+<table style="width:100%;border-collapse:collapse;font-size:.9rem;">
+  <thead>
+    <tr>
+      <th style="text-align:left;padding:.4rem .5rem;border-bottom:2px solid var(--border)">Name</th>
+      <th style="text-align:left;padding:.4rem .5rem;border-bottom:2px solid var(--border)">Status</th>
+      <th style="text-align:left;padding:.4rem .5rem;border-bottom:2px solid var(--border)">Kind</th>
+    </tr>
+  </thead>
+  <tbody id="lean-tbody">
+    <tr><td colspan="3" style="padding:.4rem;color:var(--fg-muted)">Loading…</td></tr>
+  </tbody>
+</table>
+
+</div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="/lazy-rudder-paper/assets/js/toc.js"></script>
+  <script src="/lazy-rudder-paper/assets/js/skipcue.js"></script>
+  
+  <script src="/lazy-rudder-paper/assets/js/lean.js"></script>
+  
+</body>
+</html>

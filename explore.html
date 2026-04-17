@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="baseurl" content="/lazy-rudder-paper">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Explore Data — Lazy Rudder</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})">
+</script>
+
+  <link rel="stylesheet" href="/lazy-rudder-paper/assets/css/pub.css">
+</head>
+<body class="layout-pub" data-page="explore">
+  <nav class="site-nav">
+    <span class="site-nav-title">Lazy Rudder</span>
+    <ul>
+      
+      <li><a href="/lazy-rudder-paper/" >Paper</a></li>
+      
+      <li><a href="/lazy-rudder-paper/explore" >Explore Data</a></li>
+      
+      <li><a href="/lazy-rudder-paper/lean" >Lean Proofs</a></li>
+      
+    </ul>
+  </nav>
+
+  <div class="page-wrap">
+    <aside class="toc-sidebar" id="toc-sidebar"></aside>
+    <main class="pub-content" id="pub-content">
+      <div class="pub-section" id="explore-intro">
+
+## Explore the Data
+
+All charts from the paper, interactive. Hover any point for exact values.
+
+</div>
+
+<hr />
+
+<div class="pub-section" id="explore-srank">
+
+## Srank floor across model scales
+
+<div id="widget-figA" class="widget"></div>
+
+Source: `spectral_overlap_gamma_petri` + `spectral_autopsy` + `spectral_overlap_gamma_1b_seed117`
+
+</div>
+
+<hr />
+
+<div class="pub-section" id="explore-gamma">
+
+## γ bonus_R per layer — Pythia-1B
+
+<div id="widget-figB" class="widget"></div>
+
+Four traces: DPO and CLM at two independent seeds (42 and 117). Random baseline shown as dashed reference.
+
+</div>
+
+<hr />
+
+<div class="pub-section" id="explore-modules">
+
+## γ across adapter modules — Pythia-410M
+
+<div id="widget-figE" class="widget"></div>
+
+Two traces (DPO, CLM) across four LoRA target modules.
+
+</div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="/lazy-rudder-paper/assets/js/toc.js"></script>
+  <script src="/lazy-rudder-paper/assets/js/skipcue.js"></script>
+  
+  <script src="/lazy-rudder-paper/assets/js/figA.js"></script>
+  
+  <script src="/lazy-rudder-paper/assets/js/figB.js"></script>
+  
+  <script src="/lazy-rudder-paper/assets/js/figE.js"></script>
+  
+</body>
+</html>
