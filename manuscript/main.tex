@@ -74,7 +74,12 @@ The reproducibility structure has four rungs. At the top: the Lean~4
 proofs are Mathlib-checkable by any reader with a working \texttt{lake
 build} installation. One level down: experiments are reproducible from
 the scripts, configurations, random seeds, and model identifiers logged
-in \texttt{PROVENANCE.md}. Below that: figures are reproducible from the
+in \texttt{PROVENANCE.md}. All adapter checkpoints cited in this paper
+are publicly mirrored at
+\href{https://huggingface.co/d3banjan/lazy-rudder-checkpoints}{\texttt{huggingface.co/d3banjan/lazy-rudder-checkpoints}},
+so every analysis result can be regenerated on a CPU via
+\texttt{make fetch-checkpoints \&\& make analysis} without re-running
+GPU training. Below that: figures are reproducible from the
 generation scripts and their \texttt{.config.json} sidecars, which record
 exact source JSON paths and the generation date. At the bottom: the
 physical analogies that motivated the experiments are not formally

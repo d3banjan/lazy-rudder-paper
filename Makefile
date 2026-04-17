@@ -10,6 +10,7 @@
 
 .PHONY: help all paper figs experiments training analysis clean distclean \
         clean-checkpoints clean-results \
+        fetch-checkpoints \
         train-70m train-160m train-410m-dpo train-410m-clm \
         train-1b-dpo train-1b-clm train-1b-dpo-s117 train-1b-clm-s117 \
         train-bitfit train-bitfit-ext \
@@ -32,10 +33,13 @@ help:
 	@echo "  PAPER"
 	@echo "    make paper                — build manuscript/main.pdf from generated data + Lean"
 	@echo ""
+	@echo "  REPRODUCIBILITY (analysis-only path)"
+	@echo "    make fetch-checkpoints    — pull adapter weights from HF (~2.5 GB, no GPU)"
+	@echo "    make analysis             — all analysis jobs (CPU-OK, needs checkpoints)"
+	@echo ""
 	@echo "  EXPERIMENTS (two tiers)"
 	@echo "    make experiments          — training + analysis (full re-run)"
 	@echo "    make training             — all training jobs (GPU, ~5 hours serial)"
-	@echo "    make analysis             — all analysis jobs (CPU-OK, needs checkpoints)"
 	@echo ""
 	@echo "  TRAINING (individual, GPU required)"
 	@echo "    make train-70m            — Pythia-70M  DPO r=128 800 steps   (~10 min)"
@@ -85,12 +89,24 @@ training: train-70m train-160m train-410m-dpo train-410m-clm \
           train-1b-dpo train-1b-dpo-s117 train-1b-clm train-1b-clm-s117 \
           train-bitfit train-bitfit-ext
 
-analysis: compute-channel-partition \
+analysis: fetch-checkpoints \
           gamma-410m gamma-1b gamma-1b-s117 gamma-petri \
           autopsy-spectral autopsy-sectional autopsy-bias \
           seed-variance delta delta-prime
 
 experiments: training analysis
+
+# ─────────────────────────────────────────────────────────────────────────
+# Fetch checkpoints from HuggingFace
+#
+# Pulls all paper-cited adapter weights (≈ 2.5 GB) from
+# https://huggingface.co/d3banjan/lazy-rudder-checkpoints
+# into RESULTS_DIR (resolved by scripts/_paths.py — env var
+# LAZY_RUDDER_RESULTS_DIR or paper/config.toml). Idempotent.
+# ─────────────────────────────────────────────────────────────────────────
+
+fetch-checkpoints:
+	$(PYTHON) $(SCRIPTS)/fetch_checkpoints.py
 
 # ─────────────────────────────────────────────────────────────────────────
 # Training targets

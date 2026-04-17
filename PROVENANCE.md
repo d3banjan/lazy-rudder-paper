@@ -5,6 +5,16 @@ This table gives the one-line trace: result file → script → training seed �
 
 All hyperparameter values were verified by reading the source script directly.
 
+## Checkpoint mirror
+
+All adapter weights cited in the analysis tables below are publicly mirrored at:
+
+> <https://huggingface.co/d3banjan/lazy-rudder-checkpoints>
+
+Repo layout mirrors the on-disk `cross-check/trained-model-battery/results/`
+tree, so `make fetch-checkpoints` (= `python scripts/fetch_checkpoints.py`)
+is a drop-in for `make training` when only analysis is needed (no GPU).
+
 ---
 
 ## Analysis results (no training in the script itself)

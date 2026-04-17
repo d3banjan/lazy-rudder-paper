@@ -22,6 +22,33 @@ paper/
 └── Makefile                 top-level task orchestrator
 ```
 
+## Reproducibility — analysis-only path (no GPU)
+
+All adapter checkpoints cited in the paper are mirrored on HuggingFace at
+<https://huggingface.co/d3banjan/lazy-rudder-checkpoints> (~2.5 GB, public).
+With them you can rebuild every JSON in `results/`, every figure, and the
+final PDF without re-running any training:
+
+```bash
+git clone https://github.com/d3banjan/lazy-rudder-paper
+cd lazy-rudder-paper
+
+# 1. Tell the scripts where to put the checkpoints (any writeable dir).
+cp config.example.toml config.toml
+$EDITOR config.toml         # set results_dir = "/path/to/results"
+
+# 2. Pull adapters from HuggingFace (idempotent, ~2.5 GB).
+uv sync                     # or pip install huggingface_hub
+make fetch-checkpoints      # = python scripts/fetch_checkpoints.py
+
+# 3. Re-run analysis + rebuild paper.
+make analysis               # all *.json under results/
+make paper                  # manuscript/main.pdf
+```
+
+Hard reproducibility requires the same Pythia base weights from EleutherAI
+(downloaded automatically into `models_dir` on first analysis run).
+
 ## Build Instructions
 
 ### Prerequisites
@@ -34,7 +61,7 @@ uv sync   # or: pip install torch transformers peft trl datasets safetensors sci
 elan update  # Lean via elan; v4.28.0 pinned in lean-toolchain
 ```
 
-### Building the PDF
+### Building the PDF only
 
 ```bash
 cd manuscript

@@ -1,4 +1,4 @@
-# ── Model checkpoints (reproducible via training; HF/LFS mirror planned)
+# ── Model checkpoints (public mirror: huggingface.co/d3banjan/lazy-rudder-checkpoints)
 results/**/checkpoints/
 results/**/adapter_model.safetensors
 results/**/adapter_config.json
@@ -48,3 +48,6 @@ Thumbs.db
 .idea/
 *.swp
 *~
+
+# ── arXiv submission bundles (generated on demand)
+lazy-rudder-arxiv*.zip

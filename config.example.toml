@@ -12,5 +12,6 @@ results_dir = "./results"
 # Battery root (legacy alias used by some scripts as BASE_DIR)
 base_dir   = "."
 
-# Optional: HuggingFace artifact repo for adapters + activations
-# hf_artifacts_repo = "d3banjan/lazy-rudder-artifacts"
+# HuggingFace mirror for adapter checkpoints (used by scripts/fetch_checkpoints.py).
+# This is the public repo; override only if you maintain a private fork.
+checkpoints_hf_repo = "d3banjan/lazy-rudder-checkpoints"

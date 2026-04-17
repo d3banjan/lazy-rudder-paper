@@ -110,3 +110,46 @@ def download_model(model_name: str) -> Path:
         local_dir=str(local_dir),
     )
     return local_dir
+
+
+# ── checkpoint download helper ────────────────────────────────────────────────
+
+CHECKPOINTS_HF_REPO: str = (
+    os.environ.get("LAZY_RUDDER_CHECKPOINTS_HF_REPO")
+    or _toml_cfg.get("checkpoints_hf_repo")
+    or "d3banjan/lazy-rudder-checkpoints"
+)
+
+
+def download_checkpoints(force: bool = False) -> Path:
+    """Download all paper-cited adapter checkpoints into RESULTS_DIR.
+
+    Pulls from `d3banjan/lazy-rudder-checkpoints` (public, ~2.5 GB).
+    Layout mirrors the on-disk dev tree, so analysis scripts work unchanged
+    once this completes:
+
+      RESULTS_DIR/
+        _leak/v2/checkpoints/checkpoint-800/adapter_model.safetensors
+        _leak/v3/checkpoints/checkpoint-800/adapter_model.safetensors
+        ...
+
+    By default, snapshot_download is no-op when files already match the
+    remote hashes. Pass force=True to bypass the local cache check.
+
+    Returns the RESULTS_DIR path.
+    """
+    try:
+        from huggingface_hub import snapshot_download
+    except ImportError as exc:
+        raise ImportError(
+            "huggingface_hub is required for download_checkpoints(). "
+            "Install it with: uv add huggingface_hub  (or pip install huggingface_hub)"
+        ) from exc
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    snapshot_download(
+        repo_id=CHECKPOINTS_HF_REPO,
+        local_dir=str(RESULTS_DIR),
+        force_download=force,
+    )
+    return RESULTS_DIR
