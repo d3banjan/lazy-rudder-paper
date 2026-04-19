@@ -16,21 +16,36 @@ Reads:
   - results/t21_qwen_fullweight/summary.json — Qwen srank + γ (from T2.1)
 
 Emits:
-  - results/cross_probe/correlation_matrix.json
+  - results/cross_probe/correlation_matrix_{mode}.json
       Pearson + Spearman + CI95 bootstrap for
       (srank_vs_rm, γ_vs_rm) × (hh probe, uf probe) × (pythia chain, qwen point)
-  - results/cross_probe/figI_cross_probe.png
+  - results/cross_probe/figI_cross_probe_{mode}.png
       2×2 panel: rows={srank, γ}, cols={hh probe, uf probe}
+
+  where {mode} is "sum", "per_token", "margin_win_rate", or "dpo_accuracy"
+  (controlled by --aggregator flag).
 
 Usage:
   uv run python scripts/cross_probe_correlate.py
   uv run python scripts/cross_probe_correlate.py --out results/cross_probe
+  uv run python scripts/cross_probe_correlate.py --aggregator sum
+  uv run python scripts/cross_probe_correlate.py --aggregator per_token
+  uv run python scripts/cross_probe_correlate.py --aggregator margin_win_rate
+  uv run python scripts/cross_probe_correlate.py --aggregator dpo_accuracy
 
 Bugs fixed (2026-04-18):
   Bug A: bootstrap CI NaN pollution from LAPACK DLASCL errors → drop NaNs, require
          ≥10 valid resamples before emitting a CI; suppress ConstantInputWarning.
   Bug B: Simpson's-paradox on combined Qwen+Pythia (different srank scales) →
          within-family z-score for combined_* keys; raw values for per-family keys.
+  FIX-A: length-bias in reward margin → --aggregator per_token divides logp by
+         n_tokens_chosen / n_tokens_rejected before computing the margin.
+         Default is per_token; sum mode preserved for back-compat and appendix disclosure.
+  FIX-B: length-invariant binary metrics added:
+         margin_win_rate — fraction of pairs where DPO improves margin over base;
+           length bias cancels because base+DPO see the same token counts.
+         dpo_accuracy — fraction of pairs where DPO margin > 0 (still length-biased;
+           flagged in output note).
 """
 from __future__ import annotations
 
@@ -53,13 +68,33 @@ DPO_BETA   = 0.1
 
 # ── JSONL aggregation (reward margin only) ────────────────────────────────────
 
-def aggregate_jsonl(jsonl_path: Path, beta: float = DPO_BETA) -> dict | None:
-    """Compute reward_margin_mean/se from a score JSONL.  Returns None if missing."""
+def aggregate_jsonl(
+    jsonl_path: Path,
+    beta: float = DPO_BETA,
+    aggregator: str = "per_token",
+) -> dict | None:
+    """Compute reward_margin_mean/se from a score JSONL.  Returns None if missing.
+
+    aggregator: "sum"             — raw logp sum (original behaviour, length-biased)
+                "per_token"       — divide each logp by n_tokens before computing margin
+                                    (length-normalised; requires n_tokens_chosen /
+                                     n_tokens_rejected fields, recorded since 2026-04-17)
+                "margin_win_rate" — fraction of pairs where DPO margin > base margin;
+                                    length bias cancels because base and DPO see the same
+                                    token counts (preferred for length-invariant analysis).
+                "dpo_accuracy"    — fraction of pairs where DPO margin > 0 (chosen > rejected);
+                                    NOTE: still length-biased — longer rejected sequences tend
+                                    to have more-negative sum logp, inflating accuracy numbers.
+                                    Reported for comparison only.
+    """
     if not jsonl_path.exists():
         log.warning(f"Missing JSONL: {jsonl_path}")
         return None
 
     margins = []
+    win_flags: list[float] = []   # 1.0 if DPO margin > base margin, else 0.0
+    acc_flags: list[float] = []   # 1.0 if DPO margin > 0, else 0.0
+
     with open(jsonl_path) as fh:
         for line in fh:
             line = line.strip()
@@ -73,9 +108,42 @@ def aggregate_jsonl(jsonl_path: Path, beta: float = DPO_BETA) -> dict | None:
                     r["logp_chosen_base"], r["logp_rejected_base"]]
             if any(v != v for v in vals) or any(abs(v) > 1e6 for v in vals):
                 continue
-            reward_chosen   = beta * (r["logp_chosen_dpo"]   - r["logp_chosen_base"])
-            reward_rejected = beta * (r["logp_rejected_dpo"]  - r["logp_rejected_base"])
-            margins.append(reward_chosen - reward_rejected)
+
+            # Raw logp sums (always compute for binary metrics)
+            lc_dpo  = r["logp_chosen_dpo"]
+            lr_dpo  = r["logp_rejected_dpo"]
+            lc_base = r["logp_chosen_base"]
+            lr_base = r["logp_rejected_base"]
+
+            dpo_margin_raw  = lc_dpo  - lr_dpo
+            base_margin_raw = lc_base - lr_base
+
+            # Binary metrics (length-cancellation: same nc/nr in both terms)
+            win_flags.append(1.0 if dpo_margin_raw > base_margin_raw else 0.0)
+            acc_flags.append(1.0 if dpo_margin_raw > 0.0 else 0.0)
+
+            if aggregator == "per_token":
+                nc = r.get("n_tokens_chosen")
+                nr = r.get("n_tokens_rejected")
+                if not nc or not nr or nc <= 0 or nr <= 0:
+                    # Fall back to sum if token counts missing (shouldn't happen post-2026-04-17)
+                    logp_c_dpo  = lc_dpo
+                    logp_r_dpo  = lr_dpo
+                    logp_c_base = lc_base
+                    logp_r_base = lr_base
+                else:
+                    logp_c_dpo  = lc_dpo  / nc
+                    logp_r_dpo  = lr_dpo  / nr
+                    logp_c_base = lc_base / nc
+                    logp_r_base = lr_base / nr
+            else:  # "sum" (also used as source for binary modes — not consumed there)
+                logp_c_dpo  = lc_dpo
+                logp_r_dpo  = lr_dpo
+                logp_c_base = lc_base
+                logp_r_base = lr_base
+
+            rm = (logp_c_dpo - logp_r_dpo) - (logp_c_base - logp_r_base)
+            margins.append(beta * rm)
 
     if not margins:
         log.warning(f"No valid records in {jsonl_path}")
@@ -84,11 +152,33 @@ def aggregate_jsonl(jsonl_path: Path, beta: float = DPO_BETA) -> dict | None:
     def se(vals: list[float]) -> float:
         return statistics.stdev(vals) / math.sqrt(len(vals)) if len(vals) >= 2 else float("nan")
 
-    return {
-        "reward_margin_mean": statistics.mean(margins),
-        "reward_margin_se":   se(margins),
-        "n":                  len(margins),
-    }
+    n = len(margins)
+
+    if aggregator == "margin_win_rate":
+        rate = statistics.mean(win_flags)
+        return {
+            "reward_margin_mean": rate,   # per-checkpoint win rate (used uniformly downstream)
+            "reward_margin_se":   se(win_flags),
+            "n":                  n,
+            "win_rate":           rate,
+            "raw_wins":           int(sum(win_flags)),
+        }
+    elif aggregator == "dpo_accuracy":
+        rate = statistics.mean(acc_flags)
+        return {
+            "reward_margin_mean": rate,   # per-checkpoint accuracy (used uniformly downstream)
+            "reward_margin_se":   se(acc_flags),
+            "n":                  n,
+            "dpo_accuracy":       rate,
+            "raw_correct":        int(sum(acc_flags)),
+            "note":               "length-biased: longer rejected raises accuracy spuriously",
+        }
+    else:
+        return {
+            "reward_margin_mean": statistics.mean(margins),
+            "reward_margin_se":   se(margins),
+            "n":                  n,
+        }
 
 
 # ── Structural metric loading ──────────────────────────────────────────────────
@@ -267,13 +357,14 @@ def assemble_records(
     cross_probe_dir: Path,
     probe: str,
     model_spec_fn,  # fn(row) -> job_key prefix for JSONL lookup
+    aggregator: str = "per_token",
 ) -> list[dict]:
     """For each structural row, find the matching JSONL and merge."""
     results = []
     for row in structural_rows:
         job_prefix = model_spec_fn(row)
         jsonl_path = cross_probe_dir / f"{job_prefix}__{probe}.jsonl"
-        agg = aggregate_jsonl(jsonl_path)
+        agg = aggregate_jsonl(jsonl_path, aggregator=aggregator)
         if agg is None:
             log.warning(f"Skipping {row} — no JSONL for probe={probe}")
             continue
@@ -283,7 +374,7 @@ def assemble_records(
 
 # ── Figure I ──────────────────────────────────────────────────────────────────
 
-def generate_figI(records_hh: list[dict], records_uf: list[dict], out_dir: Path) -> None:
+def generate_figI(records_hh: list[dict], records_uf: list[dict], out_dir: Path, mode: str = "per_token") -> None:
     """2×2 scatter: rows={srank, γ}, cols={hh probe, uf probe}.
 
     Layout:
@@ -415,20 +506,30 @@ def generate_figI(records_hh: list[dict], records_uf: list[dict], out_dir: Path)
 
     fig.tight_layout(rect=[0, 0.06, 1, 1])
 
-    fig_path = out_dir / "figI_cross_probe.png"
+    fig_path = out_dir / f"figI_cross_probe_{mode}.png"
     fig.savefig(str(fig_path), bbox_inches="tight", dpi=150)
     plt.close(fig)
     log.info(f"Fig I saved: {fig_path} ({fig_path.stat().st_size // 1024} KB)")
 
-    # Copy to manuscript/figures/
+    # Copy to manuscript/figures/ (per_token is the paper default)
     mfig = PAPER_DIR / "manuscript" / "figures"
     mfig.mkdir(parents=True, exist_ok=True)
     import shutil  # noqa: PLC0415
-    shutil.copy(fig_path, mfig / "figI_cross_probe.png")
+    shutil.copy(fig_path, mfig / f"figI_cross_probe_{mode}.png")
+    if mode == "per_token":
+        # Also write canonical name used by \includegraphics in main.tex
+        shutil.copy(fig_path, mfig / "figI_cross_probe.png")
 
     # Save caption
+    _mode_note_map = {
+        "per_token":       "(per-token-normalised reward margin)",
+        "sum":             "(raw-sum reward margin)",
+        "margin_win_rate": "(margin win-rate: fraction of pairs DPO improves over base)",
+        "dpo_accuracy":    "(DPO accuracy: fraction of pairs DPO prefers chosen; length-biased)",
+    }
+    mode_note = _mode_note_map.get(mode, f"({mode})")
     caption_text = (
-        "Fig I. Cross-probe correlation between weight-structural metrics (srank, \u03b3) "
+        f"Fig I {mode_note}. Cross-probe correlation between weight-structural metrics (srank, \u03b3) "
         "and DPO reward margin. Left column: the in-distribution probe (hh-rlhf test) shows "
         "srank collapse is essentially decoupled from reward (Pearson r\u2248+0.28). Right "
         "column: on the out-of-distribution probe (UltraFeedback test), srank collapse becomes "
@@ -439,7 +540,7 @@ def generate_figI(records_hh: list[dict], records_uf: list[dict], out_dir: Path)
         "hh-rlhf); Qwen2-1.5B full-weight TRL-online-DPO on UltraFeedback shown as "
         "out-of-family reference point."
     )
-    caption_path = out_dir / "figI_cross_probe.caption.txt"
+    caption_path = out_dir / f"figI_cross_probe_{mode}.caption.txt"
     caption_path.write_text(caption_text + "\n")
     log.info(f"Caption saved: {caption_path}")
 
@@ -458,11 +559,28 @@ def main() -> int:
         "--out", default=str(PAPER_DIR / "results" / "cross_probe"),
         help="Output directory (default: results/cross_probe)",
     )
+    parser.add_argument(
+        "--aggregator",
+        choices=["sum", "per_token", "margin_win_rate", "dpo_accuracy"],
+        default="per_token",
+        help=(
+            "Reward-margin aggregation mode. "
+            "'per_token' (default): divide each logp by sequence length before computing margin — "
+            "corrects for length bias when chosen/rejected lengths are asymmetric (e.g. UltraFeedback). "
+            "'sum': raw logp sum (original behaviour, preserved for back-compat and appendix disclosure). "
+            "'margin_win_rate': fraction of pairs where DPO improves margin over base; "
+            "length bias cancels because base and DPO see the same token counts. "
+            "'dpo_accuracy': fraction of pairs where DPO margin > 0; still length-biased (flagged in output)."
+        ),
+    )
     args = parser.parse_args()
 
     out_dir     = Path(args.out)
     results_dir = PAPER_DIR / "results"
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    mode = args.aggregator
+    log.info(f"Aggregator mode: {mode}")
 
     # ── Load structural side ──────────────────────────────────────────────────
     log.info("Loading structural metrics...")
@@ -481,9 +599,9 @@ def main() -> int:
 
     # ── Assemble cross-probe data ─────────────────────────────────────────────
     log.info("Assembling hh-probe records...")
-    records_hh = assemble_records(all_rows, out_dir, "hh", job_key_fn)
+    records_hh = assemble_records(all_rows, out_dir, "hh", job_key_fn, aggregator=mode)
     log.info("Assembling uf-probe records...")
-    records_uf = assemble_records(all_rows, out_dir, "uf", job_key_fn)
+    records_uf = assemble_records(all_rows, out_dir, "uf", job_key_fn, aggregator=mode)
 
     # ── Within-family z-score for combined correlations (Bug B fix) ───────────
     z_cols = ("srank", "gamma", "reward_margin_mean")
@@ -493,11 +611,19 @@ def main() -> int:
     # ── Compute correlation matrix ────────────────────────────────────────────
     log.info("\n=== Correlation matrix ===")
     corr_matrix: dict = {
+        "aggregator_mode": mode,
         "note_simpsons_paradox": (
             "combined_* correlations use within-family z-scored srank/gamma/reward_margin; "
             "raw pooling produces artifacts because Qwen srank (~28) and Pythia srank (~3.5) "
             "live on different scales."
-        )
+        ),
+        "note_aggregator": (
+            "per_token: logp divided by sequence length before margin computation, corrects "
+            "length bias when chosen/rejected lengths are asymmetric (e.g. UltraFeedback). "
+            "sum: raw logp sum, original behaviour."
+        ) if mode == "per_token" else (
+            "sum: raw logp sum aggregation. Length-biased when chosen/rejected lengths differ."
+        ),
     }
 
     for probe_label, records_raw, records_z in [
@@ -537,12 +663,56 @@ def main() -> int:
                 "gamma_vs_rm": corr_block(gammas, rewards, f"{key}/gamma_vs_rm"),
             }
 
-    corr_path = out_dir / "correlation_matrix.json"
+    # Add effective_n field (total pairs used across all keys after NaN drop)
+    all_used = set()
+    for probe_recs in [records_hh, records_uf]:
+        for r in probe_recs:
+            all_used.add((r.get("chain"), r.get("model_size"), r.get("probe")))
+    corr_matrix["effective_n"] = {
+        "hh_records": len(records_hh),
+        "uf_records": len(records_uf),
+    }
+
+    # Embed per-checkpoint rate table for easy inspection
+    def _per_ckpt_rows(records: list[dict]) -> list[dict]:
+        return [
+            {
+                "model_size": r.get("model_size"),
+                "chain":      r.get("chain"),
+                "rate":       r.get("reward_margin_mean"),
+                "se":         r.get("reward_margin_se"),
+                "n":          r.get("n"),
+            }
+            for r in records
+        ]
+
+    corr_matrix["per_checkpoint"] = {
+        "hh": _per_ckpt_rows(records_hh),
+        "uf": _per_ckpt_rows(records_uf),
+    }
+
+    if mode == "margin_win_rate":
+        corr_matrix["note_aggregator"] = (
+            "margin_win_rate: fraction of pairs where DPO margin (chosen-rejected) exceeds base margin. "
+            "Length bias cancels: base and DPO share the same token counts per pair."
+        )
+    elif mode == "dpo_accuracy":
+        corr_matrix["note_aggregator"] = (
+            "dpo_accuracy: fraction of pairs where DPO margin > 0 (chosen preferred). "
+            "WARNING: still length-biased — longer rejected sequences inflate accuracy numbers."
+        )
+
+    corr_path = out_dir / f"correlation_matrix_{mode}.json"
     corr_path.write_text(json.dumps(corr_matrix, indent=2))
     log.info(f"\nCorrelation matrix written: {corr_path}")
+    # Also write canonical path (per_token is the paper default; sum is back-compat)
+    if mode == "per_token":
+        canonical = out_dir / "correlation_matrix.json"
+        canonical.write_text(json.dumps(corr_matrix, indent=2))
+        log.info(f"Canonical correlation_matrix.json updated → {canonical}")
 
     # ── Generate Fig I ────────────────────────────────────────────────────────
-    generate_figI(records_hh, records_uf, out_dir)
+    generate_figI(records_hh, records_uf, out_dir, mode=mode)
 
     log.info("\n=== DONE ===")
     return 0

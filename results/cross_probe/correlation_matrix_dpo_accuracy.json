@@ -1,0 +1,179 @@
+{
+  "aggregator_mode": "dpo_accuracy",
+  "note_simpsons_paradox": "combined_* correlations use within-family z-scored srank/gamma/reward_margin; raw pooling produces artifacts because Qwen srank (~28) and Pythia srank (~3.5) live on different scales.",
+  "note_aggregator": "dpo_accuracy: fraction of pairs where DPO margin > 0 (chosen preferred). WARNING: still length-biased \u2014 longer rejected sequences inflate accuracy numbers.",
+  "pythia_hh": {
+    "srank_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.5120298719274967,
+      "spearman_r": -0.3354101966249684,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": 0.4802504743140724,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.8749999999999999
+    },
+    "gamma_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.5890795484856309,
+      "spearman_r": -0.44721359549995787,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": 0.34242210159867015,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.6666666666666666
+    }
+  },
+  "combined_hh": {
+    "srank_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.5120298719274967,
+      "spearman_r": -0.33394720739540396,
+      "pearson_ci95_lo": -0.9972773969849453,
+      "pearson_ci95_hi": 0.49115017039439535,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.8000000000000002
+    },
+    "gamma_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.589079548485631,
+      "spearman_r": -0.5161002296110789,
+      "pearson_ci95_lo": -0.9971516534614933,
+      "pearson_ci95_hi": 0.001309562397018601,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.44721359549995804
+    }
+  },
+  "pythia_uf": {
+    "srank_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.6421285757984885,
+      "spearman_r": -0.8720815992723809,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": 0.4143436980791675,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": -0.1111111111111111
+    },
+    "gamma_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.8774740045252154,
+      "spearman_r": -0.8720815992723809,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": -0.30927490719973294,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": -0.1111111111111111
+    }
+  },
+  "combined_uf": {
+    "srank_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.6421285757984885,
+      "spearman_r": -0.753702346348183,
+      "pearson_ci95_lo": -0.9949788258210763,
+      "pearson_ci95_hi": 0.3023567292227902,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.0909090909090909
+    },
+    "gamma_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.8774740045252157,
+      "spearman_r": -0.8696565534786727,
+      "pearson_ci95_lo": -0.9999967168829695,
+      "pearson_ci95_hi": -0.5098706762326015,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": -0.19999999999999998
+    }
+  },
+  "effective_n": {
+    "hh_records": 6,
+    "uf_records": 6
+  },
+  "per_checkpoint": {
+    "hh": [
+      {
+        "model_size": "70m",
+        "chain": "pythia",
+        "rate": 0.5555555555555556,
+        "se": 0.022356767682931492,
+        "n": 495
+      },
+      {
+        "model_size": "160m",
+        "chain": "pythia",
+        "rate": 0.5535353535353535,
+        "se": 0.022366742858015976,
+        "n": 495
+      },
+      {
+        "model_size": "410m",
+        "chain": "pythia",
+        "rate": 0.5515151515151515,
+        "se": 0.022376344379324505,
+        "n": 495
+      },
+      {
+        "model_size": "1b",
+        "chain": "pythia",
+        "rate": 0.5555555555555556,
+        "se": 0.022356767682931492,
+        "n": 495
+      },
+      {
+        "model_size": "1b_s117",
+        "chain": "pythia",
+        "rate": 0.5555555555555556,
+        "se": 0.022356767682931492,
+        "n": 495
+      },
+      {
+        "model_size": "qwen2-1.5b",
+        "chain": "qwen",
+        "rate": 0.5575757575757576,
+        "se": 0.02234641835368727,
+        "n": 495
+      }
+    ],
+    "uf": [
+      {
+        "model_size": "70m",
+        "chain": "pythia",
+        "rate": 0.42116630669546434,
+        "se": 0.022971149268184776,
+        "n": 463
+      },
+      {
+        "model_size": "160m",
+        "chain": "pythia",
+        "rate": 0.42764578833693306,
+        "se": 0.023017256280849444,
+        "n": 463
+      },
+      {
+        "model_size": "410m",
+        "chain": "pythia",
+        "rate": 0.4535637149028078,
+        "se": 0.023161566511368484,
+        "n": 463
+      },
+      {
+        "model_size": "1b",
+        "chain": "pythia",
+        "rate": 0.4708423326133909,
+        "se": 0.02322251810757501,
+        "n": 463
+      },
+      {
+        "model_size": "1b_s117",
+        "chain": "pythia",
+        "rate": 0.4708423326133909,
+        "se": 0.02322251810757501,
+        "n": 463
+      },
+      {
+        "model_size": "qwen2-1.5b",
+        "chain": "qwen",
+        "rate": 0.4666666666666667,
+        "se": 0.023160277792655042,
+        "n": 465
+      }
+    ]
+  }
+}

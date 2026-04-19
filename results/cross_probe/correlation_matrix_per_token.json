@@ -1,0 +1,89 @@
+{
+  "aggregator_mode": "per_token",
+  "note_simpsons_paradox": "combined_* correlations use within-family z-scored srank/gamma/reward_margin; raw pooling produces artifacts because Qwen srank (~28) and Pythia srank (~3.5) live on different scales.",
+  "note_aggregator": "per_token: logp divided by sequence length before margin computation, corrects length bias when chosen/rejected lengths are asymmetric (e.g. UltraFeedback). sum: raw logp sum, original behaviour.",
+  "pythia_hh": {
+    "srank_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.3492822389619694,
+      "spearman_r": 0.09999999999999999,
+      "pearson_ci95_lo": -0.9999999999999999,
+      "pearson_ci95_hi": 1.0,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    },
+    "gamma_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.35839182904319267,
+      "spearman_r": -0.09999999999999999,
+      "pearson_ci95_lo": -0.9999999999999999,
+      "pearson_ci95_hi": 1.0,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    }
+  },
+  "combined_hh": {
+    "srank_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.3492822389619694,
+      "spearman_r": -0.028571428571428574,
+      "pearson_ci95_lo": -0.9896417927687619,
+      "pearson_ci95_hi": 0.9968387710191553,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    },
+    "gamma_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.3583918290431928,
+      "spearman_r": -0.2571428571428572,
+      "pearson_ci95_lo": -0.9862411461453879,
+      "pearson_ci95_hi": 0.5953802909773357,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.8064516129032258
+    }
+  },
+  "pythia_uf": {
+    "srank_vs_rm": {
+      "n": 5,
+      "pearson_r": 0.12246334942517206,
+      "spearman_r": 0.09999999999999999,
+      "pearson_ci95_lo": -0.9999999999999999,
+      "pearson_ci95_hi": 1.0,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    },
+    "gamma_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.3552373071636708,
+      "spearman_r": -0.39999999999999997,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": 0.9999999999999998,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    }
+  },
+  "combined_uf": {
+    "srank_vs_rm": {
+      "n": 6,
+      "pearson_r": 0.12246334942517206,
+      "spearman_r": 0.028571428571428574,
+      "pearson_ci95_lo": -0.9637082410644451,
+      "pearson_ci95_hi": 0.9060470043792748,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    },
+    "gamma_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.35523730716367086,
+      "spearman_r": -0.4285714285714286,
+      "pearson_ci95_lo": -0.9978471460376817,
+      "pearson_ci95_hi": 0.7277056084059135,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.7419354838709679
+    }
+  },
+  "effective_n": {
+    "hh_records": 6,
+    "uf_records": 6
+  }
+}

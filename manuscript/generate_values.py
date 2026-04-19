@@ -467,41 +467,13 @@ else:
         "",
     ]
 
-# ── T2.1b Cross-probe correlations ─────────────────────────────────────────
-cp_corr_path = RES / "cross_probe" / "correlation_matrix.json"
-if cp_corr_path.exists():
-    cp = json.loads(cp_corr_path.read_text())
-    lines += ["", "% ── T2.1b Cross-probe correlations (pythia_uf, combined_uf) ──────"]
-    _cp_keys = [
-        # (macro_suffix, corr_matrix_key, metric_key)
-        ("PythiaUfSrank",    "pythia_uf",   "srank_vs_rm"),
-        ("PythiaUfGamma",    "pythia_uf",   "gamma_vs_rm"),
-        ("CombinedUfSrank",  "combined_uf", "srank_vs_rm"),
-        ("CombinedUfGamma",  "combined_uf", "gamma_vs_rm"),
-        ("PythiaHhSrank",    "pythia_hh",   "srank_vs_rm"),
-        ("PythiaHhGamma",    "pythia_hh",   "gamma_vs_rm"),
-        ("CombinedHhSrank",  "combined_hh", "srank_vs_rm"),
-        ("CombinedHhGamma",  "combined_hh", "gamma_vs_rm"),
-    ]
-    for suffix, cp_key, metric_key in _cp_keys:
-        if cp_key not in cp or metric_key not in cp[cp_key]:
-            lines += [macro(f"bgCorrCrossProbe{suffix}", float("nan"))]
-            continue
-        block = cp[cp_key][metric_key]
-        lines += [
-            macro(f"bgCorrCrossProbe{suffix}",       block["pearson_r"]),
-            macro(f"bgCorrCrossProbeSp{suffix}",     block["spearman_r"]),
-            macro(f"bgCorrCrossProbeCILo{suffix}",   block["pearson_ci95_lo"]),
-            macro(f"bgCorrCrossProbeCIHi{suffix}",   block["pearson_ci95_hi"]),
-        ]
-    lines += [""]
-else:
-    lines += [
-        "",
-        "% ── T2.1b Cross-probe correlations (stub) ──────────────────────────",
-        macro("bgCorrCrossProbeNote", "cross_probe/correlation_matrix.json not found"),
-        "",
-    ]
+# ── T2.1b Cross-probe correlations RETRACTED ────────────────────────────────
+# The cross-probe srank-vs-reward-margin claim was falsified as a length-bias
+# artifact (see Appendix app:cross-probe-retraction in main.tex).  The
+# bgCorrCrossProbe* macros are no longer emitted.  Raw JSONL data and
+# correlation_matrix.json are preserved in results/cross_probe/ for post-hoc
+# inspection.  Do not re-add this block without first confirming a
+# length-invariant metric (per-token logp or margin_win_rate) supports the claim.
 
 out = HERE / "values.tex"
 out.write_text("\n".join(lines) + "\n")

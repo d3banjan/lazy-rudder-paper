@@ -104,11 +104,21 @@ Frozen revisions for reproducibility:
 
 ## T2.1b cross-probe scoring
 
-Cross-probe evaluation of all 5 Pythia LoRA-DPO checkpoints on UltraFeedback (OOD) plus
-Qwen2-1.5B on both probes. The central finding: srank collapse is decoupled from
-in-distribution reward (Pythia-hh Pearson ≈ +0.23) but is a strong negative predictor
-of OOD transfer (Pythia-UF Pearson ≈ −0.92), reframing the geometric floor as
-representational overfitting.
+**RETRACTED (length-bias artifact, see Appendix `\ref{app:cross-probe-retraction}`) — infrastructure and data retained for post-hoc inspection.**
+
+The original claim (commit `46633a6`) was that srank collapse is decoupled from
+in-distribution reward (Pythia-hh Pearson ≈ +0.22) but becomes a strong negative
+predictor of OOD transfer (Pythia-UF Pearson ≈ −0.92), reframing the geometric floor as
+representational overfitting.  This claim is retracted: the UF Pearson of −0.92 was
+produced by summing log-probabilities over all tokens in each response, which introduces
+a length-proportional bias when chosen/rejected response lengths are asymmetric across
+pairs within a probe (as they systematically are in UltraFeedback).  Per-token
+normalization collapses the UF Pearson to +0.12; length-invariant margin_win_rate yields
+hh rates in [0.515, 0.546] and UF rates in [0.475, 0.527] — both within ±0.03 of chance.
+There is no statistically meaningful cross-probe asymmetry at n=5 once length bias is removed.
+
+The scoring infrastructure, JSONL files, and correlation JSON are retained below for
+post-hoc inspection.
 
 **Scoring JSONL files** (500 examples per checkpoint × probe, β=0.1):
 
@@ -134,8 +144,7 @@ pointing to `results/behavior_geometry/checkpoint_*.jsonl` — not re-scored.
 **Combined correlations** use within-family z-scored srank/gamma/reward_margin to avoid
 Simpson's-paradox artifacts (Qwen srank ≈28, Pythia srank ≈3.5).
 
-**Verdict:** positive — reveals specialization asymmetry (in-distribution decoupling vs.
-OOD overfitting penalty).
+**Verdict:** RETRACTED — see header above.  Original claim (OOD overfitting penalty) falsified by length-bias analysis.
 
 ---
 
