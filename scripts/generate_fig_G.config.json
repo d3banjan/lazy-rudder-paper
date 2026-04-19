@@ -1,0 +1,12 @@
+{
+  "source_script": "generate_fig_G.py",
+  "inputs": [
+    "/home/debanjan/Code/Research/lean-mining/papers/lazy-rudder/results/behavior_geometry/summary.json",
+    "/home/debanjan/Code/Research/lean-mining/papers/lazy-rudder/results/behavior_geometry/correlation.json"
+  ],
+  "outputs": [
+    "/home/debanjan/Code/Research/lean-mining/papers/lazy-rudder/manuscript/figures/fig_G_behavior_geometry.pdf",
+    "/home/debanjan/Code/Research/lean-mining/papers/lazy-rudder/manuscript/figures/fig_G_behavior_geometry.png"
+  ],
+  "description": "2x2 scatter grid: (srank, gamma_overlap) x (reward_margin, KL-to-base). Addresses reviewer M9: does geometry predict behavior?"
+}

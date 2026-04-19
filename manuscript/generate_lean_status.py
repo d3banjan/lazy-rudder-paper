@@ -49,19 +49,28 @@ def parse(src: str) -> list[dict]:
         start = m.end()
         end = matches[i + 1].start() if i + 1 < len(matches) else len(src)
         body = src[start:end]
+        # Preceding comment block — detect WEAKENING NOTE attached to THIS decl.
+        # Scan only the text between the previous decl end and this decl start,
+        # then take the last block-comment (/- ... -/ or /-- ... -/) in that slice.
+        prev_end = matches[i - 1].end() if i > 0 else 0
+        between = src[prev_end:m.start()]
+        # Find last block comment in `between`
+        block_comments = list(re.finditer(r"/-(?:-)?.*?-/", between, re.DOTALL))
+        is_partial = False
+        if block_comments:
+            last_block = block_comments[-1].group(0)
+            is_partial = "WEAKENING NOTE" in last_block
         # Detect sorry — but only if it appears as a statement, not in comments/strings.
-        # Simple heuristic: strip line comments, then search for "sorry".
         body_code = re.sub(r"--[^\n]*", "", body)
-        # Strip block comments (/- ... -/)
         body_code = re.sub(r"/-.*?-/", "", body_code, flags=re.DOTALL)
         has_sorry = bool(re.search(r"\bsorry\b", body_code))
-        # Detect True-sorry stubs (trivial theorem placeholders)
         is_true_stub = bool(re.search(r":\s*True\s*:=\s*sorry", body_code))
         out.append({
             "kind": kind,
             "name": name,
             "has_sorry": has_sorry,
             "is_true_stub": is_true_stub,
+            "is_partial": is_partial,
         })
     return out
 
@@ -85,33 +94,78 @@ lines = [
     "\\newcommand{\\proofCheck}{\\ensuremath{\\checkmark}}",
     "\\newcommand{\\proofSorry}{\\textsc{sorry}}",
     "\\newcommand{\\proofStub}{\\textsc{stub}}",
+    "\\newcommand{\\proofPartial}{\\textsc{partial}}",
     "",
 ]
 
-proven_count = 0          # (a) real proofs
+proven_count = 0          # (a) real proofs of the full claim
+partial_count = 0         # (d) proof of a weakened statement (WEAKENING NOTE present)
 in_proof_sorry_count = 0  # (c) non-True statements with bare := sorry
 stub_count = 0            # (b) True := sorry placeholders
 
 for d in decls:
     if d["kind"] in ("theorem", "lemma"):
         if d["is_true_stub"]:
-            # (b) literature-terminology stub: `theorem foo : True := sorry`
             status_macro = "\\proofStub"
             stub_count += 1
         elif d["has_sorry"]:
-            # (c) real mathematical statement, proof body deferred via sorry
             status_macro = "\\proofSorry"
             in_proof_sorry_count += 1
+        elif d["is_partial"]:
+            # (d) weakened statement proved — original paper claim not formalized
+            status_macro = "\\proofPartial"
+            partial_count += 1
         else:
-            # (a) complete proof, no sorry
             status_macro = "\\proofCheck"
             proven_count += 1
         lines.append(f"\\newcommand{{\\{tex_name(d['name'])}}}{{{status_macro}}}")
 
+# ── Paper-facing sorry disclosure ───────────────────────────────────────────
+# Five sorries that appear (directly or indirectly) in paper claims.
+# Each entry: (lean_name, paper_section, provability_class, note)
+#   provability_class:
+#     "planned"      — provable with known proof sketch; formal proof queued
+#     "empirical"    — empirical/statistical claim; not Lean-bridgeable in the
+#                      standard sense (requires Haar measure, training-process
+#                      formalization, or real-data assumptions outside Mathlib)
+PAPER_FACING_SORRIES = [
+    # NOTE: random_subspace_expected_overlap — PROVEN (2026-04-18, outcome 2 partial):
+    #   weakened to deterministic `subspaceOverlap U W ≤ 1`; no longer a paper-facing sorry.
+    # NOTE: stable_rank_acoustic_scaling — PROVEN (2026-04-18, outcome 2 partial):
+    #   proved under acoustic axioms frobeniusSq=d, spectralSq=√d; no longer a paper-facing sorry.
+    (
+        "gamma_right_alignment",
+        "§4 / §5 (bonus_R ≥ 5× across Pythia suite)",
+        "empirical",
+        "Empirical observation from trained checkpoints; a formal proof would require "
+        "formalizing the LoRA training process and pretraining distribution, which is "
+        "outside Mathlib scope. Named as a target theorem; not a proved claim.",
+    ),
+    (
+        "bias_autopsy_separation",
+        "§4.4 (99.97% autopsy residual)",
+        "empirical",
+        "The specific 99.97% residual is empirical (Pythia-410M checkpoints). The "
+        "underlying algebra (left-diagonal cannot perturb right-singular vectors) is a "
+        "valid research target, but the quantitative claim depends on data facts not "
+        "formalizable in Mathlib. Dropped from Lean-supported claims list.",
+    ),
+    (
+        "lower_bound_of_intent",
+        "§5 / §6 (central attractor claim)",
+        "empirical",
+        "Requires formalizing a task-loss functional on parameter space and a local "
+        "quadratic bound on the Hessian near the pretrained base. Both are outside "
+        "current Mathlib infrastructure. Long-horizon target; not paper-proved.",
+    ),
+]
+
 lines += [
     "",
-    f"% (a) theorems/lemmas with complete proofs (no sorry)",
+    f"% (a) theorems/lemmas with complete proofs of the full claim",
     f"\\newcommand{{\\leanProvenCount}}{{{proven_count}}}",
+    f"% (d) theorems proved in a WEAKENED form (WEAKENING NOTE in-file)",
+    f"\\newcommand{{\\leanPartialCount}}{{{partial_count}}}",
     f"% (b) True := sorry stubs — literature-terminology placeholders",
     f"% NOTE: \\leanSorryCount = stub count (b), matching main.tex prose",
     f"\\newcommand{{\\leanSorryCount}}{{{stub_count}}}",
@@ -120,6 +174,15 @@ lines += [
     f"% backward-compat alias (same as \\leanSorryCount)",
     f"\\newcommand{{\\leanStubCount}}{{{stub_count}}}",
     f"\\newcommand{{\\leanDefCount}}{{{sum(1 for d in decls if d['kind']=='def')}}}",
+    "",
+    f"% Paper-facing sorry disclosure (3 sorries cited or implied in paper prose)",
+    f"% NOTE: random_subspace_expected_overlap + stable_rank_acoustic_scaling PROVEN 2026-04-18",
+    f"% See PAPER_FACING_SORRIES in generate_lean_status.py for full notes.",
+    f"% planned = provable, formal proof queued",
+    f"% empirical = depends on training-process or Haar-measure assumptions; not Lean-bridgeable",
+    f"\\newcommand{{\\leanPaperFacingSorryCount}}{{{len(PAPER_FACING_SORRIES)}}}",
+    f"\\newcommand{{\\leanPaperFacingPlannedCount}}{{0}}",
+    f"\\newcommand{{\\leanPaperFacingEmpiricalCount}}{{{len(PAPER_FACING_SORRIES)}}}",
     "",
 ]
 
@@ -131,14 +194,26 @@ lines += [
     "  \\centering",
     "  \\caption{Formally verified theorems in",
     "  \\texttt{LeanMining/NeuralGeometry/SubspaceOverlap.lean}"
-    " (Lean 4 + Mathlib). Three-way status:"
+    " (Lean 4 + Mathlib, as of 2026-04-18). Three-way status:"
     " $\\proofCheck$ = complete proof (no \\texttt{sorry});"
+    " $\\proofPartial$ = proof of a strictly weaker statement than the"
+    " paper-facing claim (see in-file WEAKENING NOTE);"
     " $\\proofSorry$ = real mathematical statement with deferred proof body"
     " (honest load-bearing gap, known proof sketch exists);"
     " $\\proofStub$ = \\texttt{True := sorry} literature-terminology"
     " placeholder (not a mathematical claim, names a concept for downstream"
     " work). Counts: \\leanProvenCount~proven,"
-    " \\leanInProofSorryCount~deferred, \\leanSorryCount~stubs.}",
+    " \\leanPartialCount~partial,"
+    " \\leanInProofSorryCount~deferred, \\leanSorryCount~stubs."
+    " \\texttt{random\\_subspace\\_expected\\_overlap} and"
+    " \\texttt{stable\\_rank\\_acoustic\\_scaling} were closed 2026-04-18"
+    " (weakened deterministic forms; see in-file WEAKENING NOTEs)."
+    " Remaining \\leanPaperFacingSorryCount~paper-facing stubs"
+    " (\\texttt{gamma\\_right\\_alignment},"
+    " \\texttt{bias\\_autopsy\\_separation},"
+    " \\texttt{lower\\_bound\\_of\\_intent}):"
+    " empirical or aspirational claims not Lean-bridgeable from first principles;"
+    " none are cited as proven results.}",
     "  \\label{tab:lean-status}",
     "  \\small",
     "  \\begin{tabular}{ll}",
@@ -149,8 +224,14 @@ lines += [
 for d in decls:
     if d["kind"] not in ("theorem", "lemma"):
         continue
-    stat = "\\proofStub" if d["is_true_stub"] else ("\\proofSorry" if d["has_sorry"] else "\\proofCheck")
-    # escape underscores for display
+    if d["is_true_stub"]:
+        stat = "\\proofStub"
+    elif d["has_sorry"]:
+        stat = "\\proofSorry"
+    elif d["is_partial"]:
+        stat = "\\proofPartial"
+    else:
+        stat = "\\proofCheck"
     disp = d["name"].replace("_", "\\_")
     lines.append(f"    \\texttt{{{disp}}} & {stat} \\\\")
 lines += [

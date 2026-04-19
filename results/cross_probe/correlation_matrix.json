@@ -1,0 +1,83 @@
+{
+  "note_simpsons_paradox": "combined_* correlations use within-family z-scored srank/gamma/reward_margin; raw pooling produces artifacts because Qwen srank (~28) and Pythia srank (~3.5) live on different scales.",
+  "pythia_hh": {
+    "srank_vs_rm": {
+      "n": 5,
+      "pearson_r": 0.22492465852594673,
+      "spearman_r": -0.09999999999999999,
+      "pearson_ci95_lo": -0.9999999999999999,
+      "pearson_ci95_hi": 1.0,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    },
+    "gamma_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.35004755624499967,
+      "spearman_r": -0.6,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": 0.9929053807628524,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    }
+  },
+  "combined_hh": {
+    "srank_vs_rm": {
+      "n": 6,
+      "pearson_r": 0.22492465852594667,
+      "spearman_r": -0.14285714285714288,
+      "pearson_ci95_lo": -0.9563162686794218,
+      "pearson_ci95_hi": 0.895242707918775,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.9999999999999999
+    },
+    "gamma_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.3500475562449996,
+      "spearman_r": -0.6,
+      "pearson_ci95_lo": -0.9812425829136431,
+      "pearson_ci95_hi": 0.7408584542957358,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.6363636363636362
+    }
+  },
+  "pythia_uf": {
+    "srank_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.9171527803279063,
+      "spearman_r": -0.8999999999999998,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": -0.4045178637978588,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": -0.1111111111111111
+    },
+    "gamma_vs_rm": {
+      "n": 5,
+      "pearson_r": -0.5983076528331848,
+      "spearman_r": -0.6,
+      "pearson_ci95_lo": -1.0,
+      "pearson_ci95_hi": 0.9999999999999998,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 1.0
+    }
+  },
+  "combined_uf": {
+    "srank_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.9171527803279063,
+      "spearman_r": -0.942857142857143,
+      "pearson_ci95_lo": -0.9999917349634279,
+      "pearson_ci95_hi": -0.631066545937352,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": -0.5151515151515151
+    },
+    "gamma_vs_rm": {
+      "n": 6,
+      "pearson_r": -0.5983076528331849,
+      "spearman_r": -0.6,
+      "pearson_ci95_lo": -0.9916024875702528,
+      "pearson_ci95_hi": 0.32874813390541335,
+      "spearman_ci95_lo": -1.0,
+      "spearman_ci95_hi": 0.5024999999999638
+    }
+  }
+}

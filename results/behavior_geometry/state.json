@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "completed_model_seeds": [
+    "70m_seed42",
+    "160m_seed42",
+    "410m_seed42",
+    "1b_seed42",
+    "1b_seed117"
+  ],
+  "current_model_size": "1b",
+  "current_seed": 117,
+  "last_example_idx": 499
+}

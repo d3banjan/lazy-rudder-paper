@@ -1,0 +1,16 @@
+[project]
+name = "lazy-rudder"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=0.30",
+    "datasets>=4.8.4",
+    "huggingface-hub>=0.23",
+    "matplotlib>=3.8",
+    "numpy>=1.26",
+    "peft>=0.19.1",
+    "safetensors>=0.4",
+    "scipy>=1.17.1",
+    "torch>=2.2",
+    "transformers>=4.40",
+]

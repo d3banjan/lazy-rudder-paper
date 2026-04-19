@@ -33,6 +33,27 @@ What changes with scale?
 
 ---
 
+<div class="pub-section" id="srank-protocol">
+
+Methods note
+{:.section-label}
+
+## Stable rank: numerical protocol
+
+All stable-rank values in these charts use the definition:
+
+$$\text{srank}(A) = \frac{\|A\|_F^2}{\|A\|_2^2}$$
+
+where $\|A\|_F^2 = \sum_i \sigma_i^2$ (sum of squared singular values) and $\|A\|_2^2 = \sigma_{\max}^2$ (squared largest singular value). The ratio equals the number of directions that carry equal energy — it is always between 1 and rank(A).
+
+**Precision and thresholds.** Adapters are loaded and SVD is computed in fp32 (upcast from fp16 checkpoint weights). Singular values below machine epsilon × max(shape) × σ_max are treated as zero for rank counting but are included in the Frobenius sum (their contribution is negligible). The stable rank formula itself has no threshold dependence.
+
+**Computing script.** See [`papers/lazy-rudder/scripts/spectral_autopsy.py`](https://github.com/d3banjan/lazy-rudder-paper/blob/main/scripts/spectral_autopsy.py) for the reference implementation (function `layer_stats`).
+
+</div>
+
+---
+
 <div class="pub-section" id="explore-seeds">
 
 Seed robustness

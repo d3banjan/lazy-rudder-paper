@@ -1,0 +1,133 @@
+{
+  "derivation": "E[p_right(k)] = k / d  (exact, finite-d Haar measure on G(k,d)). Reference: Chikuse (2003) Statistics on Special Manifolds, Lecture Notes in Statistics 174, Springer; also Collins & Sniady (2006) Weingarten calculus for the unitary group. The paper's denominator k/d_in in bonus_right is therefore already the analytic Haar expectation, not a sampled approximation.",
+  "formula": "E[p(k, d)] = k / d",
+  "bonus_at_random": 1.0,
+  "configs": {
+    "pythia-70m": {
+      "k5": {
+        "k": 5,
+        "d_in": 512,
+        "d_out": 1536,
+        "p_right_analytic": 0.00976562,
+        "p_left_analytic": 0.00325521,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 5/512 = 0.009766"
+      },
+      "k10": {
+        "k": 10,
+        "d_in": 512,
+        "d_out": 1536,
+        "p_right_analytic": 0.01953125,
+        "p_left_analytic": 0.00651042,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 10/512 = 0.019531"
+      },
+      "k20": {
+        "k": 20,
+        "d_in": 512,
+        "d_out": 1536,
+        "p_right_analytic": 0.0390625,
+        "p_left_analytic": 0.01302083,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 20/512 = 0.039062"
+      }
+    },
+    "pythia-160m": {
+      "k5": {
+        "k": 5,
+        "d_in": 768,
+        "d_out": 2304,
+        "p_right_analytic": 0.00651042,
+        "p_left_analytic": 0.00217014,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 5/768 = 0.006510"
+      },
+      "k10": {
+        "k": 10,
+        "d_in": 768,
+        "d_out": 2304,
+        "p_right_analytic": 0.01302083,
+        "p_left_analytic": 0.00434028,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 10/768 = 0.013021"
+      },
+      "k20": {
+        "k": 20,
+        "d_in": 768,
+        "d_out": 2304,
+        "p_right_analytic": 0.02604167,
+        "p_left_analytic": 0.00868056,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 20/768 = 0.026042"
+      }
+    },
+    "pythia-410m": {
+      "k5": {
+        "k": 5,
+        "d_in": 1024,
+        "d_out": 3072,
+        "p_right_analytic": 0.00488281,
+        "p_left_analytic": 0.0016276,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 5/1024 = 0.004883"
+      },
+      "k10": {
+        "k": 10,
+        "d_in": 1024,
+        "d_out": 3072,
+        "p_right_analytic": 0.00976562,
+        "p_left_analytic": 0.00325521,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 10/1024 = 0.009766"
+      },
+      "k20": {
+        "k": 20,
+        "d_in": 1024,
+        "d_out": 3072,
+        "p_right_analytic": 0.01953125,
+        "p_left_analytic": 0.00651042,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 20/1024 = 0.019531"
+      }
+    },
+    "pythia-1b": {
+      "k5": {
+        "k": 5,
+        "d_in": 2048,
+        "d_out": 6144,
+        "p_right_analytic": 0.00244141,
+        "p_left_analytic": 0.0008138,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 5/2048 = 0.002441"
+      },
+      "k10": {
+        "k": 10,
+        "d_in": 2048,
+        "d_out": 6144,
+        "p_right_analytic": 0.00488281,
+        "p_left_analytic": 0.0016276,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 10/2048 = 0.004883"
+      },
+      "k20": {
+        "k": 20,
+        "d_in": 2048,
+        "d_out": 6144,
+        "p_right_analytic": 0.00976562,
+        "p_left_analytic": 0.00325521,
+        "bonus_at_random": 1.0,
+        "note": "E[p_right] = 20/2048 = 0.009766"
+      }
+    }
+  },
+  "sanity_check": {
+    "d": 1024,
+    "k": 5,
+    "n_trials": 10000,
+    "analytic": 0.0048828125,
+    "sampled_mean": 0.00490796,
+    "sampled_se": 1.366e-05,
+    "ratio": 1.005149,
+    "status": "PASS"
+  }
+}

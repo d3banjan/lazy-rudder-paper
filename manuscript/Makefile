@@ -13,7 +13,7 @@ help:
 	@echo "  make values      — regenerate values.tex from ../results/*.json"
 	@echo "  make tables      — regenerate tables.tex from ../results/*.json"
 	@echo "  make lean-status — regenerate lean_status.tex from ../lean/*.lean"
-	@echo "  make figs        — regenerate all 5 data-driven figure PDFs + schematic"
+	@echo "  make figs        — regenerate all figure PDFs (A–E real; F stub until trajectory data available)"
 	@echo "  make paper       — all above + pdflatex + bibtex + pdflatex + pdflatex"
 	@echo "  make clean       — remove build artefacts (keeps .pdf)"
 	@echo "  make distclean   — remove everything including .pdf"
@@ -32,7 +32,7 @@ lean_status.tex: generate_lean_status.py ../lean/SubspaceOverlap.lean
 
 # ── Figure generation ────────────────────────────────────────────────────────
 FIG_PDFS := figures/fig_A.pdf figures/fig_B.pdf figures/fig_C.pdf \
-             figures/fig_D.pdf figures/fig_E.pdf
+             figures/fig_D.pdf figures/fig_E.pdf figures/fig_F_progression.pdf
 
 figs: $(FIG_PDFS)
 	@echo "[figs] All figure PDFs up to date."
@@ -56,6 +56,14 @@ figures/fig_D.pdf: ../scripts/generate_fig_D.py $(wildcard ../results/bitfit_dpo
 figures/fig_E.pdf: ../scripts/generate_fig_E.py $(wildcard ../results/spectral_overlap_gamma_modules/results.json)
 	@mkdir -p figures
 	$(UVX_PY) ../scripts/generate_fig_E.py
+
+# fig_F: srank checkpoint-progression plot (T1.4 lazy-regime rebuttal).
+# Currently emits a PENDING-DATA stub because no intermediate LoRA checkpoints
+# were saved during the original training runs.  Flip DATA_AVAILABLE=True and
+# populate results/srank_trajectory.json to get the real plot.
+figures/fig_F_progression.pdf: ../scripts/generate_fig_F.py $(wildcard ../results/srank_trajectory.json)
+	@mkdir -p figures
+	$(UVX_PY) ../scripts/generate_fig_F.py
 
 paper: values tables lean-status figs $(MAIN).pdf
 

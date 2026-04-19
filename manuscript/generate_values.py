@@ -402,7 +402,106 @@ lines += [
     macro("loraToSrankCompression", "32"),
     macro("totalCompression", "4{,}000"),
     "",
+    "% ── Analytic Haar-random baseline ─────────────────────",
+    "% E[p(k)] = k/d (exact, Chikuse 2003); E[bonus(k)] = 1.0 exactly.",
+    "% The paper's k/d denominator in bonus_right IS the analytic expectation.",
+    "% These macros encode that identity explicitly for use in prose.",
+    macro("randomBaselineAnalyticFormula", r"k/d"),
+    macro("randomBaselineAnalyticBonus", 1.0),
+    "% Analytic E[p_right] at k=5 for each model width (d_in values)",
+    macro("randomBaselinePrightKfiveSeventyM",  5 / 512),   # d_in=512
+    macro("randomBaselinePrightKfiveOneSixtyM", 5 / 768),   # d_in=768
+    macro("randomBaselinePrightKfiveFourTenM",  5 / 1024),  # d_in=1024
+    macro("randomBaselinePrightKfiveOneB",      5 / 2048),  # d_in=2048
+    "",
 ]
+
+# ── T1.2: Behavior-geometry correlation ────────────────────────────────────
+bg_summary_path = RES / "behavior_geometry" / "summary.json"
+bg_corr_path    = RES / "behavior_geometry" / "correlation.json"
+
+if bg_summary_path.exists() and bg_corr_path.exists():
+    bg_summary = json.loads(bg_summary_path.read_text())
+    bg_corr    = json.loads(bg_corr_path.read_text())
+
+    # Per-checkpoint macros
+    _size_labels = {"70m": "SeventyM", "160m": "OneSixtyM", "410m": "FourTenM", "1b": "OneB"}
+    _seed_labels = {42: "Fortytwo", 117: "OneSeventeen"}
+    lines += ["", "% ── T1.2 Behavior-geometry (reward margin + KL-to-base) ──────────"]
+    for s in bg_summary:
+        ms_tag   = _size_labels.get(s["model_size"], s["model_size"])
+        seed_tag = _seed_labels.get(s["seed"], str(s["seed"]))
+        prefix   = f"bgLink{ms_tag}{seed_tag}"
+        lines += [
+            macro(f"{prefix}RewardMarginMean", s["reward_margin_mean"]),
+            macro(f"{prefix}RewardMarginSE",   s["reward_margin_se"]),
+            macro(f"{prefix}KLToBaseMean",      s["kl_to_base_mean"]),
+            macro(f"{prefix}KLToBaseSE",        s["kl_to_base_se"]),
+            macro(f"{prefix}NSamples",          s["n_samples"]),
+        ]
+
+    # Correlation macros
+    lines += ["", "% ── T1.2 Pearson correlations (n<=5; wide CIs) ───────────────────"]
+    _corr_pairs = [
+        ("SrankRewardMargin", "srank_vs_reward_margin"),
+        ("GammaRewardMargin", "gamma_vs_reward_margin"),
+        ("SrankKLToBase",     "srank_vs_kl_to_base"),
+        ("GammaKLToBase",     "gamma_vs_kl_to_base"),
+    ]
+    for label, key in _corr_pairs:
+        if key not in bg_corr:
+            continue
+        c = bg_corr[key]
+        lines += [
+            macro(f"bgCorrPearson{label}",     c["pearson_r"]),
+            macro(f"bgCorrSpearman{label}",    c["spearman_r"]),
+            macro(f"bgCorrPearsonCILo{label}", c["pearson_ci95_lo"]),
+            macro(f"bgCorrPearsonCIHi{label}", c["pearson_ci95_hi"]),
+        ]
+    lines += [macro("bgCorrNPoints", bg_corr["n_points"]), ""]
+else:
+    lines += [
+        "",
+        "% ── T1.2 Behavior-geometry (stub — run behavior_geometry_link.py first) ──",
+        macro("bgCorrNPoints", 0),
+        "",
+    ]
+
+# ── T2.1b Cross-probe correlations ─────────────────────────────────────────
+cp_corr_path = RES / "cross_probe" / "correlation_matrix.json"
+if cp_corr_path.exists():
+    cp = json.loads(cp_corr_path.read_text())
+    lines += ["", "% ── T2.1b Cross-probe correlations (pythia_uf, combined_uf) ──────"]
+    _cp_keys = [
+        # (macro_suffix, corr_matrix_key, metric_key)
+        ("PythiaUfSrank",    "pythia_uf",   "srank_vs_rm"),
+        ("PythiaUfGamma",    "pythia_uf",   "gamma_vs_rm"),
+        ("CombinedUfSrank",  "combined_uf", "srank_vs_rm"),
+        ("CombinedUfGamma",  "combined_uf", "gamma_vs_rm"),
+        ("PythiaHhSrank",    "pythia_hh",   "srank_vs_rm"),
+        ("PythiaHhGamma",    "pythia_hh",   "gamma_vs_rm"),
+        ("CombinedHhSrank",  "combined_hh", "srank_vs_rm"),
+        ("CombinedHhGamma",  "combined_hh", "gamma_vs_rm"),
+    ]
+    for suffix, cp_key, metric_key in _cp_keys:
+        if cp_key not in cp or metric_key not in cp[cp_key]:
+            lines += [macro(f"bgCorrCrossProbe{suffix}", float("nan"))]
+            continue
+        block = cp[cp_key][metric_key]
+        lines += [
+            macro(f"bgCorrCrossProbe{suffix}",       block["pearson_r"]),
+            macro(f"bgCorrCrossProbeSp{suffix}",     block["spearman_r"]),
+            macro(f"bgCorrCrossProbeCILo{suffix}",   block["pearson_ci95_lo"]),
+            macro(f"bgCorrCrossProbeCIHi{suffix}",   block["pearson_ci95_hi"]),
+        ]
+    lines += [""]
+else:
+    lines += [
+        "",
+        "% ── T2.1b Cross-probe correlations (stub) ──────────────────────────",
+        macro("bgCorrCrossProbeNote", "cross_probe/correlation_matrix.json not found"),
+        "",
+    ]
 
 out = HERE / "values.tex"
 out.write_text("\n".join(lines) + "\n")

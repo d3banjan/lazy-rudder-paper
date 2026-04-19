@@ -188,7 +188,17 @@ Limitations:
 - Re-running training scripts will not produce bit-identical checkpoints. Seeds control data shuffling and torch initialization; CUDA kernel ordering is non-deterministic.
 - The dataset loader tries `Anthropic/hh-rlhf` first, then two fallbacks. If the primary source changes, results may differ.
 - Analysis scripts are deterministic once checkpoints are fixed. Re-running them against the same adapters produces identical JSON output.
-- Two analysis scripts (`angular_fourier_delta_prime.py`, `two_point_correlator_delta.py`) depend on pre-recorded activation tensors (`_orbit/*.pt`) not included in this repository. They can be regenerated from the named base-model checkpoints.
+- Two analysis scripts (`angular_fourier_delta_prime.py`, `two_point_correlator_delta.py`) depend on pre-recorded activation tensors (`_orbit/*.pt`) not included in this repository.  Regenerate them with one command (GPU required):
+
+```bash
+make regen-activations   # downloads Pythia-410M + lomahony SFT/DPO from HF, then runs forward passes
+```
+
+This downloads `EleutherAI/pythia-410m`, `lomahony/pythia-410m-helpful-sft`, and `lomahony/pythia-410m-helpful-dpo` into `MODELS_DIR` (idempotent) and writes the three `.pt` archives to `RESULTS_DIR/_orbit/`.  After it completes, `make delta` and `make delta-prime` proceed normally.
+
+**Hardware:** RTX 3060 12 GB is sufficient (fp16 forward passes over Pythia-410M).
+**Expected runtime:** ~15–20 min total (~5 min per model variant).
+**Disk:** ~3–4 GB for model weights; `.pt` archives are ~100–500 MB each.
 
 The reference value `lora_dpo_v2_final_loss = 0.487` used in `bitfit_dpo_strike.py` and `bitfit_dpo_strike_extended.py` is the training loss from the Pythia-410M DPO r=128 run at step 800 (`_leak/v2/summary_v2.json`, full value: 0.48728475). See PROVENANCE.md for the complete trace.
 

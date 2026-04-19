@@ -1,0 +1,54 @@
+{
+  "_comment": "T2.1 extension — cross-probe scoring job manifest. 3 NEW jobs (pythia chain on UF + qwen on HH + qwen on UF). The pythia_on_hh results EXIST from T1.2 (results/behavior_geometry/). Each job is sequentially runnable. Launch: for job in $(jq -r '.jobs[].cmd' scripts/cross_probe_manifest.json); do uv run $job; done",
+  "beta": 0.1,
+  "n_examples": 500,
+  "out_dir": "results/cross_probe",
+  "jobs": [
+    {
+      "id": "pythia_chain_on_uf",
+      "description": "Score all 5 Pythia DPO LoRA checkpoints against UltraFeedback test_prefs (cross-probe; Pythia trained on hh-rlhf)",
+      "model_spec": "pythia_lora:42:v2",
+      "probe": "uf",
+      "expected_output_paths": [
+        "results/cross_probe/pythia_lora_42_v2_70m__uf.jsonl",
+        "results/cross_probe/pythia_lora_42_v2_160m__uf.jsonl",
+        "results/cross_probe/pythia_lora_42_v2_410m__uf.jsonl",
+        "results/cross_probe/pythia_lora_42_v2_1b__uf.jsonl",
+        "results/cross_probe/pythia_lora_42_v2_1b_s117__uf.jsonl"
+      ],
+      "expected_runtime_minutes": 55,
+      "expected_runtime_note": "70m≈5min, 160m≈8min, 410m≈12min, 1b≈15min, 1b_s117≈15min (RTX 3060 12GB)",
+      "cmd": "python scripts/cross_probe_score.py --model-spec pythia_lora:42:v2 --probe uf --out results/cross_probe --n 500"
+    },
+    {
+      "id": "qwen_on_hh",
+      "description": "Score Qwen2-1.5B-UF-DPO against hh-rlhf test (cross-probe; Qwen trained on UltraFeedback)",
+      "model_spec": "qwen_fullweight",
+      "probe": "hh",
+      "expected_output_paths": [
+        "results/cross_probe/qwen_fullweight__hh.jsonl"
+      ],
+      "expected_runtime_minutes": 18,
+      "expected_runtime_note": "Qwen2-1.5B ≈ Pythia-1B in size (RTX 3060 12GB)",
+      "cmd": "python scripts/cross_probe_score.py --model-spec qwen_fullweight --probe hh --out results/cross_probe --n 500"
+    },
+    {
+      "id": "qwen_on_uf",
+      "description": "Score Qwen2-1.5B-UF-DPO against UltraFeedback test_prefs (in-distribution check; same dataset as training)",
+      "model_spec": "qwen_fullweight",
+      "probe": "uf",
+      "expected_output_paths": [
+        "results/cross_probe/qwen_fullweight__uf.jsonl"
+      ],
+      "expected_runtime_minutes": 18,
+      "expected_runtime_note": "Qwen2-1.5B ≈ Pythia-1B in size (RTX 3060 12GB)",
+      "cmd": "python scripts/cross_probe_score.py --model-spec qwen_fullweight --probe uf --out results/cross_probe --n 500"
+    }
+  ],
+  "post_scoring_analysis": {
+    "description": "After all scoring jobs complete, run correlation + Fig I",
+    "cmd": "python scripts/cross_probe_correlate.py --out results/cross_probe"
+  },
+  "total_expected_runtime_minutes": 91,
+  "total_expected_runtime_note": "~91min for 3 NEW scoring jobs + ~2min correlation pass"
+}

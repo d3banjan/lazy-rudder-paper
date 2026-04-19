@@ -1,5 +1,5 @@
-title: "Lazy Rudder"
-description: "Axiomatic Bounds on LoRA Alignment Geometry"
+title: "Low Stable-Rank Structure in LoRA-DPO Adapters on Pythia 70M–1B: Empirical Scaling and Formal Invariants"
+description: "Empirical and formal study of stable-rank structure in LoRA-DPO adapters across Pythia 70M–1B"
 baseurl: "/lazy-rudder-paper"
 url: "https://d3banjan.github.io"
 

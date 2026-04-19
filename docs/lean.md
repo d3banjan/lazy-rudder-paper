@@ -12,9 +12,21 @@ extra_js:
 
 <p class="byline" markdown="0">Machine-checked in Lean 4 + Mathlib v4.28.0</p>
 
-<p class="hook" markdown="0">We proved the key claims in a proof assistant. The computer verified every step.</p>
+<p class="hook" markdown="0">We proved the structural invariants in a proof assistant. The computer verified every step — for the proven subset.</p>
 
 A "proof assistant" is a programming language where the compiler checks mathematical arguments, not just syntax. If the code compiles, the theorem is proved — no gaps, no hand-waving. We used Lean 4 with the Mathlib library of 200,000+ verified results.
+
+**Coverage as of 2026-04-18:** 12 theorems fully proven (no `sorry`), 13 `True := sorry` literature-terminology stubs, 3 deferred proof bodies (real statements, `sorry` body), 9 definitions. The machine-checked guarantee applies only to the 12 proven theorems; stubs and deferred sorries are not machine-checked in a load-bearing sense. See the full table below.
+
+**Five paper-facing sorry stubs** — these names appear in the paper's claims but are not yet proven:
+
+| Name | Status | Notes |
+|---|---|---|
+| `random_subspace_expected_overlap` | not yet proven — empirical baseline | k/n formula from random matrix theory; Haar measure on Grassmannian not in Mathlib |
+| `gamma_right_alignment` | not yet proven — empirical / aspirational | requires quantitative bound from training-process formalization, outside Mathlib scope |
+| `bias_autopsy_separation` | not yet proven — empirical / aspirational | the 99.97% residual is a data measurement; the underlying algebra is a research target but not yet formalized |
+| `stable_rank_acoustic_scaling` | not yet proven — empirical / aspirational | sub-linear scaling trend is a 2-point empirical pattern; no analytic derivation yet |
+| `lower_bound_of_intent` | not yet proven — aspirational | connecting srank floor to DPO loss requires task-loss functional formalization outside current Mathlib |
 
 **Status:** <span id="lean-counts">loading…</span>
 
@@ -64,7 +76,7 @@ Load-bearing theorems
 
 **Plain English.** RsLoRA's energy is bounded by α²·c regardless of rank. Choosing r=16 or r=128 gives the same bound on how much the adapter can affect the model.
 
-**Why it matters.** This is the formal proof that RsLoRA's normalisation achieves rank-invariant energy — α is a clean dial for amplitude that doesn't interact with the geometry.
+**Why it matters.** This is the formal proof that RsLoRA's normalisation achieves rank-invariant energy — α is a clean dial for amplitude that doesn't interact with the geometry of a fixed learned matrix.
 
 **Analogy.** Think of α as a volume knob and r as the number of speaker channels. Standard LoRA turns down the volume per-channel as you add more channels. RsLoRA keeps total volume constant — you can add channels without the signal getting quieter.
 
@@ -76,7 +88,7 @@ Load-bearing theorems
 
 **Plain English.** Scaling the adapter — by changing α or any other scalar factor — does not change its stable rank. The geometry is invariant to amplitude.
 
-**Why it matters.** The empirical srank ≈ 3.6 could be an artefact of how α is set. This theorem rules that out: the srank reflects the adapter's directional structure, not its size. Changing α moves the adapter further or closer, but always along the same directions.
+**Why it matters.** The empirical srank ≈ 3.6 could be an artefact of how α is set. This theorem rules that out for a fixed learned matrix: the srank reflects the adapter's directional structure, not its size. Changing α moves the adapter further or closer, but always along the same directions. **Scope caveat:** this does NOT imply that retraining with a different (α, r) configuration would converge to the same geometry. The theorem concerns post-hoc rescaling of an already-trained matrix, not the training dynamics. Whether different training configurations converge to the same srank is an open empirical question.
 
 **Analogy.** Zooming in on a map changes the scale bar but not the shape of the coastline. Multiplying a matrix by a scalar changes its energy but leaves the subspace it spans untouched.
 
@@ -140,21 +152,21 @@ Work in progress
 
 ## Named targets for future proofs
 
-These are `True := sorry` stubs — a placeholder that reserves a theorem name without claiming the statement. Not a gap in the proved results; they mark the next layer of the theory.
+These are stubs — either `True := sorry` placeholders that reserve a theorem name, or statements with a real body replaced by `sorry`. Not a gap in the proved results above; they mark the next layer of the theory. Paper-facing sorry stubs are marked below.
 
 **`stableRank_le_rank`** — srank(M) ≤ rank(M) always. The effective dimensionality is never larger than the formal rank count.
 
-**`gamma_right_alignment`** — A quantified lower bound on the γ subspace overlap: right singular vectors of DPO and CLM adapters of the same base model align above a computable threshold.
+**`gamma_right_alignment`** _(paper-facing, not yet proven — empirical/aspirational)_ — A quantified lower bound on the γ subspace overlap: right singular vectors of DPO and CLM adapters of the same base model align above a computable threshold. Requires formalizing the LoRA training process and pretraining distribution, outside Mathlib scope. Not cited as proven.
 
-**`random_subspace_expected_overlap`** — The expected overlap of two random k-dimensional subspaces of ℝⁿ is k/n. The formal baseline that the empirical bonus_R metric is measured against.
+**`random_subspace_expected_overlap`** _(paper-facing, closable)_ — The expected overlap of two random k-dimensional subspaces of ℝⁿ is k/n. The formal baseline that the empirical bonus_R metric is measured against. Proof is routine but not yet written.
 
-**`stable_rank_acoustic_scaling`** — A bound on how srank grows sub-linearly with model width d_model — the formal version of the acoustic scaling trend in Figure C.
+**`stable_rank_acoustic_scaling`** _(paper-facing, aspirational)_ — A bound on how srank grows sub-linearly with model width d_model — the formal version of the acoustic scaling trend in Figure C. Requires analytic derivation of the sub-linear form.
 
 **`subspace_dilution`** — Adding more rank dimensions dilutes energy per direction — the geometric counterpart to `loraUpdate_frob_decays`.
 
-**`bias_autopsy_separation`** — Under mild assumptions, the LayerNorm gain subspace and the DPO adapter subspace are nearly orthogonal — the formal version of the 99.97% result.
+**`bias_autopsy_separation`** _(paper-facing, not yet proven — empirical/aspirational)_ — The 99.97% residual finding that ΔW lies outside the column-wise rescaling subspace of W. The quantitative claim depends on checkpoint data; the algebraic research target is noted in-file but not cited as proven.
 
-**`lower_bound_of_intent`** — A lower bound on srank for any adapter that reduces DPO loss by a given amount — connecting the geometric floor to the training objective.
+**`lower_bound_of_intent`** _(paper-facing, not yet proven — aspirational)_ — A lower bound on srank for any adapter that reduces DPO loss by a given amount — connecting the geometric floor to the training objective. Requires task-loss functional formalization and a local quadratic Hessian bound, both outside current Mathlib. Not cited as proven.
 
 **`stable_rank_disentanglement`** — Energy and geometry fully decouple: you can change ‖ΔW‖²_F freely without changing srank(ΔW), and vice versa.
 

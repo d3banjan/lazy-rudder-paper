@@ -1,0 +1,126 @@
+{
+  "model_base": "Qwen/Qwen2-1.5B",
+  "model_sft": "Qwen/Qwen2-1.5B-Instruct",
+  "model_dpo": "lewtun/qwen2-1.5B-ultrafeedback-online-dpo",
+  "n_params_matched": 196,
+  "notes": [
+    "Full-weight (not LoRA); UltraFeedback (not hh-rlhf); Qwen2-1.5B (~1.5B, vs Pythia 70m\u20131B).",
+    "Complementary evidence, not strict replication. Strict T2.1 (fresh LoRA-DPO on Qwen + hh-rlhf) queued separately."
+  ],
+  "deltas": {
+    "sft": {
+      "attention": {
+        "stable_rank": {
+          "mean": 27.3251,
+          "median": 25.584,
+          "std": 12.2906,
+          "min": 2.8285,
+          "max": 67.9871,
+          "n": 112
+        },
+        "gamma": {
+          "mean": 0.095,
+          "median": 0.0826,
+          "std": 0.0432,
+          "min": 0.0355,
+          "max": 0.2725,
+          "n": 112
+        }
+      },
+      "mlp": {
+        "stable_rank": {
+          "mean": 63.8107,
+          "median": 42.6876,
+          "std": 37.7505,
+          "min": 24.5446,
+          "max": 165.6502,
+          "n": 84
+        },
+        "gamma": {
+          "mean": 0.1509,
+          "median": 0.1618,
+          "std": 0.1077,
+          "min": 0.0158,
+          "max": 0.4279,
+          "n": 84
+        }
+      }
+    },
+    "dpo": {
+      "attention": {
+        "stable_rank": {
+          "mean": 27.9093,
+          "median": 24.8805,
+          "std": 13.6726,
+          "min": 10.5715,
+          "max": 92.9008,
+          "n": 112
+        },
+        "gamma": {
+          "mean": 0.0704,
+          "median": 0.0602,
+          "std": 0.0291,
+          "min": 0.0221,
+          "max": 0.1575,
+          "n": 112
+        }
+      },
+      "mlp": {
+        "stable_rank": {
+          "mean": 61.6583,
+          "median": 50.2722,
+          "std": 40.6873,
+          "min": 6.9422,
+          "max": 202.1168,
+          "n": 84
+        },
+        "gamma": {
+          "mean": 0.107,
+          "median": 0.1267,
+          "std": 0.0691,
+          "min": 0.0148,
+          "max": 0.2598,
+          "n": 84
+        }
+      }
+    },
+    "total": {
+      "attention": {
+        "stable_rank": {
+          "mean": 27.333,
+          "median": 25.6185,
+          "std": 12.296,
+          "min": 2.8306,
+          "max": 67.9852,
+          "n": 112
+        },
+        "gamma": {
+          "mean": 0.095,
+          "median": 0.0826,
+          "std": 0.0432,
+          "min": 0.0355,
+          "max": 0.2725,
+          "n": 112
+        }
+      },
+      "mlp": {
+        "stable_rank": {
+          "mean": 63.8386,
+          "median": 42.6837,
+          "std": 37.7812,
+          "min": 24.5637,
+          "max": 166.5267,
+          "n": 84
+        },
+        "gamma": {
+          "mean": 0.1509,
+          "median": 0.1618,
+          "std": 0.1077,
+          "min": 0.0158,
+          "max": 0.4279,
+          "n": 84
+        }
+      }
+    }
+  }
+}

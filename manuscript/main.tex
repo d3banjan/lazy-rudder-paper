@@ -28,7 +28,7 @@
 % lean_status is \input-ted in the body (§3) because it also typesets a table
 
 % ── title ───────────────────────────────────────────────────────────────────
-\title{The Lazy Rudder: How LLMs Absorb Alignment \\ \large Axiomatic Bounds on LoRA Geometry}
+\title{Low Stable-Rank Structure in LoRA-DPO Adapters on Pythia 70M--1B: Empirical Scaling and Formal Invariants}
 \author{Debanjan Basu}
 \affil{Independent Research}
 \date{\today}
@@ -97,7 +97,7 @@ because the analogies that generated them were plausible enough to test
 and wrong enough to be informative. Third, the empirical scale is thin:
 four model widths (70M to 1B) on a single preference dataset
 (\texttt{hh-rlhf}) constitute weak evidence for any ``universal'' claim;
-the task-intrinsic srank floor is labeled preliminary throughout. Fourth,
+the observed srank floor is labeled preliminary and recipe-specific throughout. Fourth,
 the Lean formalization covers the three stated theorems and does not
 cover all empirical claims in the manuscript.
 
@@ -119,7 +119,7 @@ $r$ and scaling factor $\alpha$ as hyperparameters that dictate the
 expressivity of the alignment update. We term this phenomenon the \textbf{lazy $\gamma$-rudder}: alignment
 updates act as a rudder deflecting the pretrained flow rather than an
 engine building new circuitry, and the gradient is lazy in the
-Least-Action sense---collapsing into a minimal task-intrinsic subspace
+Least-Action sense---collapsing into a low-dimensional subspace
 despite abundant capacity.
 In this work, we present an
 axiomatic framework and empirical scaling study mathematically decoupling
@@ -128,30 +128,46 @@ update \emph{energy} from alignment \emph{geometry}. Using Lean 4 and
 $\alpha$-scaling strictly bounds the Frobenius energy of the update---
 formally proving the $\alpha/\sqrt{r}$ RsLoRA scheme as a guaranteed
 norm-conservation mechanism---neither hyperparameter alters the update's
-intrinsic stable rank ($srank$). Empirically, we sweep the Pythia suite
-from 70M to 1B parameters and find a \emph{task-intrinsic dimensional
-constant} of $srank \approx \srankFitTaskConst \pm 0.5$, invariant across
-three orders of magnitude of model width (RMS residual
-$\srankFitTaskRMS$, vs.\ $\srankFitSqrtRMS$ for a $1/\sqrt{d}$ acoustic
-scaling fit). LoRA updates concentrate in a 3--4 dimensional $\gamma$-rudder
-that overlaps the base weight's top right-singular subspace at
-$\bonusRKsrankFourTenMDPO\times$ random chance (Pythia-410M, DPO). We
-isolate a distinct objective-dependent signal, finding that CLM adapters
-exhibit higher top-$k$ subspace overlap than DPO adapters at $k{=}5$
-($\bonusRKfiveOneBCLMavgSeeds\times$ vs.\
+stable rank ($srank$) of a fixed learned matrix. Empirically, we sweep
+the Pythia suite from 70M to 1B parameters on \texttt{hh-rlhf} and
+observe a \emph{width-stable low-rank structure under fixed recipe},
+with $srank \approx \srankFitTaskConst \pm 0.5$ across this range (RMS
+residual $\srankFitTaskRMS$, vs.\ $\srankFitSqrtRMS$ for a $1/\sqrt{d}$
+acoustic scaling fit); broader scale coverage is needed to distinguish a
+true constant from a mild monotone decay. LoRA updates concentrate in a
+3--4 dimensional $\gamma$-rudder that overlaps the base weight's top
+right-singular subspace at $\bonusRKsrankFourTenMDPO\times$ the
+analytic Haar-random expectation $\mathbb{E}[\text{bonus}] = 1$
+(Pythia-410M, DPO; $\mathbb{E}[p_R(k)] = k/d_{\text{in}}$, exact). We isolate a distinct objective-dependent
+signal, finding that CLM adapters exhibit higher top-$k$ subspace overlap
+than DPO adapters at $k{=}5$ ($\bonusRKfiveOneBCLMavgSeeds\times$ vs.\
 $\bonusRKfiveOneBDPOavgSeeds\times$ at 1B, averaged across seeds 42
-and 117), quantifying the geometric cost of
-contrastive preference routing. We falsify the hypothesis that
-contrastive preference learning carves novel orthogonal geometry outside
-the pretrained cone; both DPO and CLM entirely reuse the base
-right-singular subspace, differing only in angular density within that
-cone. Through high-resolution ablation of
-bias-only fine-tuning (BitFit), we demonstrate that only
-$\bitfitLearningRatio$ of the DPO loss reduction is gauge-accessible
-via additive biases; the remaining majority strictly requires novel
-low-rank geometric matrix modification. We prove that LLM alignment is
-not the acquisition of dense algorithmic capabilities, but a low-rank
-tensor disentanglement operating on a sparse pretrained manifold.
+and 117), quantifying the geometric cost of contrastive preference
+routing on this dataset. On this dataset, DPO top subspaces overlap with
+CLM top subspaces above random baseline, with both objectives reusing the
+base right-singular subspace and differing only in angular density within
+that cone. Through high-resolution ablation of bias-only fine-tuning
+(BitFit), we demonstrate that only $\bitfitLearningRatio$ of the DPO
+loss reduction is gauge-accessible via additive biases; the remaining
+majority requires novel low-rank geometric matrix modification under
+gradient descent on this objective.
+A behavioral cross-check on $\bgCorrNPoints$ Pythia DPO checkpoints reveals
+that structural geometry and behavioral outcome are decoupled: $\gamma$-overlap
+correlates negatively with reward margin (Pearson $\bgCorrPearsonGammaRewardMargin$,
+Spearman $\bgCorrSpearmanGammaRewardMargin$) and positively with KL divergence from
+base (Pearson $\bgCorrPearsonGammaKLToBase$). Stable rank is uncorrelated with
+reward margin across this scale range, establishing $srank$ as a structural
+adapter property determined by architecture and training recipe, independent of
+behavioral quality on this dataset.
+Cross-probe evaluation on UltraFeedback (T2.1b) reveals a stark generalization
+penalty: while $srank$ collapse is decoupled from in-distribution reward
+(Pearson $\bgCorrCrossProbePythiaHhSrank$), it becomes a strong negative
+predictor for out-of-distribution transfer
+(Pearson $\bgCorrCrossProbePythiaUfSrank$), reframing the low-rank signature
+as representational overfitting rather than benign parameterization.
+These results constitute a downward update on the hypothesis that tighter
+geometric alignment predicts better behavioral outcomes, and an upward update
+on $srank$ as a principled structural diagnostic.
 \end{abstract}
 
 % ── §1 Introduction ─────────────────────────────────────────────────────────
@@ -210,8 +226,10 @@ magnitude? Answering this question rigorously requires distinguishing the
 Second, is the effective dimensionality of the preference signal
 determined by the model --- scaling with hidden width or depth --- or is
 it pinned by the task? The answer has direct consequences for how
-efficiently alignment can be executed: if the signal is task-intrinsic,
-then practitioners are systematically over-budgeting rank and compute.
+efficiently alignment can be executed: if the low-rank structure is
+dataset-intrinsic rather than architecture-driven, practitioners may be
+systematically over-budgeting rank and compute for tasks of this
+complexity.
 
 We make the following contributions.
 
@@ -231,10 +249,11 @@ We make the following contributions.
     $\Delta W$'s top-$k$ right-singular vectors and the base weight's
     top-$k$ right-singular vectors, sweeping from 70M to 1B parameters.
     Across this three-order-of-magnitude range, the stable rank of LoRA
-    adapters trained with DPO clusters tightly around a
-    \emph{task-intrinsic dimensional constant} of
-    $srank \approx \srankFitTaskConst \pm 0.5$, invariant to model
-    width (Table~\ref{tab:gamma-scaling}, Table~\ref{tab:scaling-fit}).
+    adapters trained with DPO clusters tightly around
+    $srank \approx \srankFitTaskConst \pm 0.5$, with a constant fit
+    favored over power-law alternatives on these four model widths under
+    the fixed \texttt{hh-rlhf} recipe
+    (Table~\ref{tab:gamma-scaling}, Table~\ref{tab:scaling-fit}).
 
   \item \textbf{Gauge-theory falsification via BitFit-DPO ablation.}
     We test whether alignment is a ``gauge freedom'' accessible through
@@ -333,12 +352,24 @@ define the right-side subspace overlap bonus at rank $k$ as:
 \;=\; \frac{d_{\text{in}} \,\|V_W^\top V_{\Delta W}\|_F^2}{k^2}
 \end{equation}
 where $d_{\text{in}} = n$ is the input dimension of the weight matrix.
-The denominator $k / d_{\text{in}}$ is the expected overlap fraction for
-two independently drawn uniformly random $k$-dimensional subspaces of
-$\mathbb{R}^{d_{\text{in}}}$. A value of $\text{bonus}_R(k) = 1$
-indicates no alignment beyond chance; values above 1 indicate that the
-LoRA adapter preferentially modifies the directions that $W$ already
-operates on most strongly. An analogous left-side metric
+The denominator $k / d_{\text{in}}$ is the \emph{exact, closed-form}
+expectation of the overlap fraction for two independently drawn Haar-uniform
+$k$-frames in $\mathbb{R}^{d_{\text{in}}}$ (Grassmannian measure):
+\begin{equation}
+\mathbb{E}_{\text{Haar}}\!\left[\frac{\|V_W^\top V_{\Delta W}\|_F^2}{k}\right]
+= \frac{k}{d_{\text{in}}}
+\label{eq:haar-expectation}
+\end{equation}
+This follows from $\mathbb{E}[V_{\Delta W} V_{\Delta W}^\top] = (k/d)I_d$
+for a Haar-uniform $k$-frame, giving
+$\mathbb{E}[\|G\|_F^2] = \mathrm{tr}((k/d)I \cdot V_W V_W^\top) = k^2/d$,
+so $\mathbb{E}[p(k)] = k/d$ exactly, without large-$d$ approximation
+\citep{chikuse2003statistics}. The denominator is therefore not a
+sampled approximation --- it is the analytic Haar expectation.
+A value of $\text{bonus}_R(k) = 1$ indicates no alignment beyond the
+analytic Haar baseline; values above 1 indicate that the LoRA adapter
+preferentially modifies the directions that $W$ already operates on
+most strongly. An analogous left-side metric
 $\text{bonus}_L(k)$ uses the left-singular vectors $U_W$ and
 $U_{\Delta W}$ with denominator $k / d_{\text{out}}$. We probe at
 $k = 5$ (a fixed reference) and at $k = \lfloor srank \rfloor$
@@ -438,9 +469,16 @@ and 1B with two random seeds.)
 \end{corollary}
 
 \textbf{Implication.} Theorem~\ref{thm:geom-invariance} rigorously
-decouples scale from dimension. Tuning $\alpha$ or choosing between
-standard LoRA and RsLoRA strictly modulates the magnitude of the
-alignment routing without altering its intrinsic dimensional structure.
+decouples scale from dimension for a \emph{fixed learned matrix}:
+rescaling $\Delta W$ by any nonzero scalar leaves its stable rank
+unchanged. This rules out a trivial measurement artifact in which
+$\alpha$ or the LoRA/RsLoRA choice would alter the \emph{reported}
+srank by changing the matrix's magnitude. It does \emph{not} imply
+that retraining with different $(\alpha, r)$ would converge to a matrix
+with the same learned geometry: the training dynamics under different
+hyperparameters may converge to qualitatively different $\Delta W$
+matrices, and whether srank is invariant across such retraining runs is
+an open empirical question (see Tier~2 follow-ups in §\ref{sec:limitations}).
 
 \subsection{Rank Bounds on Accumulated Updates}
 
@@ -491,13 +529,22 @@ formally verified using the Lean~4 interactive theorem prover and
 \texttt{Mathlib}. The source file \texttt{SubspaceOverlap.lean} contains
 \leanProvenCount~fully-proven theorems (zero \texttt{sorry} in the
 load-bearing theorems listed in Table~\ref{tab:lean-status});
-\leanSorryCount~targeted \texttt{sorry} stubs mark
-literature-terminology placeholders for downstream work, and
-\leanStubCount~\texttt{stub} entries are literature-terminology
-placeholders not yet assigned proofs
-(Table~\ref{tab:lean-status}); \leanInProofSorryCount~load-bearing
-theorems are deferred with documented proof sketches pending
-formalization.
+\leanInProofSorryCount~theorems with real (non-trivial) mathematical
+statements where the proof body is a bare \texttt{sorry} with a known
+proof sketch; and \leanSorryCount~\texttt{True~:= sorry} stubs that
+name literature concepts for downstream work without making mathematical
+claims (Table~\ref{tab:lean-status}).
+
+Of the stubs, \leanPaperFacingSorryCount~are paper-facing (cited or
+implied in paper prose): \texttt{random\_subspace\_expected\_overlap},
+\texttt{gamma\_right\_alignment}, \texttt{bias\_autopsy\_separation},
+\texttt{stable\_rank\_acoustic\_scaling}, and
+\texttt{lower\_bound\_of\_intent}. All \leanPaperFacingSorryCount~are
+empirical or aspirational claims that are not Lean-bridgeable from first
+principles without formalizing the training process, Haar measure on the
+Grassmannian, or task-loss functionals.
+These are named as targets to scope the gap between paper claims and
+formal proofs; none are cited as proved results.
 
 
 % ── §4 Empirical Ablations ──────────────────────────────────────────────────
@@ -517,6 +564,23 @@ layer of each model.
 
 \input{tables}
 
+\subsection{Stable-Rank Numerical Protocol}
+\label{sec:srank-protocol}
+
+All stable-rank values reported in this paper are computed as:
+\begin{equation}
+srank(A) = \frac{\|A\|_F^2}{\|A\|_2^2} = \frac{\sum_i \sigma_i^2}{\sigma_{\max}^2}
+\end{equation}
+where $\sigma_i$ are the singular values of $A$, $\|A\|_F^2 = \sum_i \sigma_i^2$ is
+the squared Frobenius norm, and $\|A\|_2^2 = \sigma_{\max}^2$ is the squared spectral
+norm. Computations are performed in fp32 (matrices are cast from fp16 storage before
+SVD). For finite-sample estimation, singular values below a threshold of
+$\sigma_{\max} \times 10^{-6}$ are treated as zero (this threshold is never active
+in practice: LoRA $\Delta W = BA$ with rank-128 bottleneck always has exactly 128
+non-negligible singular values, far above the numerical floor). The computation is
+implemented in \texttt{paper/scripts/spectral\_overlap\_gamma.py} (function
+\texttt{srank}), which accepts any HuggingFace model ID and adapter path.
+
 \subsection{The $\gamma$-Rudder Across Scales}
 
 \begin{figure}[tbp]
@@ -526,8 +590,8 @@ layer of each model.
 The constant fit ($c_0 = \srankFitTaskConst$, green solid line) beats both
 power-law candidates by $\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$
 over $1/\sqrt{d}$ and $\Delta\mathrm{AIC} = \srankFitDeltaAICCbrt$
-over $d^{-1/3}$ (red dashed), consistent with a task-intrinsic dimensional
-floor independent of model width.}
+over $d^{-1/3}$ (red dashed), consistent with a width-stable low-rank
+structure under this fixed recipe on \texttt{hh-rlhf}.}
 \label{fig:srank-scatter}
 \end{figure}
 
@@ -543,8 +607,8 @@ the smaller 160M model, and the 1B model sits below both. Table~\ref{tab:scaling
 shows that on these $n=4$ points the constant fit achieves
 $\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$ over $1/\sqrt{d}$ and
 $\Delta\mathrm{AIC} = \srankFitDeltaAICCbrt$ over $1/\sqrt[3]{d}$,
-consistent with a task-intrinsic floor; however, power-law models
-cannot be ruled out on four data points alone. A decisive test
+consistent with a width-stable floor under this fixed recipe; however,
+power-law models cannot be ruled out on four data points alone. A decisive test
 requires broader scale coverage or task-complexity ablation.
 
 The right-side subspace overlap at the natural rank,
@@ -555,15 +619,19 @@ $\bonusRKsrankFourTenMDPO\times$ at 410M and
 $\bonusRKsrankOneBDPOsFortyTwo\times$ at 1B. That is, every model in
 the suite concentrates its alignment update in the same right-singular
 subspace that the base weight already uses most actively --- at least
-$5\times$ above chance across all scales. This is the $\gamma$-rudder
-signature.
+$5\times$ above the analytic Haar-random expectation
+($\mathbb{E}[\text{bonus}] = 1$; $\mathbb{E}[p_R(k)] = k/d_{\text{in}}$,
+closed form, Eq.~\eqref{eq:haar-expectation}) across all scales.
+This is the $\gamma$-rudder signature.
 
 \begin{figure}[tbp]
 \centering
 \includegraphics[width=0.72\textwidth]{figures/fig_B.pdf}
 \caption{Per-layer $\mathrm{bonus}_R(k{=}5)$ for DPO (blue circles) and
 CLM (orange squares) adapters on Pythia-1B. Both objectives exceed the
-random baseline (dotted) at every layer, and CLM aligns more tightly with
+analytic Haar-random baseline $\mathbb{E}[\mathrm{bonus}]=1$ (dotted;
+$\mathbb{E}[p_R(5)] = 5/d_{\text{in}}$, exact, Eq.~\eqref{eq:haar-expectation})
+at every layer, and CLM aligns more tightly with
 the pretrained cone ($\mathrm{avg} = \bonusRKfiveOneBCLMsFortyTwo\times$
 vs.\ $\bonusRKfiveOneBDPOsFortyTwo\times$ for DPO), reflecting denser
 packing within the same subspace rather than a distinct geometry.}
@@ -593,38 +661,39 @@ effect as the output dimension grows relative to the adapter's rank.
 refers to the network-level aggregate stable rank (mean over all layers).
 Individual layers show substantial variation: at 410M, per-layer sranks
 range from $\srankPerLayerMinFourTenM$ to $\srankPerLayerMaxFourTenM$
-(std $\approx \srankPerLayerStdFourTenM$). The task-intrinsic floor is
-therefore a property of the \emph{aggregate}, not a claim that every
-layer encodes alignment in the same number of dimensions.
+(std $\approx \srankPerLayerStdFourTenM$). The observed width-stable
+floor is therefore a property of the \emph{aggregate}, not a claim that
+every layer encodes alignment in the same number of dimensions.
 
-\subsection{Task-Intrinsic Scaling Fit}
+\subsection{Scaling Fit Under Fixed Recipe}
 
 Table~\ref{tab:scaling-fit} formalizes the scaling comparison by fitting
 three candidate forms to the four measured DPO stable-rank values. The
-three candidates are: a task-intrinsic constant $c_0$, a sub-linear
+three candidates are: a width-independent constant $c_0$, a sub-linear
 power law $c/\sqrt{d}$ (motivated by random-matrix acoustic scaling
 arguments), and a shallower decay $c/\sqrt[3]{d}$.
 
-The task-intrinsic constant achieves an RMS residual of
-$\srankFitTaskRMS$ stable-rank units, lower than both
-the $1/\sqrt{d}$ fit ($\srankFitSqrtRMS$, $\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$)
-and the $1/\sqrt[3]{d}$ fit
-($\srankFitCbrtRMS$, $\Delta\mathrm{AIC} = \srankFitDeltaAICCbrt$).
-The best-fit constant is $\srankFitTaskConst$ (std $= \srankFourPtStd$
-across the four model widths). The constant fit is favored by both RMS
-and AIC; however, power-law models remain plausible on $n=4$ points. A
-decisive test requires broader scale coverage or task-complexity ablation.
+The constant fit achieves an RMS residual of $\srankFitTaskRMS$
+stable-rank units, lower than both the $1/\sqrt{d}$ fit
+($\srankFitSqrtRMS$, $\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$) and
+the $1/\sqrt[3]{d}$ fit ($\srankFitCbrtRMS$, $\Delta\mathrm{AIC} =
+\srankFitDeltaAICCbrt$). The best-fit constant is $\srankFitTaskConst$
+(std $= \srankFourPtStd$ across the four model widths). The constant fit
+is favored by both RMS and AIC under this fixed recipe; however,
+power-law models remain plausible on $n=4$ points. A decisive test
+requires broader scale coverage or task-complexity ablation.
 Note that the $\pm\srankFourPtStd$ variation reported here is the
 empirical standard deviation across four network-level aggregates, not a
 confidence interval; the true CI would be wider given the small sample.
 
-Preliminary evidence across four model widths suggests the stable rank
-is bounded in a narrow band around $\srankFitTaskConst$ effective
-dimensions per QKV adapter. Under this hypothesis, alignment
-dimensionality would be a property of the preference task and dataset
-rather than of the model architecture, with LoRA ranks above 8
-representing significant over-provisioning at this data scale. Confirming
-this claim requires a larger scale sweep or task-complexity ablation.
+Preliminary evidence across four model widths on \texttt{hh-rlhf}
+suggests the stable rank is bounded in a narrow band around
+$\srankFitTaskConst$ effective dimensions per QKV adapter under this
+LoRA configuration. This is consistent with alignment dimensionality
+being an observed floor under this preference dataset rather than a
+universal architectural property; LoRA ranks above 8 may represent
+over-provisioning at this data scale and recipe, but confirming that
+claim requires a larger scale sweep or task-complexity ablation.
 
 \subsection{BitFit-DPO: Gauge-Theory Falsification}
 
@@ -649,8 +718,8 @@ mark training-summary endpoints from \texttt{summary.json}
 $\bitfitExtLastStep$ steps). Smoothed-curve endpoints may differ by
 ${\sim}0.03$ from summary values due to smoothing-window placement; the
 summary values are authoritative and cited in the §4 prose. No visible
-phase transition---confirming that alignment is not accessible via
-additive bias perturbations alone.}
+phase transition---consistent with alignment not being accessible via
+additive bias SGD alone on this dataset.}
 \label{fig:bitfit-loss}
 \end{figure}
 
@@ -670,9 +739,11 @@ we extended the BitFit run to $\bitfitExtLastStep$ steps, nearly doubling
 the training budget. The extended run reaches a final loss of
 $\bitfitExtFinalLoss$ with no discontinuous improvement visible in the
 training curve, confirming saturation rather than delayed convergence.
-Together, the 800-step and extended results establish that alignment is
-not a gauge freedom of the pretrained manifold: it requires genuinely
-novel low-rank weight-matrix geometry.
+Together, the 800-step and extended results establish that, under
+gradient descent on this objective and dataset, alignment is not
+accessible via additive bias perturbations alone: the observed floor
+under this preference dataset requires low-rank weight-matrix geometry
+that bias-only SGD does not reach.
 
 \subsection{Bias-Theory Autopsy: Is $\gamma$ a Hidden Gain?}
 
@@ -702,10 +773,19 @@ is $\autopsyResidualSummaryPct\%$ (mean across variants, rounded to
 2 significant figures; range $[\autopsyResidualMinPct\%, \autopsyResidualMaxPct\%]$);
 the left-mult residual is similarly extreme. Less than $0.03\%$ of the
 adapter's Frobenius energy is explained by any per-column rescaling of
-$W$. Combined with the BitFit-DPO failure, this definitively rules out
-the gauge-transform hypothesis: the $\gamma$-rudder is genuinely novel
-geometric rewiring of the weight matrix, not a hidden bias or gain
-modulation of existing pretrained directions.
+$W$. Combined with the BitFit-DPO result, this rules out three specific
+alternative explanations: (1) the LayerNorm-gain subspace hypothesis
+(per-channel right-multiplicative rescaling of $W$), (2) naive BitFit
+equivalence (additive bias SGD reaching comparable loss), and (3) a
+depth-correlated capacity explanation (biases at different depths sum to
+an equivalent update). It does \emph{not} rule out a broader class of
+pretrained-anisotropy explanations---including curvature artifacts, weight-tying
+effects, token-frequency bias, or optimizer-state anisotropy---that
+could in principle produce similar autopsy signatures without implying
+genuinely novel geometry. The $\gamma$-rudder finding should therefore
+be read as ruling out these three specific null hypotheses on Pythia-410M
+with \texttt{hh-rlhf}, not as a general proof that no pretrained-anisotropy
+confound exists.
 
 
 % ── §5 Discussion ───────────────────────────────────────────────────────────
@@ -740,12 +820,13 @@ Module & avg $srank$ & avg $\text{bonus}_R(5)$ \\
 \centering
 \includegraphics[width=0.72\textwidth]{figures/fig_E.pdf}
 \caption{$\mathrm{bonus}_R(k{=}5)$ across all four LoRA target modules for
-Pythia-410M and 1B under DPO and CLM. Every module exceeds the random
-baseline (dotted) by at least $2\times$; MLP projections reach up to
+Pythia-410M and 1B under DPO and CLM. Every module exceeds the analytic
+Haar-random baseline $\mathbb{E}[\mathrm{bonus}]=1$ (dotted,
+Eq.~\eqref{eq:haar-expectation}) by at least $2\times$; MLP projections reach up to
 $8\times$ at 1B. The \texttt{attention.dense} module is the consistent
-low-overlap outlier ($\modAvgBonusRKfiveAttnDense\times$ average), behaving
-as a genuine cross-channel mixing layer rather than a pretrained-subspace
-amplifier (§\ref{sec:discussion}).}
+low-overlap outlier ($\modAvgBonusRKfiveAttnDense\times$ average), co-occurring
+with cross-channel mixing rather than pretrained-subspace amplification
+(§\ref{sec:discussion}).}
 \label{fig:modules}
 \end{figure}
 
@@ -754,9 +835,11 @@ Two phenomena emerge beyond the srank-invariance confirmation:
 \textbf{(i) MLPs align \emph{more tightly} with pretraining than QKV, not less.}
 Both MLP projections achieve higher $\text{bonus}_R$ than QKV while
 maintaining the same low $srank$. At 1B, this reaches extreme values:
-$\text{bonus}_R(k{=}srank) = \modPeakBonusRKsrank\times$ random baseline
-for $\texttt{\modPeakModule}$ under the 1B CLM run --- the tightest
-pretrained-subspace anchoring observed anywhere in our sweep.
+$\text{bonus}_R(k{=}srank) = \modPeakBonusRKsrank\times$ the analytic
+Haar-random expectation ($\mathbb{E}[\text{bonus}]=1$,
+Eq.~\eqref{eq:haar-expectation}) for $\texttt{\modPeakModule}$ under
+the 1B CLM run --- the tightest pretrained-subspace anchoring observed
+anywhere in our sweep.
 The prediction that MLPs carry heavy-lifting high-dimensional knowledge
 consolidation is disconfirmed; they in fact concentrate alignment energy
 into the \emph{same} $\sim 3$ base-subspace directions as attention, but
@@ -832,9 +915,10 @@ sit slightly below the 70M/410M floor ($\approx 3.93$), providing
 \emph{weak} evidence for a mild acoustic correction at the largest
 probed scale --- but the non-monotone 160M--410M ordering refutes any
 smooth monotone scaling law at the resolution of our measurement. We
-therefore adopt the framing ``task-intrinsic dimensional floor with
-architecture-scale noise of $\pm 0.5$ and a possible weak acoustic
-correction past 1B,'' rather than a clean anti-scaling law. Future
+therefore adopt the framing ``observed floor under this preference
+dataset and fixed recipe, with architecture-scale noise of $\pm 0.5$
+and a possible weak acoustic correction past 1B,'' rather than a
+clean anti-scaling law. Future
 work at 2.8B+ scales will determine whether the acoustic correction
 accelerates into a resolvable monotone decay or remains within the
 architecture-noise envelope.
@@ -867,7 +951,7 @@ acts as a tuned acoustic cavity where early layers carry high-frequency
 resonant filter for ``crystallized'' preference-signal routing. At 1B
 the asymmetry flattens --- both $srank$ and $\text{bonus}_R$ become
 layer-position-independent --- suggesting that at sufficient width the
-task-intrinsic crystallized signature propagates all the way up to the
+low-dimensional crystallized signature propagates all the way up to the
 earliest attention modules.
 
 \paragraph{Connection to PiSSA and the ``keyring'' hypothesis.}
@@ -879,8 +963,8 @@ high-energy directions of $W$ rather than at zero. Our $\gamma$-rudder
 findings provide \emph{empirical first-principles evidence} for why this
 initialization accelerates training: SGD with the standard (zero)
 initialization converges toward the same destination --- as quantified
-by $\text{bonus}_R(srank) \geq 5\times$ random across all scales
-(Table~\ref{tab:gamma-scaling}) --- but takes more steps to arrive.
+by $\text{bonus}_R(srank) \geq 5\times$ the analytic Haar-random
+expectation across all scales (Table~\ref{tab:gamma-scaling}) --- but takes more steps to arrive.
 The broader ``keyring'' hypothesis \citep{meng2024pissa,
 aghajanyan2020intrinsic} posits that alignment gradients preferentially
 reuse the top right singular vectors of the base parameters rather than
@@ -898,11 +982,13 @@ initialization scheme.
 \citet{aghajanyan2020intrinsic} showed that the intrinsic dimensionality
 of fine-tuning objectives for NLP tasks is orders of magnitude smaller
 than the parameter count --- as few as a few hundred trainable parameters
-suffice to recover most task performance. Our task-intrinsic floor of
-$srank \approx \srankFitTaskConst$ sharpens this finding for preference
-learning at the per-module level: each QKV adapter effectively uses
-approximately $\srankFitTaskConst$ dimensions, regardless of the
-adapter's nominal rank. The gap between the configured rank
+suffice to recover most task performance. Our observed floor of
+$srank \approx \srankFitTaskConst$ on \texttt{hh-rlhf} is consistent
+with this picture at the per-module level: each QKV adapter effectively
+uses approximately $\srankFitTaskConst$ dimensions under this recipe,
+regardless of the adapter's nominal rank. Whether this floor is
+task-intrinsic in a general sense or specific to this dataset and LoRA
+configuration remains an open question. The gap between the configured rank
 ($r = \loraCap$) and the observed srank reflects massive destructive
 interference among outer-product updates, consistent with the
 ${\sim}\loraToSrankCompression\times$ compression ratio noted in
@@ -919,6 +1005,31 @@ preference signal, possibly because their limited capacity forces them to
 represent features more monosemantically during pretraining. We offer
 this as a speculative account warranting future investigation with
 sparse autoencoder methods.
+
+\paragraph{Geometry--behavior decoupling: $srank$ as structural primitive.}
+The behavioral cross-check in T1.2 (§\ref{par:behavior-geometry}) updates
+the interpretation of $srank$ and $\gamma$ as diagnostic quantities.
+Across $n = \bgCorrNPoints$ Pythia DPO checkpoints, neither $srank$ nor
+$\gamma$ predicts reward margin in the direction one might assume.
+$\gamma$-overlap correlates \emph{negatively} with reward
+(Pearson $\bgCorrPearsonGammaRewardMargin$, Spearman $\bgCorrSpearmanGammaRewardMargin$)
+and \emph{positively} with KL-to-base
+(Pearson $\bgCorrPearsonGammaKLToBase$),
+while $srank$ is near-orthogonal to reward margin
+(Pearson $\bgCorrPearsonSrankRewardMargin$) across this scale range.
+The correct reading is that $srank$ is a structural property of the
+adapter determined by the architecture--recipe interaction, not a proxy
+for behavioral quality on the preference task.
+Adapters with $r = 128$, $\alpha = 256$ on \texttt{hh-rlhf} converge
+to $srank \approx \srankFitTaskConst$ regardless of model size;
+reward margin varies independently.
+This decoupling is the paper's primary empirical finding: structural
+geometry and behavioral outcome are not the same quantity, and treating
+$srank$ as a quality proxy would be a category error.
+The hypothesis that ``DPO gently steers along pretrained directions and
+therefore achieves good behavioral alignment'' is not supported by this
+dataset; the adjudicating experiments T2.1 and T1.3 will determine
+whether this decoupling is robust across model families and recipes.
 
 \paragraph{Safety implications (scoped).}
 The BitFit-DPO failure provides a formal argument against a narrow form
@@ -940,13 +1051,13 @@ against \emph{naturally-occurring gradient-based bias perturbations},
 but does not rule out constructive inversion attacks.
 
 \paragraph{Compute-efficient RLHF.}
-The empirical srank floor of $\srankFitTaskConst \pm 0.5$ across
-the Pythia suite implies that, for \texttt{hh-rlhf}-scale preference
-tasks, LoRA ranks $r \geq 8$ are already in the regime of significant
-over-provisioning: the gradient concentrates into approximately
-$\srankFitTaskConst$ effective dimensions regardless. Current practice
-of $r = 64$ or $r = 128$ wastes compute on adapter dimensions that
-contribute negligible energy to the final $\Delta W$. Future work should
+The observed srank of $\srankFitTaskConst \pm 0.5$ across
+the Pythia suite on \texttt{hh-rlhf} is consistent with LoRA ranks
+$r \geq 8$ being in a regime of over-provisioning for this dataset:
+the gradient concentrates into approximately $\srankFitTaskConst$
+effective dimensions under this recipe. Current practice of $r = 64$
+or $r = 128$ may be allocating adapter capacity that contributes
+negligible energy to the final $\Delta W$ on datasets of this complexity. Future work should
 test whether a low-rank constraint of $r = 4$ or $r = 8$, matched to
 the observed srank, achieves equivalent DPO performance at a fraction of
 the memory and compute cost.
@@ -975,12 +1086,13 @@ per-layer profiles rather than relying on network-level averages.}
 \label{fig:perlayer-srank}
 \end{figure}
 
-The measured task-intrinsic stable rank of $\approx \srankFitTaskConst$
-(four-point constant fit, RMS $= \srankFitTaskRMS$) sets a practical
-lower bound on meaningful LoRA capacity for \texttt{hh-rlhf}-scale
-preference tasks. Adapter dimensions above that floor do not translate to
-additional geometric work: the update collapses back into the same
-low-dimensional subspace regardless of the nominal rank. The
+The observed stable rank of $\approx \srankFitTaskConst$ under this
+fixed \texttt{hh-rlhf} recipe (four-point constant fit, RMS $= \srankFitTaskRMS$)
+sets a practical lower bound on meaningful LoRA capacity for this dataset
+and configuration. Adapter dimensions above that floor do not appear to
+translate to additional geometric work: the update collapses into the same
+low-dimensional subspace regardless of the nominal rank, at least at this
+data scale. The
 non-monotone sequence [\srankSeventyM, \srankOneSixtyM, \srankFourTenM,
 \srankOneBDPOsFortyTwo] across 70M--1B confirms that increasing model
 width does not buy more stable rank. In practice: start at $r = 4$--$8$
@@ -1066,9 +1178,10 @@ the base cone your adapter operates.
 
 The findings above are grounded in $n = 4$ model widths (70M to 1B) and
 a single task family (preference learning on \texttt{Anthropic/hh-rlhf}).
-The ``task-intrinsic'' srank claim is preliminary: the constant fit is
-favored by AIC ($\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$ over
-$1/\sqrt{d}$), but four data points cannot rule out a mild acoustic
+The observed srank floor is preliminary and recipe-specific: the constant
+fit is favored by AIC ($\Delta\mathrm{AIC} = \srankFitDeltaAICSqrt$ over
+$1/\sqrt{d}$) under this fixed configuration, but four data points
+cannot rule out a mild acoustic
 scaling correction at larger widths. Readers should replicate the sweep
 on their own task before treating $srank \approx \srankFitTaskConst$ as
 a universal bound. A one-script recipe:
@@ -1085,35 +1198,72 @@ While our empirical sweep spans three orders of magnitude of model
 capacity (70M to 1B), memory constraints inherent to Direct Preference
 Optimization (DPO)---which requires maintaining both reference and
 policy models---precluded scaling to the largest Pythia architectures
-(2.8B, 6.9B, 12B) under strict FP16 experimental controls. Future work
-must investigate whether the observed task-intrinsic dimensional floor
-($srank \approx \srankFitTaskConst$) holds absolutely at the 10B+ scale,
-or if extreme manifold sparsity induces further geometric collapse.
+(2.8B, 6.9B, 12B) under strict FP16 experimental controls. Future work must investigate whether the observed width-stable low-rank
+structure ($srank \approx \srankFitTaskConst$ under fixed recipe) persists
+at the 10B+ scale, or if extreme manifold sparsity induces further
+geometric collapse.
 Integrating QLoRA (4-bit quantization) was outside the scope of this
 work to keep the spectral measurements of the $\gamma$-rudder
 unambiguous; characterizing the geometric degradation of quantized
 alignment remains a critical open problem.
 
-\paragraph{Dataset scope: the constant is hh-rlhf-intrinsic, not universal.}
-Our task-intrinsic constant $srank \approx \srankFitTaskConst$ was
-measured exclusively on DPO fine-tuning against
-\texttt{Anthropic/hh-rlhf}, which encodes a relatively simple
-helpful-vs-harmful preference distinction. We do not claim
-universality across preference tasks. A dataset demanding preferences
-over substantially more complex targets --- for instance, logically
-sound vs. buggy code, or grammatical vs. ungrammatical multilingual
-generation --- might induce a qualitatively different $\gamma$-rudder
-dimensionality. The finding should therefore be read as: ``for
-preference tasks in the complexity regime of \texttt{hh-rlhf}, the
-preference signal has a dimensional floor of approximately
-$\srankFitTaskConst$.'' Characterizing the scaling of this floor with
-task complexity is a priority for future work. Concretely:
+\paragraph{Dataset scope: the floor is hh-rlhf- and recipe-specific.}
+Our observed floor $srank \approx \srankFitTaskConst$ was measured on a
+single LoRA configuration (rank 128, $\alpha = 256$, 800 steps, 2 seeds)
+applied to DPO fine-tuning on \texttt{Anthropic/hh-rlhf}, which encodes
+a relatively simple helpful-vs-harmful preference distinction. We do not
+claim universality across preference tasks, LoRA configurations, or model
+families. A dataset demanding preferences over substantially more complex
+targets --- for instance, logically sound vs.\ buggy code, or grammatical
+vs.\ ungrammatical multilingual generation --- might induce a qualitatively
+different $\gamma$-rudder dimensionality. The finding should therefore be
+read as: ``for this LoRA recipe on \texttt{hh-rlhf} with Pythia 70M--1B,
+the observed stable-rank floor is approximately $\srankFitTaskConst$.''
+Characterizing how this floor scales with task complexity and LoRA
+configuration is a priority for future work. Concretely:
 replicating the Pythia sweep on \texttt{UltraFeedback},
 \texttt{code-preference-pairs}, and multilingual preference datasets
 would test whether $srank$ scales with the intrinsic rank of the
 preference signal in the data, or remains a narrow constant reflecting
 the inherent low-dimensionality of human-preference abstractions in
 general.
+
+% ── T1.4: Lazy-regime rebuttal (checkpoint-progression plot) ─────────────────
+\paragraph{Transient-regime concern and pending trajectory data.}
+\label{par:transient-regime}
+Reviewer~M7 raised the concern that the observed $srank \approx \srankFitTaskConst$
+might reflect an early-training / lazy regime rather than a terminal property of the
+adapter.  The proper rebuttal requires a \emph{srank vs.\ training step} trajectory
+for each model size, showing that $srank$ has levelled off well before step~800.
+
+\textbf{Data unavailable at submission time.}  The original training runs saved only
+the final checkpoint (step~800) for each LoRA run.  No intermediate adapter weights
+were committed to the HF checkpoint repository, and no per-step $srank$ was logged
+during training (the \texttt{trainer\_state.json} records only loss and reward
+metrics at 10-step intervals).  There are no wandb or tensorboard logs on disk.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.68\textwidth]{figures/fig_F_progression.pdf}
+\caption{\textbf{[Pending] Stable-rank trajectory vs.\ training step.}
+This figure will show $srank(\Delta W)$ at each saved intermediate checkpoint
+for Pythia 70M, 160M, 410M, and 1B (LoRA-DPO, $r=128$, $\alpha=256$).
+A plateau in the final 30--50\% of training would constitute strong evidence
+against the transient-regime critique.  Currently a placeholder: no intermediate
+LoRA checkpoints were saved during the original training runs.
+\textbf{Pending trajectory extraction} from re-training with
+\texttt{save\_steps} $\leq 100$ or a \texttt{SrankCallback}.
+See \texttt{scripts/generate\_fig\_F.py} for the data schema.}
+\label{fig:srank_trajectory}
+\end{figure}
+
+Until trajectory data is available, we note two partial mitigants: (a)~the loss
+curve (logged at every 10 steps in \texttt{trainer\_state.json}) shows monotone
+decrease without an obvious plateau before step~800, suggesting training was still
+active throughout; and (b)~the $srank$ values are consistent across two different
+objectives (DPO and CLM) and two independent seeds at 1B scale, which is harder
+to explain as a transient coincidence.  These are supportive but do not substitute
+for a full trajectory; we flag this as a Tier-1 follow-up.
 
 \paragraph{Further limitations.}
 (i) All runs use Pythia; cross-architecture replication (OLMo, Qwen,
@@ -1138,6 +1288,147 @@ dimensionality in the same way. The observed $srank \approx 3.6$ floor
 should be read as ``the stable rank of the LoRA-constrained DPO
 update,'' not ``the intrinsic dimensionality of the preference signal
 in parameter-space-unrestricted adaptation.''
+
+
+% ── T1.2: Behavior-geometry decoupling (addresses reviewer M9) ───────────────
+\paragraph{Geometry--behavior decoupling (T1.2).}
+\label{par:behavior-geometry}
+We computed reward margin and KL-to-base on \bgLinkSeventyMFortytwoNSamples{} clean
+held-out \texttt{Anthropic/hh-rlhf} test examples for each of the $\bgCorrNPoints$
+Pythia DPO checkpoints (70M, 160M, 410M, 1B$\times$2~seeds), $\beta = 0.1$, fp16.
+
+\textbf{Definition.}
+For $\beta = 0.1$ and a prompt-response pair $(x, y)$, the DPO reward is
+$r_\theta(x,y) = \beta\log\bigl(\pi_\theta(y|x)/\pi_{\rm ref}(y|x)\bigr)$.
+Reward margin $= r_\theta(x, y_{\rm win}) - r_\theta(x, y_{\rm los})$.
+Sequence-level KL-to-base
+$= n^{-1}\sum_t\bigl[\log\pi_\theta(y_t|y_{<t}) - \log\pi_{\rm ref}(y_t|y_{<t})\bigr]$
+on the winning response (teacher-forced; positive = DPO assigns higher log-prob
+per token than base; negative = DPO keeps probability close to or below base).
+
+\textbf{Results} (Table~\ref{tab:behavior-geometry}, Figure~\ref{fig:behavior-geometry}).
+All checkpoints show positive mean reward margins (\bgLinkSeventyMFortytwoRewardMarginMean{}
+at 70M to \bgLinkFourTenMFortytwoRewardMarginMean{} at 410M), confirming that DPO
+training induced meaningful preference separation relative to base.
+Sequence-level KL-to-base is negative for all checkpoints (ranging from
+\bgLinkSeventyMFortytwoKLToBaseMean{} at 70M to \bgLinkFourTenMFortytwoKLToBaseMean{}
+at 410M per token), consistent with $\beta$-regularization keeping the DPO model
+close to the reference.
+
+\textbf{Geometric overlap ($\gamma$) does not predict reward; it predicts KL drift.}
+Across $n = \bgCorrNPoints$ checkpoints, $\gamma$-overlap vs.\ reward margin yields
+Pearson $r = \bgCorrPearsonGammaRewardMargin$, Spearman $\bgCorrSpearmanGammaRewardMargin$
+(95\% bootstrap CI $[\bgCorrPearsonCILoGammaRewardMargin,
+\bgCorrPearsonCIHiGammaRewardMargin]$).
+The correlation is negative: checkpoints with tighter geometric alignment to pretrained
+right-subspaces achieve \emph{lower}, not higher, reward margins on this test set.
+The intuition that ``DPO gently steers along pretrained directions'' and thereby
+achieves good behavioral outcomes is not supported by these data.
+Furthermore, $\gamma$ positively correlates with KL-to-base: Pearson
+$r = \bgCorrPearsonGammaKLToBase$, Spearman $\bgCorrSpearmanGammaKLToBase$
+(95\% CI $[\bgCorrPearsonCILoGammaKLToBase, \bgCorrPearsonCIHiGammaKLToBase]$).
+Adapters that cling most tightly to pretrained right-subspaces diverge \emph{more}
+from the base distribution per token, not less---they fight the base model at the
+distribution level while reusing its geometric directions.
+These two observations together rule out a ``benign steering'' narrative: high $\gamma$
+co-occurs with more KL drift and modest reward, not efficient alignment.
+All CIs are wide ($n = \bgCorrNPoints$; one CI pins at $\pm 1$); these correlations
+are the most parsimonious reading of the current data.
+The adjudicating experiments are T2.1 (non-Pythia replication) and T1.3 (additional
+seeds), which will confirm or revise this picture at larger $n$.
+
+\textbf{Stable rank ($srank$) is a structural primitive, not a performance proxy.}
+srank vs.\ reward margin: Pearson $r = \bgCorrPearsonSrankRewardMargin$,
+Spearman $\bgCorrSpearmanSrankRewardMargin$
+(95\% CI $[\bgCorrPearsonCILoSrankRewardMargin, \bgCorrPearsonCIHiSrankRewardMargin]$).
+The near-zero correlation, combined with the width-stable floor observed across
+70M--1B (§\ref{sec:empirical}), establishes that $srank$ measures a property of
+the architecture--recipe interaction, not of the adapter's behavioral quality.
+The physics analogy: $srank$ is the width of the pipe, not the pressure of the water.
+Adapters with $r = 128$, $\alpha = 256$ on \texttt{hh-rlhf} converge to
+$srank \approx \srankFitTaskConst$ regardless of model size;
+reward margin varies independently.
+\textbf{This decoupling of structural geometry from behavioral outcome is the
+paper's primary empirical finding}, not an incidental observation.
+Confirmation that $srank$ and $\gamma$ carry distinct information types requires
+the adjudicating experiments (T2.1, T1.3) to determine whether the decoupling
+persists across model families and training recipes.
+
+\textbf{Cross-probe evaluation reveals representational overfitting (T2.1b).}
+We initially hypothesized that the low stable rank (\texttt{srank}) observed in LoRA-DPO
+adapters represented a universal, task-intrinsic dimensional requirement for preference
+learning. However, cross-probe evaluation reveals a stark generalization penalty.
+While \texttt{srank} collapse is decoupled from in-distribution performance
+($r \approx \bgCorrCrossProbePythiaHhSrank$, Spearman $\bgCorrCrossProbeSpPythiaHhSrank$),
+it acts as a strong negative predictor for out-of-distribution transfer
+($r \approx \bgCorrCrossProbePythiaUfSrank$, Spearman $\bgCorrCrossProbeSpPythiaUfSrank$,
+95\% CI $[\bgCorrCrossProbeCILoPythiaUfSrank, \bgCorrCrossProbeCIHiPythiaUfSrank]$).
+This reframes the geometric floor: the low-rank structure is not a benign
+parameterization of human values, but rather a signature of representational
+overfitting to the finetuning distribution.
+See Figure~\ref{fig:cross-probe} for the full 2$\times$2 scatter; numerical
+provenance in \texttt{results/cross\_probe/correlation\_matrix.json}%
+\footnote{Correlation matrix generated by \texttt{scripts/cross\_probe\_correlate.py};
+5,000-bootstrap CI with NaN-drop; \texttt{n}=500 examples per (checkpoint, probe); $\beta=0.1$.}.
+
+Including Qwen2-1.5B as an out-of-family reference (full-weight DPO on UltraFeedback,
+then evaluated on both probes) reinforces the same direction after within-family z-scoring
+to control for the scale difference (Qwen srank $\approx 28$ vs.\ Pythia srank $\approx 3.5$).
+The z-scored combined-UF Pearson is $\bgCorrCrossProbeCombinedUfSrank$
+(Spearman $\bgCorrCrossProbeSpCombinedUfSrank$, $n=6$), consistent with the Pythia-only
+result and confirming that the cross-distribution penalty is not a LoRA artifact.
+Note that Qwen contributes a single point per probe; its role is directional corroboration,
+not statistical replication.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig_G_behavior_geometry.pdf}
+\caption{\textbf{Geometry--behavior decoupling (T1.2).}
+2$\times$2 scatter grid: rows = (stable rank $srank$, $\gamma$-overlap);
+columns = (reward margin, KL-to-base).
+Each point is one DPO checkpoint across Pythia 70M--1B.
+Error bars = $\pm$1~SE over \bgLinkSeventyMFortytwoNSamples{} held-out
+\texttt{Anthropic/hh-rlhf} test examples. Dashed line = OLS fit.
+Pearson $r$ with 95\% bootstrap CI in each panel.
+With $n=\bgCorrNPoints$ checkpoints, all CIs are wide and one pins at $\pm 1$;
+treat as suggestive, not definitive.
+The $\gamma$--reward-margin Pearson is $r=\bgCorrPearsonGammaRewardMargin$
+(Spearman $\bgCorrSpearmanGammaRewardMargin$;
+CI $[\bgCorrPearsonCILoGammaRewardMargin, \bgCorrPearsonCIHiGammaRewardMargin]$):
+higher subspace overlap predicts \emph{lower} reward margin, opposite to the
+benign-steering prior.
+The $\gamma$--KL-to-base Pearson is $r=\bgCorrPearsonGammaKLToBase$
+(CI $[\bgCorrPearsonCILoGammaKLToBase, \bgCorrPearsonCIHiGammaKLToBase]$):
+higher overlap co-occurs with greater divergence from the base distribution.
+The $srank$--reward-margin Pearson is $r=\bgCorrPearsonSrankRewardMargin$
+(near zero), consistent with $srank$ being a structural property of the
+adapter rather than a behavioral quality metric.
+T2.1 and T1.3 are the adjudicating experiments.}
+\label{fig:behavior-geometry}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figures/figI_cross_probe.png}
+\caption{\textbf{Cross-probe correlation: srank collapse predicts OOD penalty (T2.1b).}
+2$\times$2 scatter: rows = ($srank$, $\gamma$-overlap); columns = (hh-rlhf probe, UltraFeedback probe).
+Each point is one DPO checkpoint (Pythia 70M--1B, gradient blue; Qwen2-1.5B, orange star).
+Dashed line = OLS fit through Pythia-only points.
+Pearson $r$ with $n=5$ Pythia points in each panel.
+\emph{Left column (hh, in-distribution):} $srank$ vs.\ reward margin Pearson
+$r = \bgCorrCrossProbePythiaHhSrank$ — essentially decoupled.
+\emph{Right column (UF, cross-distribution):} Pearson
+$r = \bgCorrCrossProbePythiaUfSrank$
+(95\% CI $[\bgCorrCrossProbeCILoPythiaUfSrank, \bgCorrCrossProbeCIHiPythiaUfSrank]$,
+Spearman $\bgCorrCrossProbeSpPythiaUfSrank$) — strong negative predictor, reversing sign
+and amplifying magnitude $\approx 3\times$.
+This asymmetry reframes the low-rank signature as representational overfitting rather than
+benign parameterization.
+Qwen2-1.5B (full-weight TRL-online-DPO on UltraFeedback) is shown as an out-of-family
+reference point; it contributes to $z$-scored combined correlations but not to the Pythia OLS fit.
+Numerical provenance: \texttt{results/cross\_probe/correlation\_matrix.json}.}
+\label{fig:cross-probe}
+\end{figure}
 
 
 % ── bibliography ────────────────────────────────────────────────────────────

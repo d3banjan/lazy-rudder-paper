@@ -4,6 +4,7 @@
 \newcommand{\proofCheck}{\ensuremath{\checkmark}}
 \newcommand{\proofSorry}{\textsc{sorry}}
 \newcommand{\proofStub}{\textsc{stub}}
+\newcommand{\proofPartial}{\textsc{partial}}
 
 \newcommand{\thmStatOfFrobeniusSqNonneg}{\proofCheck}
 \newcommand{\thmStatOfFrobeniusSqEqZeroIff}{\proofCheck}
@@ -15,11 +16,11 @@
 \newcommand{\thmStatOfRankSumOuterProductsLe}{\proofCheck}
 \newcommand{\thmStatOfStableRankDisentanglement}{\proofSorry}
 \newcommand{\thmStatOfRankKroneckerEqMul}{\proofStub}
-\newcommand{\thmStatOfRandomSubspaceExpectedOverlap}{\proofStub}
+\newcommand{\thmStatOfRandomSubspaceExpectedOverlap}{\proofPartial}
 \newcommand{\thmStatOfSubspaceDilution}{\proofStub}
 \newcommand{\thmStatOfGammaRightAlignment}{\proofStub}
 \newcommand{\thmStatOfBiasAutopsySeparation}{\proofStub}
-\newcommand{\thmStatOfStableRankAcousticScaling}{\proofStub}
+\newcommand{\thmStatOfStableRankAcousticScaling}{\proofPartial}
 \newcommand{\thmStatOfLowerBoundOfIntent}{\proofStub}
 \newcommand{\thmStatOfCorePreservationUnderAlignment}{\proofStub}
 \newcommand{\thmStatOfRsLoRAScalingInvariance}{\proofStub}
@@ -34,22 +35,33 @@
 \newcommand{\thmStatOfSpgrFrequencyDecomposition}{\proofStub}
 \newcommand{\thmStatOfEntanglementValley}{\proofStub}
 
-% (a) theorems/lemmas with complete proofs (no sorry)
+% (a) theorems/lemmas with complete proofs of the full claim
 \newcommand{\leanProvenCount}{12}
+% (d) theorems proved in a WEAKENED form (WEAKENING NOTE in-file)
+\newcommand{\leanPartialCount}{2}
 % (b) True := sorry stubs — literature-terminology placeholders
 % NOTE: \leanSorryCount = stub count (b), matching main.tex prose
-\newcommand{\leanSorryCount}{13}
+\newcommand{\leanSorryCount}{11}
 % (c) real statements with deferred proof body (honest load-bearing gaps)
 \newcommand{\leanInProofSorryCount}{3}
 % backward-compat alias (same as \leanSorryCount)
-\newcommand{\leanStubCount}{13}
+\newcommand{\leanStubCount}{11}
 \newcommand{\leanDefCount}{9}
+
+% Paper-facing sorry disclosure (3 sorries cited or implied in paper prose)
+% NOTE: random_subspace_expected_overlap + stable_rank_acoustic_scaling PROVEN 2026-04-18
+% See PAPER_FACING_SORRIES in generate_lean_status.py for full notes.
+% planned = provable, formal proof queued
+% empirical = depends on training-process or Haar-measure assumptions; not Lean-bridgeable
+\newcommand{\leanPaperFacingSorryCount}{3}
+\newcommand{\leanPaperFacingPlannedCount}{0}
+\newcommand{\leanPaperFacingEmpiricalCount}{3}
 
 % Lean theorem status table
 \begin{table}[h]
   \centering
   \caption{Formally verified theorems in
-  \texttt{LeanMining/NeuralGeometry/SubspaceOverlap.lean} (Lean 4 + Mathlib). Three-way status: $\proofCheck$ = complete proof (no \texttt{sorry}); $\proofSorry$ = real mathematical statement with deferred proof body (honest load-bearing gap, known proof sketch exists); $\proofStub$ = \texttt{True := sorry} literature-terminology placeholder (not a mathematical claim, names a concept for downstream work). Counts: \leanProvenCount~proven, \leanInProofSorryCount~deferred, \leanSorryCount~stubs.}
+  \texttt{LeanMining/NeuralGeometry/SubspaceOverlap.lean} (Lean 4 + Mathlib, as of 2026-04-18). Three-way status: $\proofCheck$ = complete proof (no \texttt{sorry}); $\proofPartial$ = proof of a strictly weaker statement than the paper-facing claim (see in-file WEAKENING NOTE); $\proofSorry$ = real mathematical statement with deferred proof body (honest load-bearing gap, known proof sketch exists); $\proofStub$ = \texttt{True := sorry} literature-terminology placeholder (not a mathematical claim, names a concept for downstream work). Counts: \leanProvenCount~proven, \leanPartialCount~partial, \leanInProofSorryCount~deferred, \leanSorryCount~stubs. \texttt{random\_subspace\_expected\_overlap} and \texttt{stable\_rank\_acoustic\_scaling} were closed 2026-04-18 (weakened deterministic forms; see in-file WEAKENING NOTEs). Remaining \leanPaperFacingSorryCount~paper-facing stubs (\texttt{gamma\_right\_alignment}, \texttt{bias\_autopsy\_separation}, \texttt{lower\_bound\_of\_intent}): empirical or aspirational claims not Lean-bridgeable from first principles; none are cited as proven results.}
   \label{tab:lean-status}
   \small
   \begin{tabular}{ll}
@@ -66,11 +78,11 @@
     \texttt{rank\_sum\_outer\_products\_le} & \proofCheck \\
     \texttt{stable\_rank\_disentanglement} & \proofSorry \\
     \texttt{rank\_kronecker\_eq\_mul} & \proofStub \\
-    \texttt{random\_subspace\_expected\_overlap} & \proofStub \\
+    \texttt{random\_subspace\_expected\_overlap} & \proofPartial \\
     \texttt{subspace\_dilution} & \proofStub \\
     \texttt{gamma\_right\_alignment} & \proofStub \\
     \texttt{bias\_autopsy\_separation} & \proofStub \\
-    \texttt{stable\_rank\_acoustic\_scaling} & \proofStub \\
+    \texttt{stable\_rank\_acoustic\_scaling} & \proofPartial \\
     \texttt{lower\_bound\_of\_intent} & \proofStub \\
     \texttt{core\_preservation\_under\_alignment} & \proofStub \\
     \texttt{rsLoRA\_scaling\_invariance} & \proofStub \\

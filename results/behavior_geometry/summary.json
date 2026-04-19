@@ -1,0 +1,62 @@
+[
+  {
+    "model_size": "70m",
+    "seed": 42,
+    "srank": 3.9295013958395746,
+    "gamma_overlap": 5.118132197062175,
+    "reward_margin_mean": 0.0516919191919192,
+    "reward_margin_se": 0.023722135311596646,
+    "kl_to_base_mean": -0.055325747397805575,
+    "kl_to_base_se": 0.0061205607089282466,
+    "n_samples": 495,
+    "n_skipped_nan": 5
+  },
+  {
+    "model_size": "160m",
+    "seed": 42,
+    "srank": 3.509904163038634,
+    "gamma_overlap": 5.4091920661926265,
+    "reward_margin_mean": 0.028734217171717175,
+    "reward_margin_se": 0.021838869852402888,
+    "kl_to_base_mean": -0.06372803402422637,
+    "kl_to_base_se": 0.005899872978806083,
+    "n_samples": 495,
+    "n_skipped_nan": 5
+  },
+  {
+    "model_size": "410m",
+    "seed": 42,
+    "srank": 3.924437618795663,
+    "gamma_overlap": 5.060570833333333,
+    "reward_margin_mean": 0.07390151515151516,
+    "reward_margin_se": 0.031929804470063834,
+    "kl_to_base_mean": -0.12064563691954765,
+    "kl_to_base_se": 0.008509538567258288,
+    "n_samples": 495,
+    "n_skipped_nan": 5
+  },
+  {
+    "model_size": "1b",
+    "seed": 42,
+    "srank": 3.1342703844688216,
+    "gamma_overlap": 3.23939375,
+    "reward_margin_mean": 0.05606060606060607,
+    "reward_margin_se": 0.025946498817409198,
+    "kl_to_base_mean": -0.09752802322660577,
+    "kl_to_base_se": 0.007113890638607327,
+    "n_samples": 495,
+    "n_skipped_nan": 5
+  },
+  {
+    "model_size": "1b",
+    "seed": 117,
+    "srank": 3.363574488478672,
+    "gamma_overlap": 3.48571875,
+    "reward_margin_mean": 0.06177241161616162,
+    "reward_margin_se": 0.026469697950830123,
+    "kl_to_base_mean": -0.1082968581364561,
+    "kl_to_base_se": 0.007835708201415992,
+    "n_samples": 495,
+    "n_skipped_nan": 5
+  }
+]

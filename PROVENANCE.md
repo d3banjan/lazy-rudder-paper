@@ -76,6 +76,69 @@ The value is hardcoded as `LORA_DPO_V2_FINAL_LOSS = 0.487` in `bitfit_dpo_strike
 
 ---
 
+## External checkpoints (T2.1 — opportunistic cross-arch)
+
+T2.1 opportunistic run reuses **publicly cached** HF-hub checkpoints (no local training).
+Frozen revisions for reproducibility:
+
+| Role | HF repo | Revision SHA |
+|---|---|---|
+| base | `Qwen/Qwen2-1.5B` | `8a16abf2848eda07cc5253dec660bf1ce007ad7a` |
+| SFT (Instruct) | `Qwen/Qwen2-1.5B-Instruct` | `ba1cf1846d7df0a0591d6c00649f57e798519da8` |
+| DPO | `lewtun/qwen2-1.5B-ultrafeedback-online-dpo` | `6750e4e383493166cdd8f47a6ebb7a3b79c0a7c6` |
+
+| Result file | Source script | Notes |
+|---|---|---|
+| `results/t21_qwen_fullweight/per_layer.json` | `scripts/t21_qwen_fullweight_delta.py` | 196 matched params × 3 deltas (Δ_SFT, Δ_DPO, Δ_total) |
+| `results/t21_qwen_fullweight/summary.json` | same | mean/median srank + γ per delta, attn/MLP split |
+| `results/t21_qwen_fullweight/figH_qwen_delta.png` | same | violin: srank + γ distributions per delta type |
+
+**Caveats (echoed in summary.json `notes`):**
+- Full-weight (not LoRA): different inductive bias than the Pythia LoRA chain.
+- Dataset: UltraFeedback (not hh-rlhf) — DPO signal is complementary, not strict replication.
+- Scale: Qwen2-1.5B (~1.5B params), between Pythia-410m and Pythia-1B in size.
+- DPO trainer: TRL OnlineDPOConfig (reward model `CIR-AMS/BTRM_Qwen2_7B_0613`), not offline DPO.
+- Strict T2.1 (fresh LoRA-DPO on Qwen + hh-rlhf, r=128 α=256) remains queued separately if needed.
+
+---
+
+## T2.1b cross-probe scoring
+
+Cross-probe evaluation of all 5 Pythia LoRA-DPO checkpoints on UltraFeedback (OOD) plus
+Qwen2-1.5B on both probes. The central finding: srank collapse is decoupled from
+in-distribution reward (Pythia-hh Pearson ≈ +0.23) but is a strong negative predictor
+of OOD transfer (Pythia-UF Pearson ≈ −0.92), reframing the geometric floor as
+representational overfitting.
+
+**Scoring JSONL files** (500 examples per checkpoint × probe, β=0.1):
+
+| JSONL path | Checkpoint | Probe | Notes |
+|---|---|---|---|
+| `results/cross_probe/pythia_lora_42_v2_70m__uf.jsonl` | Pythia-70m LoRA-DPO s42 | UltraFeedback | cross-probe (trained on hh-rlhf) |
+| `results/cross_probe/pythia_lora_42_v2_160m__uf.jsonl` | Pythia-160m LoRA-DPO s42 | UltraFeedback | cross-probe |
+| `results/cross_probe/pythia_lora_42_v2_410m__uf.jsonl` | Pythia-410m LoRA-DPO s42 | UltraFeedback | cross-probe |
+| `results/cross_probe/pythia_lora_42_v2_1b__uf.jsonl` | Pythia-1B LoRA-DPO s42 | UltraFeedback | cross-probe |
+| `results/cross_probe/pythia_lora_42_v2_1b_s117__uf.jsonl` | Pythia-1B LoRA-DPO s117 | UltraFeedback | cross-probe |
+| `results/cross_probe/qwen_fullweight__hh.jsonl` | Qwen2-1.5B full-weight TRL-online-DPO | hh-rlhf | cross-probe (trained on UF) |
+| `results/cross_probe/qwen_fullweight__uf.jsonl` | Qwen2-1.5B full-weight TRL-online-DPO | UltraFeedback | in-distribution check |
+
+**Note:** Pythia-on-hh scores reuse T1.2 data via symlinks in `results/cross_probe/`
+pointing to `results/behavior_geometry/checkpoint_*.jsonl` — not re-scored.
+
+**Scripts:**
+- `scripts/cross_probe_score.py` — GPU scoring (not re-run for this step)
+- `scripts/cross_probe_correlate.py` — CPU correlation + Fig I (bugs A+B fixed 2026-04-18)
+- `scripts/cross_probe_manifest.json` — job manifest
+
+**Config:** β=0.1, n_examples=500 per (checkpoint, probe).
+**Combined correlations** use within-family z-scored srank/gamma/reward_margin to avoid
+Simpson's-paradox artifacts (Qwen srank ≈28, Pythia srank ≈3.5).
+
+**Verdict:** positive — reveals specialization asymmetry (in-distribution decoupling vs.
+OOD overfitting penalty).
+
+---
+
 ## Unrecoverable results
 
 None. All 14 result JSON files (16 counting `_leak/v2/channel_partition.json` and `bitfit_dpo_strike/loss_trajectory.json`) are traceable to named scripts in `paper/scripts/` or `cross-check/trained-model-battery/`.

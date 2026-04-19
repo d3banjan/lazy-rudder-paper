@@ -10,7 +10,7 @@
 
 .PHONY: help all paper figs experiments training analysis clean distclean \
         clean-checkpoints clean-results \
-        fetch-checkpoints \
+        fetch-checkpoints regen-activations \
         train-70m train-160m train-410m-dpo train-410m-clm \
         train-1b-dpo train-1b-clm train-1b-dpo-s117 train-1b-clm-s117 \
         train-bitfit train-bitfit-ext \
@@ -20,7 +20,7 @@
         seed-variance delta delta-prime \
         site-data site-dev site-figs
 
-PYTHON  ?= python3
+PYTHON  ?= uv run
 SCRIPTS := scripts
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -36,6 +36,7 @@ help:
 	@echo ""
 	@echo "  REPRODUCIBILITY (analysis-only path)"
 	@echo "    make fetch-checkpoints    — pull adapter weights from HF (~1.9 GB, no GPU)"
+	@echo "    make regen-activations    — regenerate _orbit/*.pt activation tensors (GPU, ~20 min)"
 	@echo "    make analysis             — all analysis jobs (CPU-OK, needs checkpoints)"
 	@echo ""
 	@echo "  EXPERIMENTS (two tiers)"
@@ -133,6 +134,33 @@ experiments: training analysis
 
 fetch-checkpoints:
 	$(PYTHON) $(SCRIPTS)/fetch_checkpoints.py
+
+# ─────────────────────────────────────────────────────────────────────────
+# Activation-tensor regeneration
+#
+# Generates the three residual-stream activation archives consumed by the
+# two δ / δ′ analysis scripts:
+#
+#   RESULTS_DIR/_orbit/410m_base_activations.pt
+#   RESULTS_DIR/_orbit/410m_sft_activations.pt
+#   RESULTS_DIR/_orbit/410m_dpo_activations.pt
+#
+# Downloads Pythia-410M weights from EleutherAI and fine-tune weights from
+# lomahony/ (all public on HuggingFace) into MODELS_DIR, then runs
+# forward passes over the three prompt sets used by the battery.
+#
+# Prerequisites:
+#   - GPU with >= 12 GB VRAM (RTX 3060 12GB is sufficient)
+#   - uv sync already run (or equivalent torch+transformers install)
+#   - LAZY_RUDDER_MODELS_DIR set (or config.toml / fallback path used)
+#
+# The script is idempotent: existing .pt files are skipped.
+#
+# Expected runtime: ~15–20 min total on RTX 3060 12GB.
+# ─────────────────────────────────────────────────────────────────────────
+
+regen-activations:
+	$(PYTHON) $(SCRIPTS)/regen_activations.py
 
 # ─────────────────────────────────────────────────────────────────────────
 # Training targets
@@ -240,10 +268,14 @@ results/seed_variance_quick/results.json: $(CKPT_1B_DPO) $(CKPT_1B_DPO_S117) $(S
 	$(PYTHON) $(SCRIPTS)/seed_variance_quick.py
 
 delta: results/two_point_correlator_delta/results.json
+# NOTE: delta requires RESULTS_DIR/_orbit/410m_{base,sft,dpo}_activations.pt
+#       Run `make regen-activations` once before this target if those files are absent.
 results/two_point_correlator_delta/results.json: $(SCRIPTS)/two_point_correlator_delta.py
 	$(PYTHON) $(SCRIPTS)/two_point_correlator_delta.py
 
 delta-prime: results/angular_fourier_delta_prime/results.json
+# NOTE: delta-prime requires RESULTS_DIR/_orbit/410m_{base,sft,dpo}_activations.pt
+#       Run `make regen-activations` once before this target if those files are absent.
 results/angular_fourier_delta_prime/results.json: $(SCRIPTS)/angular_fourier_delta_prime.py
 	$(PYTHON) $(SCRIPTS)/angular_fourier_delta_prime.py
 

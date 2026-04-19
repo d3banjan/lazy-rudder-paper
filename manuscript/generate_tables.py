@@ -231,5 +231,87 @@ t4 = [
 ]
 
 
-(HERE / "tables.tex").write_text("\n".join(t1 + t2 + t3 + t4))
+# ── Table 5: Behavior-Geometry Correlation (T1.2) ─────────────────────────
+bg_path = RES / "behavior_geometry" / "summary.json"
+bg_corr_path = RES / "behavior_geometry" / "correlation.json"
+t5: list[str] = []
+
+if bg_path.exists() and bg_corr_path.exists():
+    bg = load(bg_path)
+    bg_corr = load(bg_corr_path)
+
+    t5 = [
+        "% Table 5: Behavior-geometry correlation (T1.2)",
+        "\\begin{table}[t]",
+        "  \\centering",
+        "  \\caption{Behavior-geometry correlation across Pythia DPO checkpoints."
+        " For each checkpoint, we compute reward margin"
+        " $= \\beta\\cdot[\\log\\pi_\\theta(y_{\\text{win}}|x)/\\pi_{\\text{ref}}(y_{\\text{win}}|x)"
+        " - \\log\\pi_\\theta(y_{\\text{los}}|x)/\\pi_{\\text{ref}}(y_{\\text{los}}|x)]$"
+        " and sequence-level KL-to-base"
+        " $= n^{-1}\\sum_t[\\log\\pi_\\theta(y_t|y_{<t}) - \\log\\pi_{\\text{ref}}(y_t|y_{<t})]$"
+        " on the \\texttt{Anthropic/hh-rlhf} test split ($n=500$, $\\beta=0.1$)."
+        " Geometry columns (srank, $\\gamma$) are from prior spectral analysis."
+        " With $n=5$ checkpoints, correlations are suggestive, not definitive.}",
+        "  \\label{tab:behavior-geometry}",
+        "  \\small",
+        "  \\begin{tabular}{lrrrrrr}",
+        "    \\toprule",
+        "    Checkpoint & $srank$ & $\\gamma_{R}(k{=}5)$ & "
+        r"rew.\ margin & $\pm$ SE & KL-to-base & $\pm$ SE \\",
+        "    \\midrule",
+    ]
+    for s in bg:
+        msize = s["model_size"]
+        seed  = s["seed"]
+        row = (
+            f"    {msize} (s{seed}) & "
+            f"{s['srank']:.2f} & "
+            f"{s['gamma_overlap']:.2f} & "
+            f"{s['reward_margin_mean']:.4f} & "
+            f"{s['reward_margin_se']:.4f} & "
+            f"{s['kl_to_base_mean']:.4f} & "
+            f"{s['kl_to_base_se']:.4f} \\\\"
+        )
+        t5.append(row)
+
+    # Correlation summary rows
+    t5 += ["    \\midrule"]
+    corr_rows = [
+        ("srank vs rew.~margin", "srank_vs_reward_margin"),
+        ("$\\gamma$ vs rew.~margin",  "gamma_vs_reward_margin"),
+        ("srank vs KL",          "srank_vs_kl_to_base"),
+        ("$\\gamma$ vs KL",           "gamma_vs_kl_to_base"),
+    ]
+    for label, key in corr_rows:
+        if key not in bg_corr:
+            continue
+        c = bg_corr[key]
+        pr = c["pearson_r"]
+        pl = c["pearson_ci95_lo"]
+        ph = c["pearson_ci95_hi"]
+        sr = c["spearman_r"]
+        pr_str = f"{pr:.2f} [{pl:.2f},{ph:.2f}]" if pr == pr else "n/a"
+        sr_str = f"{sr:.2f}" if sr == sr else "n/a"
+        t5.append(
+            f"    \\multicolumn{{2}}{{l}}{{{label}}} & "
+            f"\\multicolumn{{2}}{{l}}{{Pearson: {pr_str}}} & "
+            f"\\multicolumn{{2}}{{l}}{{Spearman: {sr_str}}} \\\\"
+        )
+
+    t5 += [
+        "    \\bottomrule",
+        "  \\end{tabular}",
+        "\\end{table}",
+        "",
+    ]
+else:
+    t5 = [
+        "% Table 5: Behavior-geometry correlation (T1.2) — not yet generated",
+        "% Run: uv run python behavior_geometry_link.py",
+        "",
+    ]
+
+
+(HERE / "tables.tex").write_text("\n".join(t1 + t2 + t3 + t4 + t5))
 print(f"wrote {HERE / 'tables.tex'}")
