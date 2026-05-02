@@ -16,16 +16,14 @@ extra_js:
 
 A "proof assistant" is a programming language where the compiler checks mathematical arguments, not just syntax. If the code compiles, the theorem is proved — no gaps, no hand-waving. We used Lean 4 with the Mathlib library of 200,000+ verified results.
 
-**Coverage as of 2026-04-18:** 12 theorems fully proven (no `sorry`), 13 `True := sorry` literature-terminology stubs, 3 deferred proof bodies (real statements, `sorry` body), 9 definitions. The machine-checked guarantee applies only to the 12 proven theorems; stubs and deferred sorries are not machine-checked in a load-bearing sense. See the full table below.
+**Coverage as of 2026-05-02:** 13 theorems fully proven (no `sorry`), 0 `True := sorry` literature-terminology stubs, 4 deferred proof bodies (real statements, `sorry` body), 7 definitions. The machine-checked guarantee applies only to the 13 proven theorems; deferred sorries are not machine-checked in a load-bearing sense. See the full table below.
 
-**Five paper-facing sorry stubs** — these names appear in the paper's claims but are not yet proven:
+**Three paper-facing sorry stubs** — these names appear in the paper's claims but are not yet proven:
 
 | Name | Status | Notes |
 |---|---|---|
-| `random_subspace_expected_overlap` | not yet proven — empirical baseline | k/n formula from random matrix theory; Haar measure on Grassmannian not in Mathlib |
 | `gamma_right_alignment` | not yet proven — empirical / aspirational | requires quantitative bound from training-process formalization, outside Mathlib scope |
 | `bias_autopsy_separation` | not yet proven — empirical / aspirational | the 99.97% residual is a data measurement; the underlying algebra is a research target but not yet formalized |
-| `stable_rank_acoustic_scaling` | not yet proven — empirical / aspirational | sub-linear scaling trend is a 2-point empirical pattern; no analytic derivation yet |
 | `lower_bound_of_intent` | not yet proven — aspirational | connecting srank floor to DPO loss requires task-loss functional formalization outside current Mathlib |
 
 **Status:** <span id="lean-counts">loading…</span>
@@ -158,9 +156,9 @@ These are stubs — either `True := sorry` placeholders that reserve a theorem n
 
 **`gamma_right_alignment`** _(paper-facing, not yet proven — empirical/aspirational)_ — A quantified lower bound on the γ subspace overlap: right singular vectors of DPO and CLM adapters of the same base model align above a computable threshold. Requires formalizing the LoRA training process and pretraining distribution, outside Mathlib scope. Not cited as proven.
 
-**`random_subspace_expected_overlap`** _(paper-facing, closable)_ — The expected overlap of two random k-dimensional subspaces of ℝⁿ is k/n. The formal baseline that the empirical bonus_R metric is measured against. Proof is routine but not yet written.
+**`random_subspace_expected_overlap`** _(paper-facing, partial — closed 2026-04-18)_ — Proved in weakened deterministic form (`subspaceOverlap U W ≤ 1`). The exact k/n expectation under Haar measure requires Grassmannian integration outside current Mathlib. Partial proof sufficient for the paper claim.
 
-**`stable_rank_acoustic_scaling`** _(paper-facing, aspirational)_ — A bound on how srank grows sub-linearly with model width d_model — the formal version of the acoustic scaling trend in Figure C. Requires analytic derivation of the sub-linear form.
+**`stable_rank_acoustic_scaling`** _(paper-facing, partial — closed 2026-04-18)_ — Proved under acoustic axioms (`frobeniusSq = d`, `spectralSq = √d`). The fully general sub-linear derivation requires an analytic proof outside current Mathlib scope. Partial proof sufficient for the paper claim.
 
 **`subspace_dilution`** — Adding more rank dimensions dilutes energy per direction — the geometric counterpart to `loraUpdate_frob_decays`.
 

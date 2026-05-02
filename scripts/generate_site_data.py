@@ -24,7 +24,7 @@ def build_srank():
         "_schema": "srank_floor_v1",
         "_source_files": [
             "results/spectral_overlap_gamma_petri/results.json",
-            "results/spectral_autopsy/results.json",
+            "results/spectral_overlap_gamma/results.json",
             "results/spectral_overlap_gamma_1b_seed117/results.json",
         ],
         "models": [],
@@ -53,17 +53,18 @@ def build_srank():
         }
     )
 
-    # 410M from spectral_autopsy
-    autopsy_path = Path("results/spectral_autopsy/results.json")
-    with open(autopsy_path) as f:
-        autopsy = json.load(f)
+    # 410M from spectral_overlap_gamma — adapter srank_delta (NOT base weight stable_rank)
+    # spectral_autopsy/results.json contains base weight stable_rank (avg ~5.2) which is
+    # irrelevant here. The adapter srank lives in spectral_overlap_gamma per-layer srank_delta.
+    gamma_path = Path("results/spectral_overlap_gamma/results.json")
+    with open(gamma_path) as f:
+        gamma = json.load(f)
 
-    # v2_dpo_r128 is a list of per-layer results
-    dpo_r128 = autopsy["v2_dpo_r128"]
-    dpo_srank = round(mean(layer["stable_rank"] for layer in dpo_r128), 2)
+    dpo_r128 = gamma["runs"]["v2_dpo_r128"]["per_layer"]
+    dpo_srank = round(mean(layer["srank_delta"] for layer in dpo_r128), 2)
 
-    clm_r128 = autopsy["v3_clm_r128"]
-    clm_srank = round(mean(layer["stable_rank"] for layer in clm_r128), 2)
+    clm_r128 = gamma["runs"]["v3_clm_r128"]["per_layer"]
+    clm_srank = round(mean(layer["srank_delta"] for layer in clm_r128), 2)
 
     srank_data["models"].append(
         {
@@ -304,26 +305,65 @@ def parse_lean_theorems(lean_path: Path) -> list[dict]:
     return theorems
 
 
+def _read_lean_count_from_tex(tex_path: Path, macro_name: str) -> int:
+    """Extract a \\newcommand{\\<macro_name>}{<value>} integer from lean_status.tex."""
+    with open(tex_path) as f:
+        content = f.read()
+    m = re.search(r"\\newcommand\{\\%s\}\{(\d+)\}" % re.escape(macro_name), content)
+    if m:
+        return int(m.group(1))
+    raise ValueError(f"Macro \\{macro_name} not found in {tex_path}")
+
+
 def build_lean_status():
-    """Parse Lean file and emit proof status summary.
+    """Read Lean proof status from manuscript/lean_status.tex (authoritative source).
+
+    lean/SubspaceOverlap.lean is a thin import wrapper; the actual theorems live
+    in LeanMining/NeuralGeometry/SubspaceOverlap.lean (monorepo root).  Parsing
+    the wrapper returns 0 theorems.  manuscript/lean_status.tex is auto-generated
+    from the canonical Lean file via `make lean-status` and is committed — it is
+    the single authoritative source for the site dashboard.
 
     Returns:
         dict with schema lean_status_v1, containing theorem counts and details.
     """
-    lean_path = Path("lean/SubspaceOverlap.lean")
-    theorems = parse_lean_theorems(lean_path)
+    tex_path = Path("manuscript/lean_status.tex")
 
-    proven_count = sum(1 for t in theorems if t["status"] == "proven")
-    deferred_count = sum(1 for t in theorems if t["status"] == "deferred")
-    stub_count = sum(1 for t in theorems if t["status"] == "stub")
+    proven_count = _read_lean_count_from_tex(tex_path, "leanProvenCount")
+    deferred_count = _read_lean_count_from_tex(tex_path, "leanInProofSorryCount")
+    stub_count = _read_lean_count_from_tex(tex_path, "leanStubCount")
+    partial_count = _read_lean_count_from_tex(tex_path, "leanPartialCount")
+    paper_facing_sorry = _read_lean_count_from_tex(tex_path, "leanPaperFacingSorryCount")
+
+    # Build per-theorem list from the \thmStatOf* macros (order matches the tex table)
+    STATUS_MAP = {
+        "\\proofCheck": "proven",
+        "\\proofSorry": "deferred",
+        "\\proofStub": "stub",
+        "\\proofPartial": "partial",
+    }
+    with open(tex_path) as f:
+        tex_content = f.read()
+    theorems = []
+    for m in re.finditer(
+        r"\\newcommand\{\\thmStatOf([A-Za-z]+)\}\{(\\proof[A-Za-z]+)\}", tex_content
+    ):
+        camel_name = m.group(1)
+        status_tex = m.group(2)
+        # Convert CamelCase back to snake_case heuristically (lowercase at uppercase boundary)
+        snake_name = re.sub(r"(?<!^)(?=[A-Z])", "_", camel_name).lower()
+        status = STATUS_MAP.get(status_tex, status_tex)
+        theorems.append({"name": snake_name, "kind": "theorem", "status": status})
 
     return {
         "_schema": "lean_status_v1",
-        "_source_files": ["lean/SubspaceOverlap.lean"],
+        "_source_files": ["manuscript/lean_status.tex"],
         "counts": {
             "proven": proven_count,
             "deferred": deferred_count,
             "stub": stub_count,
+            "partial": partial_count,
+            "paper_facing_sorry": paper_facing_sorry,
         },
         "theorems": theorems,
     }
@@ -491,10 +531,15 @@ def main():
         json.dump(modules_data, f, indent=2)
     print(f"  {len(modules_data['runs'])} runs")
 
-    # Generate lean_status
+    # Generate lean_status — write to both assets/data/ (consumed by JS) and
+    # docs/_data/ (consumed by Jekyll templates as site.data.lean_status).
     print("Generating lean_status.json...")
     lean_status_data = build_lean_status()
     with open(output_dir / "lean_status.json", "w") as f:
+        json.dump(lean_status_data, f, indent=2)
+    jekyll_data_dir = Path("docs/_data")
+    jekyll_data_dir.mkdir(parents=True, exist_ok=True)
+    with open(jekyll_data_dir / "lean_status.json", "w") as f:
         json.dump(lean_status_data, f, indent=2)
     counts = lean_status_data["counts"]
     print(

@@ -2,7 +2,7 @@
   "_schema": "srank_floor_v1",
   "_source_files": [
     "results/spectral_overlap_gamma_petri/results.json",
-    "results/spectral_autopsy/results.json",
+    "results/spectral_overlap_gamma/results.json",
     "results/spectral_overlap_gamma_1b_seed117/results.json"
   ],
   "models": [
@@ -21,8 +21,8 @@
     {
       "name": "410M",
       "d_model": 1024,
-      "srank_dpo": 5.2,
-      "srank_clm": 3.5
+      "srank_dpo": 3.92,
+      "srank_clm": 3.45
     },
     {
       "name": "1B",
