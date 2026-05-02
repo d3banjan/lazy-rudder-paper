@@ -525,20 +525,13 @@ formally verified using the Lean~4 interactive theorem prover and
 load-bearing theorems listed in Table~\ref{tab:lean-status});
 \leanInProofSorryCount~theorems with real (non-trivial) mathematical
 statements where the proof body is a bare \texttt{sorry} with a known
-proof sketch; and \leanSorryCount~\texttt{True~:= sorry} stubs that
-name literature concepts for downstream work without making mathematical
-claims (Table~\ref{tab:lean-status}).
-
-Of the stubs, \leanPaperFacingSorryCount~are paper-facing (cited or
-implied in paper prose): \texttt{random\_subspace\_expected\_overlap},
-\texttt{gamma\_right\_alignment}, \texttt{bias\_autopsy\_separation},
-\texttt{stable\_rank\_acoustic\_scaling}, and
-\texttt{lower\_bound\_of\_intent}. All \leanPaperFacingSorryCount~are
-empirical or aspirational claims that are not Lean-bridgeable from first
-principles without formalizing the training process, Haar measure on the
-Grassmannian, or task-loss functionals.
-These are named as targets to scope the gap between paper claims and
-formal proofs; none are cited as proved results.
+proof sketch; and \leanSorryCount~\texttt{True~:= sorry} terminology
+stubs (Table~\ref{tab:lean-status}). The paper-local Lean file is now an
+import-only wrapper around the canonical
+\texttt{LeanMining/NeuralGeometry/SubspaceOverlap.lean}, so this status
+does not count the stale fork that previously inflated paper-facing
+\texttt{sorry} totals. The remaining deferred proofs are disclosed in
+Table~\ref{tab:lean-status}; none are cited as proved results.
 
 
 % ── §4 Empirical Ablations ──────────────────────────────────────────────────
