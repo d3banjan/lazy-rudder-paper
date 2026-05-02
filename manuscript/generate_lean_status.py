@@ -29,7 +29,9 @@ import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-LEAN = HERE.parent / "lean" / "SubspaceOverlap.lean"
+LOCAL_LEAN = HERE.parent / "lean" / "SubspaceOverlap.lean"
+CANONICAL_LEAN = HERE.parents[2] / "LeanMining" / "NeuralGeometry" / "SubspaceOverlap.lean"
+LEAN = CANONICAL_LEAN if CANONICAL_LEAN.exists() else LOCAL_LEAN
 
 
 def parse(src: str) -> list[dict]:
