@@ -187,9 +187,12 @@ dimensionality (stable rank), the fraction of update energy that lives in
 the base model's dominant subspace (top-$k$ overlap), and the orthogonal
 residual (what new geometry DPO actually builds). Empirically, across
 three orders of model width: the rudder is tiny ($srank \approx
-\srankFitTaskConst$), the reuse is total ($\geq 99.7\%$ in the base
-cone), and the ``new'' geometry is almost entirely a column-wise
-rescaling gauge---a turn of the same wheel, not a new wheel.
+\srankFitTaskConst$), the top-5 base cone captures only
+\topFiveDPOInsideMass\%--\topFiveCLMInsideMass\% of absolute Frobenius
+mass at 1B, and the alignment signal is nevertheless enriched along
+pretrained directions by several times the Haar baseline. The rudder is
+therefore a statistical bias toward existing flow, not literal confinement
+inside the top-5 cone.
 
 \begin{figure}[tbp]
 \centering
@@ -199,8 +202,11 @@ base weight's top-$k$ right-singular subspace forms a cone (blue ellipse);
 alignment via LoRA installs a small rudder $\Delta W$ (red arrow, $srank
 \approx 3$) that deflects the dominant base flow rather than carving new
 directions. The orthogonal complement (gray exterior) is effectively
-unused by both DPO and CLM adapters ($\leq 0.3\%$ of Frobenius mass
-exits the cone at $k{=}5$, §\ref{sec:discussion}).}
+where most Frobenius mass lives: only \topFiveDPOInsideMass\% (DPO) and
+\topFiveCLMInsideMass\% (CLM) lie inside the top-5 base cone at 1B.
+The measured rudder is the above-Haar angular enrichment inside that
+small cone, not a claim that the orthogonal complement is unused
+(§\ref{sec:discussion}).}
 \label{fig:schematic}
 \end{figure}
 
@@ -639,9 +645,9 @@ exhibits a consistently higher $\text{bonus}_R$ than DPO at $k=5$
 (Figure~\ref{fig:topk-overlap}): $\bonusRKfiveOneBCLMavgSeeds\times$ vs.\
 $\bonusRKfiveOneBDPOavgSeeds\times$
 on average across seeds, quantifying the geometric cost of contrastive
-preference routing: DPO must partially exit the pretrained top-$k$ input
-subspace to encode the contrast between preferred and rejected
-completions. The left-side metric $\text{bonus}_L(5)$ is near-random at
+preference routing: DPO spreads its dominant directions less densely
+inside the pretrained top-$k$ input subspace than CLM. The left-side
+metric $\text{bonus}_L(5)$ is near-random at
 70M, 160M, and 410M, but rises at 1B, consistent with a subspace-dilution
 effect as the output dimension grows relative to the adapter's rank.
 
@@ -1159,8 +1165,8 @@ $99\%$ suggest the adapter has significant diagonal-rescaling character
 and may be over-parameterized.
 (d)~\emph{Orthogonal residual Frobenius}: compare $\|\Delta W - \Delta
 W_\parallel\|_F / \|\Delta W\|_F$ against the DPO baseline of
-$\approx 1 - \orthDPOMeanKfive/100$ at $k = 5$ to gauge how far outside
-the base cone your adapter operates.
+$\approx \orthDPOMeanKfive\%$ Frobenius mass outside the top-$5$ base
+subspace to gauge how far outside the base cone your adapter operates.
 
 \subsection{Extrapolation Caveats}
 

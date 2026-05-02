@@ -323,6 +323,7 @@ orth_path = RES / "dpo_clm_orthogonal_decomp" / "results.json"
 if orth_path.exists():
     orth = load(orth_path)
     comp = orth["comparison"]
+    k5_entry = comp.get("k5_orthogonal_frac", {})
     # Convert fractions to percentage points
     for k_name in ["k5", "k10", "k20", "k_srank"]:
         entry = comp.get(f"{k_name}_orthogonal_frac", comp.get(k_name, {}))
@@ -336,6 +337,15 @@ if orth_path.exists():
                 macro(f"orthCLMMean{label_map[k_name]}",  clm_mean * 100),
                 macro(f"orthDPOminusCLM{label_map[k_name]}", delta * 100),  # percentage points
             ]
+    if isinstance(k5_entry, dict):
+        dpo_out = k5_entry.get("dpo_mean", 0.0) * 100
+        clm_out = k5_entry.get("clm_mean", 0.0) * 100
+        lines += [
+            macro("topFiveDPOInsideMass", 100 - dpo_out),
+            macro("topFiveCLMInsideMass", 100 - clm_out),
+            macro("topFiveDPOOutsideMass", dpo_out),
+            macro("topFiveCLMOutsideMass", clm_out),
+        ]
     verdict = orth.get("verdict", "unknown")
     lines += [macro("orthVerdict", verdict.replace("_", " "))]
 else:
@@ -344,6 +354,12 @@ else:
         lines += [macro(f"orthDPOMean{label}", 0.0),
                   macro(f"orthCLMMean{label}", 0.0),
                   macro(f"orthDPOminusCLM{label}", 0.0)]
+    lines += [
+        macro("topFiveDPOInsideMass", 0.0),
+        macro("topFiveCLMInsideMass", 0.0),
+        macro("topFiveDPOOutsideMass", 0.0),
+        macro("topFiveCLMOutsideMass", 0.0),
+    ]
     lines += [macro("orthVerdict", "pending")]
 
 lines += [

@@ -4,7 +4,7 @@
 %
 % Diagram: 2D representation of the pretrained singular-vector cone.
 %  - Gray shaded ellipse = base pretrained subspace (top-k cone).
-%  - Hatched region outside ellipse = orthogonal complement (unused, < 0.3 %).
+%  - Hatched region outside ellipse = orthogonal complement (dominates absolute mass).
 %  - Black arrow along cone axis = base pretrained "flow" (dominant singular vectors).
 %  - Small red arrow near axis = alignment rudder Delta W (deflection, srank ~ 3-4 dims).
 %  - Labeled singular vectors (v1, v2) as thin gray arrows inside cone.
@@ -29,9 +29,9 @@
   \draw[blue!35, thick, rotate=10] (0,0) ellipse (3.0cm and 1.05cm);
 \end{scope}
 
-% ── "unused orthogonal space" hatching label ─────────────────────────────────
+% ── orthogonal-complement hatching label ─────────────────────────────────────
 \node[gray!55, align=center, font=\footnotesize] at (-2.5, -1.55)
-  {unused orthogonal\\space ($\leq 0.3\%$)};
+  {orthogonal\\mass dominates};
 
 % ── singular vector arrows inside cone ───────────────────────────────────────
 \draw[svec] (0,0) -- ++(25:2.0)  node[above right, gray, font=\footnotesize] {$v_1$};
