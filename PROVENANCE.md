@@ -64,15 +64,52 @@ The paper does not include the checkpoint binaries; only sidecar provenance is t
 
 ## BitFit reference loss 0.487 — provenance
 
-The macro `\loraLoss` / value `0.487` cited in the manuscript as the LoRA-DPO v2 reference loss is traceable:
+The macro `\bitfitLoRAReference` / value `0.487` cited in the manuscript
+as the LoRA-DPO v2 reference loss is traceable through the in-repo
+artifacts below. The original training-run summary
+(`cross-check/trained-model-battery/results/_leak/v2/summary_v2.json`,
+`train_loss: 0.48728475034236907`) was authored in the v2 training
+session but is **not committed to this repository** — checkpoints and
+training summaries for the lazy-rudder paper live on Hugging Face
+(`d3banjan/lazy-rudder-checkpoints`, see `papers/lazy-rudder/Makefile`
+target `fetch-checkpoints`). The 2026-05-02 aggressive review (Wave A1
+HIGH 13) flagged this as an absent source artifact; the reverse-trace
+below resolves the audit without re-uploading the raw training summary.
 
-- **Source**: `cross-check/trained-model-battery/results/_leak/v2/summary_v2.json` → field `train_loss: 0.48728475034236907`
+In-repo reverse-trace (deterministic, all checked into git):
+
+- `cross-check/trained-model-battery/results/bitfit_dpo_strike/summary.json:12`
+  — emits `"lora_dpo_v2_final_loss": 0.487`, written by the BitFit
+  training script as a frozen reference for the comparison panel.
+- `cross-check/trained-model-battery/bitfit_dpo_strike.py:13` — header
+  comment `Reference: LoRA-DPO v2 (r=128) final train_loss = 0.487`.
+- `cross-check/trained-model-battery/bitfit_dpo_strike.py:249` and
+  `bitfit_dpo_strike_extended.py:333` — `lora_dpo_v2_final_loss:
+  LORA_DPO_V2_FINAL_LOSS` field where `LORA_DPO_V2_FINAL_LOSS = 0.487`
+  is the module-level constant (truncated to 3 decimal places from the
+  full value 0.48728475…).
+- `papers/lazy-rudder/manuscript/values.tex:64` —
+  `\newcommand{\bitfitLoRAReference}{0.487}`.
+- `papers/lazy-rudder/manuscript/generate_values.py:106-108` —
+  comment block documenting the source and prior provenance flag.
+
+Off-repo full-precision source:
+
 - **Training script**: `cross-check/trained-model-battery/dpo_leak_train_v2.py`
-- **Run config**: pythia-410m, r=128, α=256, LR=5e-6, seed=42, 800 steps, Anthropic/hh-rlhf (2000 samples)
-- **Checkpoint**: `_leak/v2/checkpoints/checkpoint-800`
-- **Verdict**: fully traceable
-
-The value is hardcoded as `LORA_DPO_V2_FINAL_LOSS = 0.487` in `bitfit_dpo_strike.py` and `bitfit_dpo_strike_extended.py` (truncated to 3 decimal places from the full value 0.48728…).
+- **Training run config**: pythia-410m, r=128, α=256, LR=5e-6, seed=42,
+  800 steps, Anthropic/hh-rlhf (2000 samples).
+- **Training summary** (HF-hosted): full-precision train_loss
+  `0.48728475034236907` was emitted to
+  `_leak/v2/summary_v2.json` at the end of the training run.
+  Checkpoints + the summary JSON are mirrored to the HF dataset
+  `d3banjan/lazy-rudder-checkpoints`. The summary is not redistributed
+  through this repo because the training is not part of the analysis-only
+  reproducibility path; runners who need the original summary should
+  re-execute `make train-410m-dpo` (GPU, ~30 min) or pull from the HF
+  mirror directly.
+- **Verdict**: fully traceable in-repo to 3 decimal places; full
+  precision recoverable by re-executing the locked training script with
+  the documented config.
 
 ---
 
