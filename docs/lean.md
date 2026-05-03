@@ -16,7 +16,15 @@ extra_js:
 
 A "proof assistant" is a programming language where the compiler checks mathematical arguments, not just syntax. If the code compiles, the theorem is proved — no gaps, no hand-waving. We used Lean 4 with the Mathlib library of 200,000+ verified results.
 
-**Coverage as of 2026-05-02:** 13 theorems fully proven (no `sorry`), 0 `True := sorry` literature-terminology stubs, 4 deferred proof bodies (real statements, `sorry` body), 7 definitions. The machine-checked guarantee applies only to the 13 proven theorems; deferred sorries are not machine-checked in a load-bearing sense. See the full table below.
+**Coverage as of 2026-05-02:** 13 theorems fully proven (no `sorry`), 2 partial (proved in weakened form; see in-file WEAKENING NOTE), 4 deferred proof bodies (real statements, `sorry` body), 0 `True := sorry` literature-terminology stubs, 7 definitions. Three of the deferred items are paper-facing (gamma_right_alignment, bias_autopsy_separation, lower_bound_of_intent — listed below). The machine-checked guarantee applies only to the 13 proven theorems; partial and deferred items are not machine-checked in a load-bearing sense. See the full table below.
+
+**Source.** Theorem statements and proofs are vendored at [`lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean`](https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean). Each theorem name in the table below links to its declaration line in that file. The vendored copy is kept in sync with a private upstream monorepo by `make sync-lean`; `make verify-lean` fails on drift. Build and verify locally:
+
+```bash
+cd lean/
+lake update   # first run only — pulls Mathlib (~5 min, ~3 GB)
+lake build
+```
 
 **Three paper-facing sorry stubs** — these names appear in the paper's claims but are not yet proven:
 
@@ -194,6 +202,7 @@ Full status table
 
 <p style="margin-top:1rem;font-family:var(--font-sans);font-size:.82rem;color:var(--fg-muted)" markdown="0">
   <span class="lean-badge proven">proven</span>&nbsp; complete proof, no <code>sorry</code> &nbsp;&nbsp;
+  <span class="lean-badge partial">partial</span>&nbsp; weakened form proved (see in-file WEAKENING NOTE) &nbsp;&nbsp;
   <span class="lean-badge deferred">deferred</span>&nbsp; real statement, proof body is <code>sorry</code> &nbsp;&nbsp;
   <span class="lean-badge stub">stub</span>&nbsp; <code>True := sorry</code> placeholder
 </p>

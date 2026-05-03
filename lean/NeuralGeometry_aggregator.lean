@@ -1,1 +1,0 @@
-import LeanMining.NeuralGeometry.SubspaceOverlap

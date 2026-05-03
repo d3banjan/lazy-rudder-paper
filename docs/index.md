@@ -98,7 +98,7 @@ Before concluding the srank floor is real, we tried to explain it away with thre
 
 <figure markdown="0">
   <img src="/lazy-rudder-paper/assets/img/figD.png" alt="BitFit vs LoRA loss trajectories">
-  <figcaption>BitFit-DPO (orange) reduces loss — but plateaus well above LoRA-DPO (blue). The loss gap is consistent with LoRA learning geometry that biases alone cannot replicate in this setting.</figcaption>
+  <figcaption>BitFit-DPO (orange) reduces loss to <strong>0.660</strong> at step 800 — but plateaus well above the LoRA-DPO endpoint of <strong>0.487</strong>. The 0.173 gap (≈16% of the LoRA loss reduction) is consistent with LoRA learning geometry that biases alone cannot replicate in this setting.</figcaption>
 </figure>
 
 **Attempt 3: maybe depth carries structure.** If DPO adapters form a "quasiparticle" — a correlated pattern that travels across layers — we'd expect the layer-depth correlator $C(L, L+k)$ to decay with $k$. It doesn't. The correlator is flat (Pearson ≈ 0.97 regardless of depth gap). No depth-wise structure. No quasiparticle.
@@ -147,7 +147,7 @@ For the curious
 
 **Data.** Anthropic/hh-rlhf, 2000 samples. DPO uses preference pairs. CLM uses chosen responses only (no rejection signal).
 
-**Reproducibility.** All adapter checkpoints are mirrored at [`d3banjan/lazy-rudder-checkpoints`](https://huggingface.co/d3banjan/lazy-rudder-checkpoints) (~1.9 GB). Every figure regenerates from `make analysis && make paper`.
+**Reproducibility.** All adapter checkpoints are mirrored at [`d3banjan/lazy-rudder-checkpoints`](https://huggingface.co/d3banjan/lazy-rudder-checkpoints) (~1.9 GB). Every figure regenerates from `make analysis && make paper`. Per-checkpoint hashes, training configs, and seeds are recorded in [`PROVENANCE.md`](https://github.com/d3banjan/lazy-rudder-paper/blob/main/PROVENANCE.md).
 
 <figure markdown="0">
   <img src="/lazy-rudder-paper/assets/img/figC.png" alt="Per-layer srank for 70M and 160M">
@@ -217,6 +217,6 @@ Citation
   url    = {https://github.com/d3banjan/lazy-rudder-paper}
 }</div>
 
-**References.** Hu et al. (2022) LoRA; Rafailov et al. (2023) DPO; Kalajdzievski (2023) RsLoRA; Biderman et al. (2023) Pythia; Lean 4 + Mathlib.
+**References.** [Hu et al. (2022) LoRA](https://arxiv.org/abs/2106.09685); [Rafailov et al. (2023) DPO](https://arxiv.org/abs/2305.18290); [Kalajdzievski (2023) RsLoRA](https://arxiv.org/abs/2312.03732); [Biderman et al. (2023) Pythia](https://arxiv.org/abs/2304.01373); [Lean 4](https://leanprover.github.io/) + [Mathlib](https://github.com/leanprover-community/mathlib4) ([The Mathlib Community, 2020](https://doi.org/10.1145/3372885.3373824)).
 
 </div>

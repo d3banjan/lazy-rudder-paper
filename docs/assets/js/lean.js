@@ -5,10 +5,15 @@
     .then(data => {
       const counts = document.getElementById('lean-counts');
       if (counts) {
-        counts.innerHTML =
-          `<strong>${data.counts.proven}</strong> proven &nbsp;&middot;&nbsp; ` +
-          `<strong>${data.counts.deferred}</strong> deferred &nbsp;&middot;&nbsp; ` +
-          `<strong>${data.counts.stub}</strong> stubs`;
+        const c = data.counts;
+        const parts = [
+          `<strong>${c.proven}</strong> proven`,
+          `<strong>${c.partial ?? 0}</strong> partial`,
+          `<strong>${c.deferred}</strong> deferred`,
+          `<strong>${c.paper_facing_sorry ?? 0}</strong> paper-facing sorry`,
+          `<strong>${c.stub}</strong> stubs`,
+        ];
+        counts.innerHTML = parts.join(' &nbsp;&middot;&nbsp; ');
       }
 
       const tbody = document.getElementById('lean-tbody');
@@ -18,7 +23,17 @@
         const tr = document.createElement('tr');
         const tdName = document.createElement('td');
         tdName.style.cssText = 'font-family:monospace;font-size:.85rem;padding:.35rem .5rem;';
-        tdName.textContent = t.name;
+        if (t.source_url) {
+          const a = document.createElement('a');
+          a.href = t.source_url;
+          a.textContent = t.name;
+          a.title = `View Lean source (line ${t.line})`;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          tdName.appendChild(a);
+        } else {
+          tdName.textContent = t.name;
+        }
         const tdStatus = document.createElement('td');
         tdStatus.style.cssText = 'padding:.35rem .5rem;';
         const badge = document.createElement('span');

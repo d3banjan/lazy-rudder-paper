@@ -29,9 +29,14 @@ import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-LOCAL_LEAN = HERE.parent / "lean" / "SubspaceOverlap.lean"
+# Vendored Lean source lives in the public paper repo at
+# lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean. Prefer it so the
+# script runs standalone inside the public repo. Fall back to the monorepo
+# canonical only if the vendored copy is missing (e.g. a fresh clone before
+# `make sync-lean` has run).
+LOCAL_LEAN = HERE.parent / "lean" / "LeanMining" / "NeuralGeometry" / "SubspaceOverlap.lean"
 CANONICAL_LEAN = HERE.parents[2] / "LeanMining" / "NeuralGeometry" / "SubspaceOverlap.lean"
-LEAN = CANONICAL_LEAN if CANONICAL_LEAN.exists() else LOCAL_LEAN
+LEAN = LOCAL_LEAN if LOCAL_LEAN.exists() else CANONICAL_LEAN
 
 
 def parse(src: str) -> list[dict]:

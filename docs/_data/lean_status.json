@@ -1,8 +1,10 @@
 {
   "_schema": "lean_status_v1",
   "_source_files": [
-    "manuscript/lean_status.tex"
+    "manuscript/lean_status.tex",
+    "lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean"
   ],
+  "_source_url_base": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean",
   "counts": {
     "proven": 13,
     "deferred": 4,
@@ -12,99 +14,137 @@
   },
   "theorems": [
     {
-      "name": "frobenius_sq_nonneg",
+      "name": "frobeniusSq_nonneg",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 82,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L82"
     },
     {
-      "name": "frobenius_sq_eq_zero_iff",
+      "name": "frobeniusSq_eq_zero_iff",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 88,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L88"
     },
     {
-      "name": "stable_rank_le_rank",
+      "name": "stableRank_le_rank",
       "kind": "theorem",
-      "status": "deferred"
+      "status": "deferred",
+      "line": 137,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L137"
     },
     {
-      "name": "stable_rank_mul_le_min",
+      "name": "stableRank_mul_le_min",
       "kind": "theorem",
-      "status": "deferred"
+      "status": "deferred",
+      "line": 142,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L142"
     },
     {
-      "name": "outer_product_eq_col_mul_row",
+      "name": "outerProduct_eq_col_mul_row",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 162,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L162"
     },
     {
       "name": "rank_outer_product_le_one",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 172,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L172"
     },
     {
       "name": "rank_add_le",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 188,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L188"
     },
     {
       "name": "rank_sum_outer_products_le",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 211,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L211"
     },
     {
       "name": "random_subspace_expected_overlap",
       "kind": "theorem",
-      "status": "partial"
+      "status": "partial",
+      "line": 285,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L285"
     },
     {
       "name": "stable_rank_acoustic_scaling",
       "kind": "theorem",
-      "status": "partial"
+      "status": "partial",
+      "line": 334,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L334"
     },
     {
-      "name": "frobenius_sq_smul",
+      "name": "frobeniusSq_smul",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 358,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L358"
     },
     {
-      "name": "lora_update_frob_decays",
+      "name": "loraUpdate_frob_decays",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 387,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L387"
     },
     {
-      "name": "rs_lora_update_frob_bounded",
+      "name": "rsLoraUpdate_frob_bounded",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 407,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L407"
     },
     {
       "name": "ratio_smul_invariant_of_quadratic",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 434,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L434"
     },
     {
-      "name": "spectral_sq_smul",
+      "name": "spectralSq_smul",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 452,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L452"
     },
     {
-      "name": "stable_rank_smul_invariant",
+      "name": "stableRank_smul_invariant",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 471,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L471"
     },
     {
       "name": "subspace_project_complement_le_norm",
       "kind": "theorem",
-      "status": "deferred"
+      "status": "deferred",
+      "line": 507,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L507"
     },
     {
-      "name": "stable_rank_implies_low_dim_approximation",
+      "name": "stableRank_implies_low_dim_approximation",
       "kind": "theorem",
-      "status": "deferred"
+      "status": "deferred",
+      "line": 538,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L538"
     },
     {
       "name": "global_plus_delta_error_bound",
       "kind": "theorem",
-      "status": "proven"
+      "status": "proven",
+      "line": 565,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L565"
     }
   ]
 }

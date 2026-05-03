@@ -44,7 +44,15 @@ All stable-rank values in these charts use the definition:
 
 $$\text{srank}(A) = \frac{\|A\|_F^2}{\|A\|_2^2}$$
 
-where $\|A\|_F^2 = \sum_i \sigma_i^2$ (sum of squared singular values) and $\|A\|_2^2 = \sigma_{\max}^2$ (squared largest singular value). The ratio equals the number of directions that carry equal energy — it is always between 1 and rank(A).
+where the Frobenius norm squared is the sum of squared singular values:
+
+$$\|A\|_F^2 = \sum_i \sigma_i^2,$$
+
+and the spectral norm squared is the largest squared singular value:
+
+$$\|A\|_2^2 = \sigma_{\max}^2.$$
+
+The ratio equals the number of directions that carry equal energy — it is always between 1 and rank(A).
 
 **Precision and thresholds.** Adapters are loaded and SVD is computed in fp32 (upcast from fp16 checkpoint weights). Singular values below machine epsilon × max(shape) × σ_max are treated as zero for rank counting but are included in the Frobenius sum (their contribution is negligible). The stable rank formula itself has no threshold dependence.
 
