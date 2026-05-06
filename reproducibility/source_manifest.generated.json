@@ -2,7 +2,7 @@
   "paper": "lazy-rudder",
   "display_name": "Lazy Rudder: low stable-rank LoRA-DPO adapters",
   "root_repo": "d3banjan/lean-mining",
-  "root_commit": "8920118",
+  "root_commit": "29aaba1",
   "generated_at": "2026-05-06",
   "theorem_manifest": "status/papers/lazy-rudder.yaml",
   "ledger": "status/theorem-status.yaml",
