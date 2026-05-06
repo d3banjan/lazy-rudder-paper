@@ -1,6 +1,6 @@
 # Paper theorem snapshot
 # Generated: 2026-05-06
-# Root commit: 29aaba1
+# Root commit: b2dd2f6
 # Do not edit — regenerate from lean-mining root
 
 theorems:
@@ -12,9 +12,9 @@ theorems:
 
   - name: subspace_project_complement_le_norm
     file: LeanMining/NeuralGeometry/SubspaceOverlap.lean
-    status: partial
-    sorry_count: 1
-    note: "orthogonal projection residual ‖x - P_U x‖² ≤ ‖x‖²; Pythagoras argument; statement clean; proof sorry (2026-04-25)"
+    status: proved
+    sorry_count: 0
+    note: "orthogonal projection residual ‖x - P_U x‖² ≤ ‖x‖² for U with orthonormal columns. Closed via direct Pythagoras calculation: ⟨x,Ux⟩ = ‖Uᵀx‖² and ‖U Uᵀ x‖² = ‖Uᵀx‖² (orthonormality), so ‖x - U Uᵀ x‖² = ‖x‖² - ‖Uᵀx‖² ≤ ‖x‖². Closes Class C end-to-end alongside the abstract EckartYoungResidual.lean. (2026-05-06)"
 
   - name: stableRank_implies_low_dim_approximation
     file: LeanMining/NeuralGeometry/SubspaceOverlap.lean

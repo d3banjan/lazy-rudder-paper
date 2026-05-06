@@ -511,10 +511,71 @@ theorem subspace_project_complement_le_norm
     ∀ (_hU : ∀ i j, (U.transpose * U) i j = if i = j then 1 else 0),
     (∑ i : Fin d, (x i - ∑ j : Fin k, U i j * ∑ l : Fin d, U l j * x l) ^ 2) ≤
       (∑ i : Fin d, x i ^ 2) := by
-  intro _hU
-  sorry -- TODO (subspace-projection): follows from Pythagoras + orthonormality of U columns:
-        -- ‖x‖² = ‖U Uᵀ x‖² + ‖x - U Uᵀ x‖² (Pythagorean theorem for orthogonal projection)
-        -- so ‖x - U Uᵀ x‖² ≤ ‖x‖², taking sqrt gives the result.
+  intro hU
+  -- Set y = Uᵀ x (the projected coordinates) and z = U Uᵀ x (the reconstruction).
+  set y : Fin k → ℝ := fun j => ∑ l : Fin d, U l j * x l with hy_def
+  set z : Fin d → ℝ := fun i => ∑ j : Fin k, U i j * y j with hz_def
+  -- Orthonormality of U's columns from the hypothesis.
+  have hortho : ∀ j j' : Fin k,
+      (∑ i : Fin d, U i j * U i j') = if j = j' then (1 : ℝ) else 0 := by
+    intro j j'
+    have h := hU j j'
+    have heq : (U.transpose * U) j j' = ∑ i : Fin d, U i j * U i j' := by
+      simp [Matrix.mul_apply, Matrix.transpose_apply]
+    rw [heq] at h; exact h
+  -- Cross term: ⟨x, z⟩ = ‖y‖².
+  have hcross : (∑ i : Fin d, x i * z i) = ∑ j : Fin k, y j ^ 2 := by
+    have step : (∑ i : Fin d, x i * z i)
+        = ∑ i : Fin d, ∑ j : Fin k, U i j * x i * y j := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      simp only [hz_def, Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun j _ => by ring)
+    rw [step, Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [show (∑ i : Fin d, U i j * x i * y j) = (∑ i : Fin d, U i j * x i) * y j from
+      (Finset.sum_mul _ _ _).symm]
+    show (∑ i : Fin d, U i j * x i) * y j = y j ^ 2
+    have hyj : (∑ i : Fin d, U i j * x i) = y j := rfl
+    rw [hyj]; ring
+  -- Square term: ‖z‖² = ‖y‖² (uses orthonormality).
+  have hsq : (∑ i : Fin d, z i ^ 2) = ∑ j : Fin k, y j ^ 2 := by
+    have expand : (∑ i : Fin d, z i ^ 2) =
+        ∑ i : Fin d, ∑ j : Fin k, ∑ j' : Fin k, U i j * U i j' * (y j * y j') := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      simp only [hz_def, sq]
+      rw [Finset.sum_mul_sum]
+      refine Finset.sum_congr rfl (fun j _ =>
+        Finset.sum_congr rfl (fun j' _ => by ring))
+    rw [expand, Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [Finset.sum_comm]
+    rw [show (∑ j' : Fin k, ∑ i : Fin d, U i j * U i j' * (y j * y j'))
+          = ∑ j' : Fin k, (∑ i : Fin d, U i j * U i j') * (y j * y j') from
+        Finset.sum_congr rfl (fun j' _ => (Finset.sum_mul _ _ _).symm)]
+    rw [show (∑ j' : Fin k, (∑ i : Fin d, U i j * U i j') * (y j * y j'))
+          = ∑ j' : Fin k, (if j = j' then (1 : ℝ) else 0) * (y j * y j') from
+        Finset.sum_congr rfl (fun j' _ => by rw [hortho])]
+    rw [show (∑ j' : Fin k, (if j = j' then (1 : ℝ) else 0) * (y j * y j'))
+          = ∑ j' : Fin k, (if j = j' then y j * y j' else 0) from
+        Finset.sum_congr rfl (fun j' _ => by
+          by_cases h : j = j'
+          · subst h; simp
+          · simp [h])]
+    rw [Finset.sum_ite_eq, if_pos (Finset.mem_univ _)]
+    ring
+  -- Combine via Pythagoras: ∑ (x - z)² = ‖x‖² + ‖z‖² - 2⟨x,z⟩ = ‖x‖² - ‖y‖² ≤ ‖x‖².
+  show (∑ i : Fin d, (x i - z i) ^ 2) ≤ ∑ i : Fin d, x i ^ 2
+  have h_each : ∀ i : Fin d, (x i - z i) ^ 2 = x i ^ 2 + z i ^ 2 - 2 * (x i * z i) := by
+    intros; ring
+  have h_expand : (∑ i : Fin d, (x i - z i) ^ 2) =
+      (∑ i : Fin d, x i ^ 2) + (∑ i : Fin d, z i ^ 2)
+        - 2 * (∑ i : Fin d, x i * z i) := by
+    simp_rw [h_each]
+    rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.mul_sum]
+  rw [h_expand, hcross, hsq]
+  have hpos : 0 ≤ ∑ j : Fin k, y j ^ 2 :=
+    Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  linarith
 
 /-- **Stable rank implies low-dimensional approximation.**
 

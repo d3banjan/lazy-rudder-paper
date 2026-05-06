@@ -10,9 +10,9 @@
     {
       "name": "subspace_project_complement_le_norm",
       "file": "LeanMining/NeuralGeometry/SubspaceOverlap.lean",
-      "status": "partial",
-      "sorry_count": 1,
-      "note": "orthogonal projection residual \u2016x - P_U x\u2016\u00b2 \u2264 \u2016x\u2016\u00b2; Pythagoras argument; statement clean; proof sorry (2026-04-25)"
+      "status": "proved",
+      "sorry_count": 0,
+      "note": "orthogonal projection residual \u2016x - P_U x\u2016\u00b2 \u2264 \u2016x\u2016\u00b2 for U with orthonormal columns. Closed via direct Pythagoras calculation: \u27e8x,Ux\u27e9 = \u2016U\u1d40x\u2016\u00b2 and \u2016U U\u1d40 x\u2016\u00b2 = \u2016U\u1d40x\u2016\u00b2 (orthonormality), so \u2016x - U U\u1d40 x\u2016\u00b2 = \u2016x\u2016\u00b2 - \u2016U\u1d40x\u2016\u00b2 \u2264 \u2016x\u2016\u00b2. Closes Class C end-to-end alongside the abstract EckartYoungResidual.lean. (2026-05-06)"
     },
     {
       "name": "stableRank_implies_low_dim_approximation",
@@ -24,7 +24,7 @@
   ],
   "open": [],
   "_meta": {
-    "root_commit": "29aaba1",
+    "root_commit": "b2dd2f6",
     "generated_at": "2026-05-06",
     "paper": "lazy-rudder"
   }

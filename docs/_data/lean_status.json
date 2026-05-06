@@ -136,15 +136,15 @@
       "name": "stableRank_implies_low_dim_approximation",
       "kind": "theorem",
       "status": "deferred",
-      "line": 538,
-      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L538"
+      "line": 599,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L599"
     },
     {
       "name": "global_plus_delta_error_bound",
       "kind": "theorem",
       "status": "proven",
-      "line": 565,
-      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L565"
+      "line": 626,
+      "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L626"
     }
   ]
 }

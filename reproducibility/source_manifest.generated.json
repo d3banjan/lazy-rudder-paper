@@ -2,7 +2,7 @@
   "paper": "lazy-rudder",
   "display_name": "Lazy Rudder: low stable-rank LoRA-DPO adapters",
   "root_repo": "d3banjan/lean-mining",
-  "root_commit": "29aaba1",
+  "root_commit": "b2dd2f6",
   "generated_at": "2026-05-06",
   "theorem_manifest": "status/papers/lazy-rudder.yaml",
   "ledger": "status/theorem-status.yaml",
@@ -22,8 +22,8 @@
     },
     {
       "name": "subspace_project_complement_le_norm",
-      "status": "partial",
-      "sorry_count": 1,
+      "status": "proved",
+      "sorry_count": 0,
       "file": "LeanMining/NeuralGeometry/SubspaceOverlap.lean"
     },
     {
@@ -38,7 +38,7 @@
     "manuscript/values.tex": "3e5412f6d8ef1eec",
     "manuscript/tables.tex": "8b757422b329cfdc",
     "manuscript/lean_status.tex": "e1199ea50a94aaf3",
-    "docs/_data/lean_status.json": "b78da436301c6e77",
+    "docs/_data/lean_status.json": "148dd2b27d9b50bf",
     "docs/_data/site_data.json": null,
     "docs/assets/data/site_data.json": null
   }
