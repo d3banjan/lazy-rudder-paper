@@ -27,7 +27,7 @@ tables.tex: generate_tables.py $(wildcard ../results/*/results.json) $(wildcard 
 	$(PYTHON) generate_tables.py
 
 lean-status: lean_status.tex
-lean_status.tex: generate_lean_status.py ../lean/SubspaceOverlap.lean
+lean_status.tex: generate_lean_status.py ../lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean
 	$(PYTHON) generate_lean_status.py
 
 # ── Figure generation ────────────────────────────────────────────────────────

@@ -89,10 +89,9 @@ values tables lean-status figs:
 # Lean source vendoring (drift cure)
 # ─────────────────────────────────────────────────────────────────────────
 # Canonical Lean source lives in the private parent monorepo at
-# ../../LeanMining/NeuralGeometry/SubspaceOverlap.lean. This target copies
-# it into lean/LeanMining/NeuralGeometry/ so the public paper repo is
-# self-contained (lake build works without the monorepo). Idempotent:
-# re-running on an unchanged source is a no-op diff.
+# ../../LeanMining/NeuralGeometry/SubspaceOverlap.lean. Public clones can
+# vendor a copy; monorepo checkouts may keep this path as a symlink to avoid
+# silent fork drift.
 CANONICAL_LEAN := ../../LeanMining/NeuralGeometry/SubspaceOverlap.lean
 VENDORED_LEAN  := lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean
 
@@ -102,8 +101,12 @@ sync-lean: ## Vendor canonical SubspaceOverlap.lean from monorepo into lean/
 	    exit 0; \
 	fi
 	@mkdir -p $$(dirname $(VENDORED_LEAN))
-	@cp $(CANONICAL_LEAN) $(VENDORED_LEAN)
-	@echo "[sync-lean] vendored $$(wc -l < $(VENDORED_LEAN)) lines into $(VENDORED_LEAN)"
+	@if [ -L $(VENDORED_LEAN) ]; then \
+	    echo "[sync-lean] symlink already resolves to canonical source"; \
+	else \
+	    cp $(CANONICAL_LEAN) $(VENDORED_LEAN); \
+	    echo "[sync-lean] vendored $$(wc -l < $(VENDORED_LEAN)) lines into $(VENDORED_LEAN)"; \
+	fi
 
 verify-lean: ## Diff vendored Lean source against canonical (fails on drift)
 	@if [ ! -f $(CANONICAL_LEAN) ]; then \

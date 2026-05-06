@@ -1035,7 +1035,12 @@ search, black-box optimization, or analytic inversion) might still find
 a bias-only adversarial perturbation that undoes alignment. The result
 therefore supports a cautiously optimistic view of alignment robustness
 against \emph{naturally-occurring gradient-based bias perturbations},
-but does not rule out constructive inversion attacks.
+but does not rule out constructive inversion attacks. A post-hoc formal
+confirmation of this gauge-theory falsification across a broader steerability
+setting is provided by \texttt{BiasGenDecoupling.lean} (closed 2026-05-06,
+8 theorems, 0 sorries), whose \texttt{equal\_readouts\_collapses} theorem proves
+that single-covector readouts trivially collapse Class K --- extending the BitFit
+observation to the bias/generation decoupling family.
 
 \paragraph{Compute-efficient RLHF.}
 The observed srank of $\srankFitTaskConst \pm 0.5$ across
@@ -1214,6 +1219,14 @@ would test whether $srank$ scales with the intrinsic rank of the
 preference signal in the data, or remains a narrow constant reflecting
 the inherent low-dimensionality of human-preference abstractions in
 general.
+
+The task-intrinsic stable-rank floor (srank $\approx 3.6$) reported here is the
+empirical ancestor of the compression-ladder G_4 task-conditional rank hypothesis
+(\texttt{union@16} $\approx 98\%$, participation ratio $\approx 10$), and is
+structurally aligned with the orbit-class probe finding (probe-regime-dream 53\%
+SRN at 410M; SFT=0\% gauge). Cross-paper formalization of the floor as a Class G
+theorem capstone (\texttt{stableRank\_smul\_invariant} in
+\texttt{LeanMining/NeuralGeometry/SubspaceOverlap.lean}) is a natural next step.
 
 % ── T1.4: Lazy-regime rebuttal (checkpoint-progression plot) ─────────────────
 \paragraph{Transient-regime concern and pending trajectory data.}
