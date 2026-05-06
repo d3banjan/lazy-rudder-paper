@@ -1,0 +1,31 @@
+{
+  "theorems": [
+    {
+      "name": "global_plus_delta_error_bound",
+      "file": "LeanMining/NeuralGeometry/SubspaceOverlap.lean",
+      "status": "proved",
+      "sorry_count": 0,
+      "note": "G_4 error bound: approximation error of global+delta scheme \u2264 global error + delta error (triangle inequality). Closed via SubspaceOverlap bridge. (2026-04-26)"
+    },
+    {
+      "name": "subspace_project_complement_le_norm",
+      "file": "LeanMining/NeuralGeometry/SubspaceOverlap.lean",
+      "status": "partial",
+      "sorry_count": 1,
+      "note": "orthogonal projection residual \u2016x - P_U x\u2016\u00b2 \u2264 \u2016x\u2016\u00b2; Pythagoras argument; statement clean; proof sorry (2026-04-25)"
+    },
+    {
+      "name": "stableRank_implies_low_dim_approximation",
+      "file": "LeanMining/NeuralGeometry/SubspaceOverlap.lean",
+      "status": "partial",
+      "sorry_count": 1,
+      "note": "Eckart-Young existence: stableRank W \u2264 k \u21d2 \u2203 rank-k approx with bounded Frobenius error; needs SVD theory; sorry (2026-04-25)"
+    }
+  ],
+  "open": [],
+  "_meta": {
+    "root_commit": "9cf6cf9",
+    "generated_at": "2026-05-06",
+    "paper": "lazy-rudder"
+  }
+}
