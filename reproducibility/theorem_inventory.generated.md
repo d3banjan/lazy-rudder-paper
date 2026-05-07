@@ -1,7 +1,7 @@
 # Theorem Inventory Snapshot — lazy-rudder
 
-Generated: 2026-05-06
-Root commit: `ce64f3f`
+Generated: 2026-05-07
+Root commit: `fd43676`
 Source: `status/theorem-status.yaml` + `status/papers/lazy-rudder.yaml`
 
 Do not edit here. Regenerate from root repo:
