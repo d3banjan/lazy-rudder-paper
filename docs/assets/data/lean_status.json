@@ -6,8 +6,8 @@
   ],
   "_source_url_base": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean",
   "counts": {
-    "proven": 13,
-    "deferred": 4,
+    "proven": 14,
+    "deferred": 3,
     "stub": 0,
     "partial": 2,
     "paper_facing_sorry": 3
@@ -128,7 +128,7 @@
     {
       "name": "subspace_project_complement_le_norm",
       "kind": "theorem",
-      "status": "deferred",
+      "status": "proven",
       "line": 507,
       "source_url": "https://github.com/d3banjan/lazy-rudder-paper/blob/main/lean/LeanMining/NeuralGeometry/SubspaceOverlap.lean#L507"
     },
