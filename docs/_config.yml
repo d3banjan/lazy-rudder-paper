@@ -22,7 +22,7 @@ exclude:
   - "*.toml"
 
 nav:
-  - title: "Paper"
+  - title: "Overview"
     url: "/"
   - title: "Explore Data"
     url: "/explore"
